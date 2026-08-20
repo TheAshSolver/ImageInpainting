@@ -48,6 +48,6 @@ def postprocess_output(
 
 
 def main():
-    postprocess_output("./output/Result_0/painted_image.raw", "./output.png")
+    postprocess_output("./output/Result_0/output_0.raw", "./output.png")
 
 main()

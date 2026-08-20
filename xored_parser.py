@@ -56,7 +56,7 @@ def postprocess_output(
 
 def main():
     postprocess_output(
-        output_raw_path="./output/Result_0/painted_image.raw",
+        output_raw_path="./output/Result_0/output_0.raw",
         original_image_path="./1.png",
         mask_path="./1_mask.png",
         output_path="./output_result.png",
