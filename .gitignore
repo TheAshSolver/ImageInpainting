@@ -1,3 +1,5 @@
 Benchmark/input/raw_image/
 Benchmark/input/raw_mask/
 Benchmark/output/
+output/
+output_profiling/

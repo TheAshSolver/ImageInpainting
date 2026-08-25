@@ -42,9 +42,9 @@ def run_snpe_inference(
 
     # 1. Construct environment variables 
     env_vars = [
-        f"export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:{base_dir}/lib:{base_dir}",
-        f"export ADSP_LIBRARY_PATH='{base_dir}/dsp/lib;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp'",
-        f"export PATH=$PATH:{base_dir}/bin:{base_dir}"
+        f"export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:{base_dir}/lib:{base_dir}:vendor/lib64:/system/lib64",
+        f"export ADSP_LIBRARY_PATH='{base_dir}/dsp;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp'",
+        f"export PATH=$PATH:{base_dir}/bin:{base_dir}",
     ]
     
     # 2. Construct the snpe-net-run execution arguments
@@ -96,4 +96,4 @@ if __name__ == "__main__":
     subprocess.run(["adb", "devices"])
     print("-" * 40)
     
-    run_snpe_inference(runtime="gpu", model_name="aotgan.dlc")
+    run_snpe_inference(runtime="dsp", model_name="migan.dlc")
