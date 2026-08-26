@@ -2,8 +2,8 @@
 
 ### Team Details
 - Team Number: <Enter team number>
-- Team Name: <Enter team name>
-- Course/Module: <Enter course name>
+- Team Name: Black & White
+- Course/Module: Embedded Systems Workshop
 
 ---
 
