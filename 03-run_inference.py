@@ -96,4 +96,4 @@ if __name__ == "__main__":
     subprocess.run(["adb", "devices"])
     print("-" * 40)
     
-    run_snpe_inference(runtime="dsp", model_name="migan.dlc")
+    run_snpe_inference(runtime="dsp", model_name="migan_htp_v79.dlc")
