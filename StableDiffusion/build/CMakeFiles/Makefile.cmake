@@ -61,4 +61,5 @@ set(CMAKE_MAKEFILE_PRODUCTS
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/sd_qidk_runner.dir/DependInfo.cmake"
+  "CMakeFiles/sd_qidk_runner_encoder.dir/DependInfo.cmake"
   )

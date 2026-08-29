@@ -129,6 +129,19 @@ sd_qidk_runner/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner.dir/build.make CMakeFiles/sd_qidk_runner.dir/build
 .PHONY : sd_qidk_runner/fast
 
+#=============================================================================
+# Target rules for targets named sd_qidk_runner_encoder
+
+# Build rule for target.
+sd_qidk_runner_encoder: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 sd_qidk_runner_encoder
+.PHONY : sd_qidk_runner_encoder
+
+# fast build rule for target.
+sd_qidk_runner_encoder/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner_encoder.dir/build.make CMakeFiles/sd_qidk_runner_encoder.dir/build
+.PHONY : sd_qidk_runner_encoder/fast
+
 sd_runner.o: sd_runner.cpp.o
 .PHONY : sd_runner.o
 
@@ -153,6 +166,30 @@ sd_runner.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner.dir/build.make CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.s
 .PHONY : sd_runner.cpp.s
 
+sd_runner_encoder.o: sd_runner_encoder.cpp.o
+.PHONY : sd_runner_encoder.o
+
+# target to build an object file
+sd_runner_encoder.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner_encoder.dir/build.make CMakeFiles/sd_qidk_runner_encoder.dir/sd_runner_encoder.cpp.o
+.PHONY : sd_runner_encoder.cpp.o
+
+sd_runner_encoder.i: sd_runner_encoder.cpp.i
+.PHONY : sd_runner_encoder.i
+
+# target to preprocess a source file
+sd_runner_encoder.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner_encoder.dir/build.make CMakeFiles/sd_qidk_runner_encoder.dir/sd_runner_encoder.cpp.i
+.PHONY : sd_runner_encoder.cpp.i
+
+sd_runner_encoder.s: sd_runner_encoder.cpp.s
+.PHONY : sd_runner_encoder.s
+
+# target to generate assembly for a file
+sd_runner_encoder.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner_encoder.dir/build.make CMakeFiles/sd_qidk_runner_encoder.dir/sd_runner_encoder.cpp.s
+.PHONY : sd_runner_encoder.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -162,9 +199,13 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... sd_qidk_runner"
+	@echo "... sd_qidk_runner_encoder"
 	@echo "... sd_runner.o"
 	@echo "... sd_runner.i"
 	@echo "... sd_runner.s"
+	@echo "... sd_runner_encoder.o"
+	@echo "... sd_runner_encoder.i"
+	@echo "... sd_runner_encoder.s"
 .PHONY : help
 
 
