@@ -4,7 +4,7 @@ project(qidk_stable_diffusion CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 # Set path to Qualcomm AI Engine Direct SDK
-set(QNN_SDK_ROOT $ENV{QAIRT_ROOT})
+set(QNN_SDK_ROOT $ENV{QNN_SDK_ROOT})
 
 include_directories(
     ${QNN_SDK_ROOT}/include/QNN
@@ -15,17 +15,17 @@ link_directories(
     ${QNN_SDK_ROOT}/lib/aarch64-android
 )
 
-add_executable(sd_qidk_runner sd_runner.cpp)
+# add_executable(sd_qidk_runner sd_runner.cpp)
 add_executable(sd_qidk_runner_encoder sd_runner_encoder.cpp)
 
 # Link against Qualcomm HTP and QNN System libraries
-target_link_libraries(sd_qidk_runner
-    QnnHtp
-    QnnSystem
-    dl
-    log
-    android
-)
+# target_link_libraries(sd_qidk_runner
+#     QnnHtp
+#     QnnSystem
+#     dl
+#     log
+#     android
+# )
 target_link_libraries(sd_qidk_runner_encoder
     QnnHtp
     QnnSystem

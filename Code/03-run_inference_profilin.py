@@ -32,7 +32,7 @@ def run_adb_command(command, shell_mode=False):
 
 def run_snpe_inference(
     base_dir="/data/local/tmp/lama", 
-    model_name="blah.dlc", 
+    model_name="aotgan.dlc", 
     input_list="input_list.txt",
     output_dir="output",
     local_output_dir="Benchmark/output",
@@ -52,7 +52,9 @@ def run_snpe_inference(
         "snpe-net-run",
         f"--container {model_name}",
         f"--input_list {input_list}",
-        f"--output_dir {output_dir}"
+        f"--output_dir {output_dir}",
+        f"--perf_profile burst", 
+        "--profiling_level detailed"
     ]
 
     if runtime == "dsp":
@@ -96,4 +98,4 @@ if __name__ == "__main__":
     subprocess.run(["adb", "devices"])
     print("-" * 40)
     
-    run_snpe_inference(runtime="dsp", model_name="lama_dilated.dlc")
+    run_snpe_inference(runtime="dsp", model_name="migan_htp_v79.dlc")

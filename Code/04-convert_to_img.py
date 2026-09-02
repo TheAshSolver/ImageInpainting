@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image
 
 def convert_raw_to_images():
-    base_dir = "Benchmark/output"
+    base_dir = "Benchmark/output/"
     output_results_dir = os.path.join(base_dir, "results")
     
     # Create the final results directory
@@ -54,7 +54,7 @@ def convert_raw_to_images():
                 if channels == 3:
                     # RGB format (512, 512, 3)
                     arr = arr.reshape((H, W, 3))
-                    arr= np.clip(arr, 0, 255).astype(np.uint8)
+                    arr= np.clip((arr*255), 0, 255).astype(np.uint8)
                     img = Image.fromarray(arr, 'RGB')
                 elif channels == 1:
                     # Grayscale format (512, 512)

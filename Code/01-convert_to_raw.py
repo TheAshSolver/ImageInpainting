@@ -65,15 +65,14 @@ def convert_to_raw_resized(normalised = False, mask_reversed = False):
             # Resize mask using NEAREST to avoid interpolating/blending distinct mask labels
             mask = mask.resize(target_size, Image.Resampling.NEAREST)
             mask_arr = np.array(mask, dtype=np.float32)
-
-            if (mask_reversed):
-                mask_arr = 255.0 - mask_arr
-
-
             if (normalised):
                 mask_arr = np.array(mask, dtype=np.float32) / 255.0
+                if(mask_reversed):
+                    mask_arr = 1-mask_arr
                 mask_arr = np.where(mask_arr > 0.5, 1.0, 0.0).astype(np.float32)
             else:
+                if(mask_reversed):
+                    mask_arr = 255-mask_arr
                 mask_arr = np.array(mask, dtype=np.float32)
             
             # Add Channel dimension -> (512, 512, 1)
@@ -83,8 +82,8 @@ def convert_to_raw_resized(normalised = False, mask_reversed = False):
             mask_nhwc = np.expand_dims(mask_arr, axis=0)
 
             # --- Save to .raw ---
-            out_img_path = os.path.join(out_img_dir, f"{number}.raw")
-            out_mask_path = os.path.join(out_mask_dir, f"{number}_mask.raw")
+            out_img_path = os.path.join(out_img_dir, f"{int(number)-1}.raw")
+            out_mask_path = os.path.join(out_mask_dir, f"{int(number)-1}_mask.raw")
 
             img_nhwc.tofile(out_img_path)
             mask_nhwc.tofile(out_mask_path)
