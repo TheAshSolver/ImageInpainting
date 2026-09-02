@@ -1,0 +1,19 @@
+Index,GT_File,Pred_File,Model,PSNR_dB,SSIM
+1,1.png,0_migan.png,migan,30.5286,0.958
+2,2.png,1_migan.png,migan,20.6271,0.8735
+3,3.png,2_migan.png,migan,29.0628,0.9236
+4,4.png,3_migan.png,migan,15.7759,0.8494
+5,5.png,4_migan.png,migan,20.5216,0.926
+6,6.png,5_migan.png,migan,20.9901,0.8767
+7,7.png,6_migan.png,migan,22.0494,0.9409
+8,8.png,7_migan.png,migan,17.5197,0.8986
+9,9.png,8_migan.png,migan,19.8908,0.9094
+10,10.png,9_migan.png,migan,24.2556,0.9227
+11,11.png,10_migan.png,migan,21.9643,0.9096
+12,12.png,11_migan.png,migan,23.0565,0.9321
+13,13.png,12_migan.png,migan,23.3684,0.953
+14,14.png,13_migan.png,migan,21.4041,0.9271
+15,15.png,14_migan.png,migan,27.1385,0.9588
+16,16.png,15_migan.png,migan,27.1538,0.9546
+17,17.png,16_migan.png,migan,15.161,0.7413
+AVERAGE,17 pairs,-,migan,22.3805,0.9091

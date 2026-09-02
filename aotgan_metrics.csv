@@ -1,0 +1,19 @@
+Index,GT_File,Pred_File,Model,PSNR_dB,SSIM
+1,1.png,0_aotgan.png,aotgan,29.8589,0.9532
+2,2.png,1_aotgan.png,aotgan,21.7555,0.8759
+3,3.png,2_aotgan.png,aotgan,28.8761,0.9235
+4,4.png,3_aotgan.png,aotgan,15.1442,0.8323
+5,5.png,4_aotgan.png,aotgan,21.9094,0.9243
+6,6.png,5_aotgan.png,aotgan,21.354,0.8779
+7,7.png,6_aotgan.png,aotgan,22.7828,0.9387
+8,8.png,7_aotgan.png,aotgan,19.5879,0.8967
+9,9.png,8_aotgan.png,aotgan,21.3534,0.9092
+10,10.png,9_aotgan.png,aotgan,25.1238,0.9222
+11,11.png,10_aotgan.png,aotgan,22.7608,0.9082
+12,12.png,11_aotgan.png,aotgan,24.4882,0.9304
+13,13.png,12_aotgan.png,aotgan,23.1224,0.9502
+14,14.png,13_aotgan.png,aotgan,22.6336,0.9231
+15,15.png,14_aotgan.png,aotgan,29.6221,0.9602
+16,16.png,15_aotgan.png,aotgan,25.7542,0.9498
+17,17.png,16_aotgan.png,aotgan,15.2346,0.7507
+AVERAGE,17 pairs,-,aotgan,23.0213,0.9074

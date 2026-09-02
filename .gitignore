@@ -1,3 +1,7 @@
 *.dlc
 /StableDiffusion/build
 *lama
+# Raw binary dumps and benchmark outputs
+*.raw
+Benchmark/output/
+SNPE_Diagnostic.log
