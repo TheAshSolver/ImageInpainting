@@ -69,3 +69,12 @@ eog Benchmark/output/figures/05_gan_domain_stress_6grid.jpg \
 ```
 
 For complete instructions on hardware setup, FastRPC library configuration, and on-device execution, refer to **[SETUP.md](SETUP.md)**.
+
+## Starting Qprof GUI
+```bash
+adb forward tcp:62472 tcp:62472
+adb shell
+export QMONITOR_BACKEND_LIB_PATH=/vendor/qprof/backends
+export LD_LIBRARY_PATH=/apex/com.android.i18n/lib64:/apex/com.android.runtime/lib64:/apex/com.android.art/lib64:/system/lib64:/vendor/lib64:/vendor/qprof/libs:$LD_LIBRARY_PATH
+/vendor/bin/qmonitor-grpc-server -n 127.0.0.1 -p 62472
+```
