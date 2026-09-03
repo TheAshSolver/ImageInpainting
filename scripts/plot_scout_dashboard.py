@@ -184,5 +184,9 @@ ax4.text(0.0, 0.01, "* Neural networks compile to static tensors (1×3×512×512
 os.makedirs(os.path.dirname(OUT_FIG), exist_ok=True)
 plt.savefig(OUT_FIG, dpi=300, facecolor=BG_COLOR)
 print(f"✅ Saved clean 300 DPI dashboard to: {OUT_FIG}")
-print("🚀 Opening window...")
-plt.show()
+if os.environ.get("DISPLAY") and not os.environ.get("HEADLESS"):
+    try:
+        print("🚀 Opening window...")
+        plt.show()
+    except Exception:
+        pass

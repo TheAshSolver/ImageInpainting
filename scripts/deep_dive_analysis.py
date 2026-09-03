@@ -1,26 +1,29 @@
-import os, glob
+#!/usr/bin/env python3
+"""
+Domain Performance Comparison: Places365 (Scenes) vs Objects & Faces on Snapdragon 8 Elite NPU.
+"""
+
+import os
 import pandas as pd
 import numpy as np
 import matplotlib
-# Use default interactive GUI backend (TkAgg / Qt)
-matplotlib.use('TkAgg')
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 csv_path = "Benchmark/output/all_pairs_detailed_metrics.csv"
 if not os.path.exists(csv_path):
-    print("CSV not found!")
+    print(f"CSV not found: {csv_path}")
     exit(1)
 
 df = pd.read_csv(csv_path)
 
-# Label first 100 as Places, remaining 100 as Faces
-df['dataset'] = np.where(df['sample_idx'] <= 100, 'Places (Scenes)', 'Faces (Portraits)')
+# Label first 100 as Places, remaining 100 as Objects / Faces
+df['dataset'] = np.where(df['sample_idx'] <= 100, 'Places (Scenes)', 'Objects & Textures')
 
 # Exclude SD for direct GAN domain comparison
 df_gans = df[df['model'].isin(['migan', 'aotgan', 'lama'])].copy()
 
-fig, axes = plt.subplots(1, 3, figsize=(18, 6))
-fig.canvas.manager.set_window_title('Inpainting: Places vs. Faces Domain Comparison')
+fig, axes = plt.subplots(1, 3, figsize=(18, 6), dpi=300)
 
 metrics = [
     ('hole_psnr', 'Hole-Only PSNR (dB) ↑', 'Higher is Better'),
@@ -37,10 +40,10 @@ for idx, (met, title, subtitle) in enumerate(metrics):
     ax = axes[idx]
     
     places_vals = [df_gans[(df_gans['model']==m) & (df_gans['dataset']=='Places (Scenes)')][met].mean() for m in models]
-    faces_vals = [df_gans[(df_gans['model']==m) & (df_gans['dataset']=='Faces (Portraits)')][met].mean() for m in models]
+    faces_vals = [df_gans[(df_gans['model']==m) & (df_gans['dataset']=='Objects & Textures')][met].mean() for m in models]
     
     rects1 = ax.bar(x - width/2, places_vals, width, label='Places (Scenes)', color='#3a86ff')
-    rects2 = ax.bar(x + width/2, faces_vals, width, label='Faces (Portraits)', color='#ff006e')
+    rects2 = ax.bar(x + width/2, faces_vals, width, label='Objects & Textures', color='#ff006e')
     
     ax.set_title(f"{title}\n({subtitle})", fontsize=11, fontweight='bold')
     ax.set_xticks(x)
@@ -57,8 +60,11 @@ for idx, (met, title, subtitle) in enumerate(metrics):
     if idx == 0:
         ax.legend(loc='lower right')
 
-plt.suptitle("Domain Performance Comparison: Places365 (Scenes) vs. Faces on Snapdragon 8 Elite NPU", fontsize=14, fontweight='bold')
+plt.suptitle("Domain Performance Comparison: Places365 (Scenes) vs. Objects & Textures (Snapdragon 8 Elite NPU)", fontsize=14, fontweight='bold')
 plt.tight_layout()
-print("Opening interactive Matplotlib window...")
-plt.show()
-EOF
+
+out_path = "Benchmark/output/figures/07_domain_performance_comparison.png"
+os.makedirs(os.path.dirname(out_path), exist_ok=True)
+plt.savefig(out_path, dpi=300)
+plt.close()
+print(f"✅ Saved domain performance comparison to: {out_path}")
