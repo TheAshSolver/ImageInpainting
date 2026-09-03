@@ -3,5 +3,19 @@
 *lama
 # Raw binary dumps and benchmark outputs
 *.raw
-Benchmark/output/
 SNPE_Diagnostic.log
+
+# Raw model output directories (large raw dumps)
+Benchmark/output/Result_*
+Benchmark/output/aotgan/
+Benchmark/output/lama/
+Benchmark/output/migan/
+Benchmark/output/sd/
+Benchmark/output/results/
+
+# Large uncompressed figure files
+Benchmark/output/figures/*.png
+Benchmark/output/figures/*_compressed.webp
+Benchmark/pulled_artifacts/
+Benchmark/qualitative_6x6/
+scripts/Benchmark/
