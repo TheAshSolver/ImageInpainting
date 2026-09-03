@@ -19,3 +19,16 @@ Benchmark/output/figures/*_compressed.webp
 Benchmark/pulled_artifacts/
 Benchmark/qualitative_6x6/
 scripts/Benchmark/
+
+# Benchmark test inputs & raw tensor dumps
+Benchmark/input/
+Benchmark/pulled_artifacts/
+*.raw
+*.bin
+
+# Root artifacts and loose CSV logs
+/*_metrics.csv
+/evaluation_suite.py
+/master_benchmark.py
+/DEEP_DIVE_STATISTICAL_REPORT.md
+/FINAL_EVALUATION_REPORT.md
