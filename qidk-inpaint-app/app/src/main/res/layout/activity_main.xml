@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#111827"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⚡ Snapdragon 8 Elite Inpainting"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hexagon HTP v79 NPU Acceleration"
+            android:textColor="#9CA3AF"
+            android:textSize="13sp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Source Image Controls -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/btnGallery"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="🖼️ Gallery"
+                android:layout_marginEnd="4dp"
+                android:backgroundTint="#374151" />
+
+            <Button
+                android:id="@+id/btnCamera"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="📷 Camera"
+                android:layout_marginStart="4dp"
+                android:backgroundTint="#374151" />
+        </LinearLayout>
+
+        <!-- Interactive Canvas View -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="320dp"
+            android:background="#1F2937"
+            android:layout_marginBottom="8dp">
+
+            <com.qualcomm.qidk.inpaint.ui.InpaintCanvasView
+                android:id="@+id/inpaintCanvasView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <!-- Canvas Tool Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/btnModeBrush"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="🖌️ Brush"
+                android:textSize="12sp"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="#4B5563" />
+
+            <Button
+                android:id="@+id/btnModeBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="🔲 Box"
+                android:textSize="12sp"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="#4B5563" />
+
+            <Button
+                android:id="@+id/btnGrabCut"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.2"
+                android:text="⚡ GrabCut"
+                android:textSize="12sp"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="#2563EB" />
+
+            <Button
+                android:id="@+id/btnUndo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.8"
+                android:text="↩️"
+                android:textSize="12sp"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="#4B5563" />
+
+            <Button
+                android:id="@+id/btnClear"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.8"
+                android:text="🗑️"
+                android:textSize="12sp"
+                android:layout_marginStart="2dp"
+                android:backgroundTint="#DC2626" />
+        </LinearLayout>
+
+        <!-- Router Recommendation Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1F2937"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:id="@+id/routerBadgeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🎯 RECOMMENDED: MIGAN"
+                android:textColor="#10B981"
+                android:textStyle="bold"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/routerJustificationText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Router heuristic analysis ready."
+                android:textColor="#D1D5DB"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <!-- Model Choice & Run Button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <Spinner
+                android:id="@+id/modelSpinner"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="#374151"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btnRunInpaint"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="🚀 Inpaint"
+                android:textStyle="bold"
+                android:backgroundTint="#10B981" />
+        </LinearLayout>
+
+        <!-- Results & Telemetry -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Inpainted Output"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <ImageView
+            android:id="@+id/resultImageView"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:background="#1F2937"
+            android:scaleType="fitCenter"
+            android:layout_marginBottom="12dp" />
+
+        <LinearLayout
+            android:id="@+id/telemetryCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1E3A8A"
+            android:padding="12dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📊 FastRPC Hardware Telemetry"
+                android:textColor="#93C5FD"
+                android:textStyle="bold"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/telemetryText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

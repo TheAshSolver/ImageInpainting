@@ -32,3 +32,10 @@ Benchmark/pulled_artifacts/
 /master_benchmark.py
 /DEEP_DIVE_STATISTICAL_REPORT.md
 /FINAL_EVALUATION_REPORT.md
+
+# Android build outputs & caches
+qidk-inpaint-app/.gradle/
+qidk-inpaint-app/build/
+qidk-inpaint-app/app/build/
+qidk-inpaint-app/local.properties
+*.apk
