@@ -78,6 +78,10 @@ class MainActivity : AppCompatActivity() {
             pickImageLauncher.launch("image/*")
         }
 
+        canvasView.onBoxSelectionStatusChanged = { msg ->
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        }
+
         findViewById<Button>(R.id.btnCamera).setOnClickListener {
             takePhotoLauncher.launch(null)
         }
@@ -89,7 +93,7 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnModeBox).setOnClickListener {
             canvasView.setMode(InpaintCanvasView.Mode.BOUNDING_BOX)
-            Toast.makeText(this, "Box Mode: Drag box around unwanted object", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Box Mode: Tap 1st corner, then opposite corner", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.btnGrabCut).setOnClickListener {
@@ -98,10 +102,11 @@ class MainActivity : AppCompatActivity() {
             if (box != null && src != null) {
                 val (mask, latency) = GrabCutEngine.generateBoundingBoxMask(src, box)
                 canvasView.applyGrabCutMask(mask)
+                canvasView.resetBoxSelection()
                 updateRouterLogic()
                 Toast.makeText(this, "GrabCut generated silhouette in ${latency}ms", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Please drag a selection box first", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please tap 2 corners to select a box first", Toast.LENGTH_SHORT).show()
             }
         }
 
