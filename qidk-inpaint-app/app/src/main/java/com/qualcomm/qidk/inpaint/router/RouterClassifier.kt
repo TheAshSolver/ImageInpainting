@@ -203,7 +203,8 @@ object RouterClassifier {
                 val c = pixels[rowOffset + x]
                 val alpha = Color.alpha(c)
                 val red = Color.red(c)
-                if (alpha > 128 || red > 128) {
+                // Hole requires positive mask alpha AND luminance/red > 128
+                if (alpha > 50 && red > 128) {
                     holePixels++
                     if (x < minX) minX = x
                     if (x > maxX) maxX = x

@@ -99,6 +99,11 @@ object GrabCutEngine {
         return Pair(maskBmp, latency)
     }
 
+    private fun isHolePixel(c: Int): Boolean {
+        val luma = (Color.red(c) * 299 + Color.green(c) * 587 + Color.blue(c) * 114) / 1000
+        return Color.alpha(c) > 50 && (luma > 128 || Color.red(c) > 128)
+    }
+
     /**
      * Refines a rough brush stroke mask by snapping tightly to object boundaries.
      */
@@ -124,7 +129,7 @@ object GrabCutEngine {
             val row = y * w
             for (x in 0 until w) {
                 val c = maskPixels[row + x]
-                if (Color.red(c) > 100 || Color.alpha(c) > 100) {
+                if (isHolePixel(c)) {
                     if (x < minX) minX = x
                     if (x > maxX) maxX = x
                     if (y < minY) minY = y
@@ -148,7 +153,7 @@ object GrabCutEngine {
         for (y in bTop..bBottom) {
             for (x in bLeft..bRight) {
                 val mc = maskPixels[y * w + x]
-                val isStroke = (Color.red(mc) > 100 || Color.alpha(mc) > 100)
+                val isStroke = isHolePixel(mc)
                 if (!isStroke) {
                     val c = srcPixels[y * w + x]
                     bgR += Color.red(c)
@@ -167,7 +172,7 @@ object GrabCutEngine {
         for (y in minY..maxY) {
             for (x in minX..maxX) {
                 val mc = maskPixels[y * w + x]
-                if (Color.red(mc) > 100 || Color.alpha(mc) > 100) {
+                if (isHolePixel(mc)) {
                     val c = srcPixels[y * w + x]
                     fgR += Color.red(c)
                     fgG += Color.green(c)
@@ -195,7 +200,7 @@ object GrabCutEngine {
                 val distFg = (r - meanFgR)*(r - meanFgR) + (g - meanFgG)*(g - meanFgG) + (b - meanFgB)*(b - meanFgB)
 
                 val mc = maskPixels[row + x]
-                val inOriginalStroke = (Color.red(mc) > 100 || Color.alpha(mc) > 100)
+                val inOriginalStroke = isHolePixel(mc)
 
                 if (distFg < distBg || inOriginalStroke) {
                     outPixels[row + x] = Color.WHITE

@@ -22,7 +22,7 @@ import numpy as np
 from PIL import Image
 from typing import Dict, Any, Tuple, Optional, Union
 
-from src.auto_masking import ensure_512_image, mask_to_raw_tensors
+from src.auto_masking import ensure_512_image, mask_to_raw_tensors, composite_inpaint_result
 
 # Model benchmark telemetry baseline on Snapdragon 8 Elite (Hexagon NPU / HTP v79)
 BENCHMARK_PROFILES = {
@@ -368,7 +368,8 @@ def run_live_snpe_inference(
 
                     if os.path.isfile(local_out):
                         sd_img = np.array(Image.open(local_out).convert("RGB"))
-                        return sd_img, {
+                        sd_final = composite_inpaint_result(img_512, sd_img, mask_512, feather=True)
+                        return sd_final, {
                             "execution_mode": "QUALCOMM_HEXAGON_NPU_LIVE (SD 1.5 RePaint)",
                             "device": dev_name,
                             "model_executed": profile["name"],
@@ -399,7 +400,7 @@ def run_live_snpe_inference(
                     create_list_cmd = f"echo '{input_line}' > {device_base}/live_input.txt"
                     subprocess.run(["adb", "shell", create_list_cmd], check=True, timeout=5)
 
-                    out_dir_dev = f"{device_base}/live_output"
+                    out_dir_dev = f"{device_base}/host_live_output"
                     clean_cmd = f"rm -rf {out_dir_dev} && mkdir -p {out_dir_dev}"
                     subprocess.run(["adb", "shell", clean_cmd], check=True, timeout=5)
 
@@ -409,14 +410,14 @@ def run_live_snpe_inference(
                         f"export PATH=$PATH:{device_base}/bin:{device_base}; "
                         f"cd {device_base}"
                     )
-                    snpe_run = f"{device_base}/snpe-net-run --container {profile['dlc']} --input_list live_input.txt --output_dir live_output {profile['runtime_flag']}"
+                    snpe_run = f"{device_base}/snpe-net-run --container {profile['dlc']} --input_list live_input.txt --output_dir host_live_output {profile['runtime_flag']}"
                     full_cmd = f"{env_setup} && {snpe_run}"
 
                     t_snpe_0 = time.perf_counter()
                     subprocess.run(["adb", "shell", full_cmd], capture_output=True, text=True, timeout=25)
                     snpe_ms = (time.perf_counter() - t_snpe_0) * 1000.0
 
-                    local_out_dir = os.path.join(tmpdir, "live_output")
+                    local_out_dir = os.path.join(tmpdir, "host_live_output")
                     os.makedirs(local_out_dir, exist_ok=True)
                     subprocess.run(["adb", "pull", f"{out_dir_dev}/.", local_out_dir], check=True, timeout=10)
 
@@ -441,8 +442,9 @@ def run_live_snpe_inference(
                                 else:
                                     raw_arr = raw_arr * 255.0
                             raw_u8 = np.clip(raw_arr, 0, 255).astype(np.uint8).reshape((512, 512, 3))
+                            final_u8 = composite_inpaint_result(img_512, raw_u8, mask_512, feather=True)
                             total_ms = (time.perf_counter() - t_start) * 1000.0
-                            return raw_u8, {
+                            return final_u8, {
                                 "execution_mode": "QUALCOMM_HEXAGON_NPU_LIVE",
                                 "device": dev_name,
                                 "model_executed": profile["name"],
@@ -464,9 +466,10 @@ def run_live_snpe_inference(
     # High-fidelity CPU Fallback
     inpaint_mode = cv2.INPAINT_TELEA if selected_model == "migan" else cv2.INPAINT_NS
     inpainted = cv2.inpaint(img_512, mask_512, inpaintRadius=5, flags=inpaint_mode)
+    final_u8 = composite_inpaint_result(img_512, inpainted, mask_512, feather=False)
     total_ms = (time.perf_counter() - t_start) * 1000.0
 
-    return inpainted, {
+    return final_u8, {
         "execution_mode": "CPU_SIMULATED_TELEMETRY",
         "device": f"{dev_name} (Simulation Fallback)",
         "model_executed": profile["name"],

@@ -97,11 +97,18 @@ class InpaintCanvasView @JvmOverloads constructor(
     fun getSourceBitmap(): Bitmap? = sourceBitmap
 
     fun getMaskBitmap(): Bitmap {
-        // Returns 512x512 single-channel / grayscale mask where 255=hole, 0=background
-        val outBitmap = Bitmap.createBitmap(canonicalSize, canonicalSize, Bitmap.Config.ALPHA_8)
-        val canvas = Canvas(outBitmap)
-        val paint = Paint()
-        canvas.drawBitmap(maskBitmap, 0f, 0f, paint)
+        // Returns 512x512 mask where 255=hole, 0=background
+        val outBitmap = Bitmap.createBitmap(canonicalSize, canonicalSize, Bitmap.Config.ARGB_8888)
+        val pixels = IntArray(canonicalSize * canonicalSize)
+        maskBitmap.getPixels(pixels, 0, canonicalSize, 0, 0, canonicalSize, canonicalSize)
+        for (i in pixels.indices) {
+            val c = pixels[i]
+            val a = Color.alpha(c)
+            val r = Color.red(c)
+            val isHole = (a > 50 && r > 128)
+            pixels[i] = if (isHole) Color.WHITE else Color.BLACK
+        }
+        outBitmap.setPixels(pixels, 0, canonicalSize, 0, 0, canonicalSize, canonicalSize)
         return outBitmap
     }
 
@@ -110,7 +117,17 @@ class InpaintCanvasView @JvmOverloads constructor(
     fun applyGrabCutMask(binaryMask: Bitmap) {
         saveUndoState()
         val scaled = Bitmap.createScaledBitmap(binaryMask, canonicalSize, canonicalSize, false)
-        maskCanvas.drawBitmap(scaled, 0f, 0f, null)
+        val pixels = IntArray(canonicalSize * canonicalSize)
+        scaled.getPixels(pixels, 0, canonicalSize, 0, 0, canonicalSize, canonicalSize)
+
+        for (i in pixels.indices) {
+            val c = pixels[i]
+            val a = Color.alpha(c)
+            val r = Color.red(c)
+            val isHole = (a > 50 && r > 128)
+            pixels[i] = if (isHole) Color.WHITE else Color.TRANSPARENT
+        }
+        maskBitmap.setPixels(pixels, 0, canonicalSize, 0, 0, canonicalSize, canonicalSize)
         currentBBox = null
         invalidate()
     }

@@ -11,11 +11,13 @@ import android.provider.MediaStore
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.qualcomm.qidk.inpaint.engine.OnDeviceProcessDriver
 import com.qualcomm.qidk.inpaint.router.RouterClassifier
 import com.qualcomm.qidk.inpaint.ui.InpaintCanvasView
 import com.qualcomm.qidk.inpaint.utils.GrabCutEngine
+import java.io.File
 import java.io.InputStream
 
 class MainActivity : AppCompatActivity() {
@@ -126,12 +128,108 @@ class MainActivity : AppCompatActivity() {
             updateRouterLogic()
         }
 
+        findViewById<Button>(R.id.btnLoadSample)?.setOnClickListener {
+            showSamplePickerDialog()
+        }
+
         findViewById<Button>(R.id.btnRunInpaint).setOnClickListener {
             runInpainting()
         }
     }
 
+    private fun showSamplePickerDialog() {
+        // Direct sample loading on Android 15 (Scoped Storage compliant)
+        val samplesDir = File(getExternalFilesDir(null), "samples")
+        val altDir = File("/sdcard/Android/data/com.qualcomm.qidk.inpaint/files/samples")
+        val targetDir = when {
+            samplesDir.exists() && samplesDir.isDirectory -> samplesDir
+            altDir.exists() && altDir.isDirectory -> altDir
+            else -> null
+        }
+
+        if (targetDir == null) {
+            Toast.makeText(this, "Samples directory not found. Please push samples via ADB.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val sampleFiles = targetDir.listFiles { file ->
+            file.isFile && (file.name.endsWith(".png", true) || file.name.endsWith(".jpg", true)) && !file.name.contains("mask")
+        }?.sortedBy { it.name } ?: emptyList()
+
+        if (sampleFiles.isEmpty()) {
+            Toast.makeText(this, "No samples found in ${targetDir.absolutePath}", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val items = sampleFiles.map { it.name }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle("🧪 Select Benchmark Sample (${sampleFiles.size} available)")
+            .setItems(items) { _, which ->
+                val selectedFile = sampleFiles[which]
+                loadSampleFile(selectedFile, targetDir)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun loadSampleFile(imageFile: File, baseDir: File) {
+        try {
+            val bmp = BitmapFactory.decodeFile(imageFile.absolutePath)
+            if (bmp != null) {
+                setCanvasImage(bmp)
+                canvasView.clearMask(saveUndo = false)
+
+                // Check for companion mask
+                val stem = imageFile.nameWithoutExtension
+                val maskCandidates = arrayOf(
+                    File(baseDir, "masks/${imageFile.name}"),
+                    File(baseDir, "masks/${stem}.png"),
+                    File(baseDir, "${stem}_mask.png"),
+                    File(baseDir, "${stem}_mask.jpg")
+                )
+                var foundMask: File? = null
+                for (cand in maskCandidates) {
+                    if (cand.exists()) {
+                        foundMask = cand
+                        break
+                    }
+                }
+
+                if (foundMask != null) {
+                    val maskBmp = BitmapFactory.decodeFile(foundMask.absolutePath)
+                    if (maskBmp != null) {
+                        canvasView.applyGrabCutMask(maskBmp)
+                        updateRouterLogic()
+                        Toast.makeText(this, "Loaded ${imageFile.name} + Mask", Toast.LENGTH_SHORT).show()
+                        return
+                    }
+                }
+
+                updateRouterLogic()
+                Toast.makeText(this, "Loaded ${imageFile.name}", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error loading sample: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun loadDefaultSample() {
+        val samplesDir = File(getExternalFilesDir(null), "samples")
+        val altDir = File("/sdcard/Android/data/com.qualcomm.qidk.inpaint/files/samples")
+        val targetDir = when {
+            samplesDir.exists() && samplesDir.isDirectory -> samplesDir
+            altDir.exists() && altDir.isDirectory -> altDir
+            else -> null
+        }
+
+        if (targetDir != null) {
+            val s001 = File(targetDir, "001.png")
+            if (s001.exists()) {
+                loadSampleFile(s001, targetDir)
+                return
+            }
+        }
+
         try {
             val stream = assets.open("sample.png")
             val bmp = BitmapFactory.decodeStream(stream)

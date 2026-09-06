@@ -5,6 +5,7 @@ import android.graphics.Color
 import java.io.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import kotlin.math.max
 
 data class InferenceTelemetry(
     val modelName: String,
@@ -54,12 +55,15 @@ object OnDeviceProcessDriver {
                     "./sd_qidk_runner_encoder 'high quality clean photo restoration'"
                 )
 
-                val process = ProcessBuilder(*cmd).start()
-                process.waitFor()
+                val process = ProcessBuilder(*cmd).redirectErrorStream(true).start()
+                val logText = process.inputStream.bufferedReader().readText()
+                val exitCode = process.waitFor()
+                android.util.Log.d("OnDeviceProcessDriver", "sd runner exit=$exitCode: $logText")
                 val totalLatency = System.currentTimeMillis() - startTime
 
                 if (outPng.exists()) {
-                    val resultBmp = android.graphics.BitmapFactory.decodeFile(outPng.absolutePath)
+                    val rawBmp = android.graphics.BitmapFactory.decodeFile(outPng.absolutePath)
+                    val resultBmp = if (rawBmp != null) compositeInpaintResult(image, rawBmp, mask) else image
                     InferenceTelemetry(
                         modelName = "Stable Diffusion 1.5 (RePaint)",
                         executionMode = "Snapdragon 8 Elite NPU Live (SD 1.5)",
@@ -67,7 +71,7 @@ object OnDeviceProcessDriver {
                         energyJoules = 210.0f,
                         powerWatts = 4.12f,
                         thermalDeltaC = 14.8f,
-                        resultBitmap = resultBmp ?: image
+                        resultBitmap = resultBmp
                     )
                 } else {
                     fallbackSimulation(image, mask, "Stable Diffusion 1.5", totalLatency)
@@ -99,7 +103,12 @@ object OnDeviceProcessDriver {
             val rawImgFile = File(inputDir, "live_img.raw")
             val rawMaskFile = File(inputDir, "live_mask.raw")
             val listFile = File(DEVICE_LAMA_DIR, "live_input.txt")
-            val outDir = File(DEVICE_LAMA_DIR, "live_output")
+            val outDir = File(DEVICE_LAMA_DIR, "app_live_output")
+            if (outDir.exists()) {
+                outDir.walkBottomUp().forEach { if (it.isFile) it.delete() }
+            } else {
+                outDir.mkdirs()
+            }
 
             FileOutputStream(rawImgFile).use { it.write(imgBytes) }
             FileOutputStream(rawMaskFile).use { it.write(maskBytes) }
@@ -112,12 +121,14 @@ object OnDeviceProcessDriver {
                 "export ADSP_LIBRARY_PATH='$DEVICE_LAMA_DIR/dsp/lib;$DEVICE_LAMA_DIR/dsp;/dsp'; " +
                 "export PATH=\$PATH:$DEVICE_LAMA_DIR; " +
                 "cd $DEVICE_LAMA_DIR && " +
-                "rm -rf live_output && mkdir -p live_output && " +
-                "./snpe-net-run --container $dlcName --input_list live_input.txt --output_dir live_output $runtimeFlag"
+                "mkdir -p app_live_output && rm -f app_live_output/Result_0/*.raw && " +
+                "./snpe-net-run --container $dlcName --input_list live_input.txt --output_dir app_live_output $runtimeFlag"
             )
 
-            val process = ProcessBuilder(*cmd).start()
-            process.waitFor()
+            val process = ProcessBuilder(*cmd).redirectErrorStream(true).start()
+            val logText = process.inputStream.bufferedReader().readText()
+            val exitCode = process.waitFor()
+            android.util.Log.d("OnDeviceProcessDriver", "snpe-net-run exit=$exitCode: $logText")
             val totalLatency = System.currentTimeMillis() - startTime
 
             // Search for raw output
@@ -132,7 +143,8 @@ object OnDeviceProcessDriver {
 
             if (resultRawFile != null && resultRawFile!!.exists()) {
                 val rawOutBytes = resultRawFile!!.readBytes()
-                val resultBmp = rawFloat32ToBitmap(rawOutBytes, 512, 512)
+                val rawBmp = rawFloat32ToBitmap(rawOutBytes, 512, 512)
+                val resultBmp = compositeInpaintResult(image, rawBmp, mask)
                 InferenceTelemetry(
                     modelName = targetModel,
                     executionMode = "Qualcomm Hexagon NPU (HTP v79 Live)",
@@ -150,6 +162,11 @@ object OnDeviceProcessDriver {
             val totalLatency = System.currentTimeMillis() - startTime
             fallbackSimulation(image, mask, targetModel, totalLatency)
         }
+    }
+
+    private fun isHolePixel(c: Int): Boolean {
+        val luma = (Color.red(c) * 299 + Color.green(c) * 587 + Color.blue(c) * 114) / 1000
+        return Color.alpha(c) > 50 && (luma > 128 || Color.red(c) > 128)
     }
 
     private fun fallbackSimulation(
@@ -175,8 +192,7 @@ object OnDeviceProcessDriver {
             val row = y * w
             for (x in 2 until w - 2) {
                 val idx = row + x
-                val mVal = Color.red(maskPixels[idx])
-                if (mVal > 128) {
+                if (isHolePixel(maskPixels[idx])) {
                     // Sample neighborhood
                     var rSum = 0
                     var gSum = 0
@@ -185,7 +201,7 @@ object OnDeviceProcessDriver {
                     for (dy in -2..2) {
                         for (dx in -2..2) {
                             val nIdx = (y + dy) * w + (x + dx)
-                            if (Color.red(maskPixels[nIdx]) <= 128) {
+                            if (!isHolePixel(maskPixels[nIdx])) {
                                 val c = imgPixels[nIdx]
                                 rSum += Color.red(c)
                                 gSum += Color.green(c)
@@ -201,6 +217,7 @@ object OnDeviceProcessDriver {
             }
         }
         outBmp.setPixels(imgPixels, 0, w, 0, 0, w, h)
+        val finalResult = compositeInpaintResult(image, outBmp, mask)
 
         val latency = when {
             modelName.contains("MIGAN") -> 216L
@@ -216,8 +233,48 @@ object OnDeviceProcessDriver {
             energyJoules = if (modelName.contains("MIGAN")) 0.62f else 0.99f,
             powerWatts = if (modelName.contains("MIGAN")) 2.86f else 3.10f,
             thermalDeltaC = if (modelName.contains("MIGAN")) 9.6f else 24.6f,
-            resultBitmap = outBmp
+            resultBitmap = finalResult
         )
+    }
+
+    fun compositeInpaintResult(original: Bitmap, inpaintOutput: Bitmap, mask: Bitmap): Bitmap {
+        val w = 512
+        val h = 512
+        val origScaled = Bitmap.createScaledBitmap(original, w, h, true)
+        val outScaled = Bitmap.createScaledBitmap(inpaintOutput, w, h, true)
+        val maskScaled = Bitmap.createScaledBitmap(mask, w, h, false)
+
+        val origPixels = IntArray(w * h)
+        val outPixels = IntArray(w * h)
+        val maskPixels = IntArray(w * h)
+        val finalPixels = IntArray(w * h)
+
+        origScaled.getPixels(origPixels, 0, w, 0, 0, w, h)
+        outScaled.getPixels(outPixels, 0, w, 0, 0, w, h)
+        maskScaled.getPixels(maskPixels, 0, w, 0, 0, w, h)
+
+        // Strict alpha composite:
+        // final = original * (1.0 - mask_norm) + model_output * mask_norm
+        // where mask_norm is 1.0 at hole (inpaint region) and 0.0 at background (keep region)
+        for (i in 0 until (w * h)) {
+            val mc = maskPixels[i]
+            val isHole = isHolePixel(mc)
+            val maskNorm = if (isHole) 1.0f else 0.0f
+            val invNorm = 1.0f - maskNorm
+
+            val origC = origPixels[i]
+            val outC = outPixels[i]
+
+            val r = ((Color.red(origC) * invNorm) + (Color.red(outC) * maskNorm)).toInt().coerceIn(0, 255)
+            val g = ((Color.green(origC) * invNorm) + (Color.green(outC) * maskNorm)).toInt().coerceIn(0, 255)
+            val b = ((Color.blue(origC) * invNorm) + (Color.blue(outC) * maskNorm)).toInt().coerceIn(0, 255)
+
+            finalPixels[i] = Color.rgb(r, g, b)
+        }
+
+        val result = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        result.setPixels(finalPixels, 0, w, 0, 0, w, h)
+        return result
     }
 
     private fun bitmapToFloat32Raw(bitmap: Bitmap): ByteArray {
@@ -245,7 +302,7 @@ object OnDeviceProcessDriver {
 
         val buffer = ByteBuffer.allocate(w * h * 1 * 4).order(ByteOrder.LITTLE_ENDIAN)
         for (c in pixels) {
-            val isHole = (Color.red(c) > 128 || Color.alpha(c) > 128)
+            val isHole = isHolePixel(c)
             val v = if (inverted) {
                 if (isHole) 0.0f else 1.0f
             } else {

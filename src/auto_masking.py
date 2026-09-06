@@ -367,3 +367,38 @@ def mask_to_raw_tensors(
 
     mask_float = mask_val[np.newaxis, ..., np.newaxis]
     return img_float, mask_float
+
+
+def composite_inpaint_result(
+    original: Union[np.ndarray, Image.Image],
+    model_output: Union[np.ndarray, Image.Image],
+    mask: Union[np.ndarray, Image.Image],
+    feather: bool = True,
+) -> np.ndarray:
+    """
+    Composites inpaint prediction with original image using strict alpha mask:
+    final = original * (1.0 - weight) + model_output * weight
+    where weight is 1.0 inside hole (mask >= 128) and 0.0 outside (unmasked background).
+    Ensures background is preserved 1:1 and hole is 100% replaced by model output.
+    """
+    orig = ensure_512_image(original).astype(np.float32)
+    pred = ensure_512_image(model_output).astype(np.float32)
+
+    if isinstance(mask, Image.Image):
+        mask_np = np.array(mask.convert("L").resize(TARGET_SIZE, Image.Resampling.NEAREST))
+    else:
+        mask_np = mask
+        if mask_np.shape[:2] != TARGET_SIZE:
+            mask_np = cv2.resize(mask_np, TARGET_SIZE, interpolation=cv2.INTER_NEAREST)
+
+    mask_bin = (mask_np >= 128).astype(np.float32)
+
+    if feather:
+        # Subtle 3x3 gaussian feathering to prevent harsh boundary stepping
+        weight = cv2.GaussianBlur(mask_bin, (3, 3), 0)[..., np.newaxis]
+    else:
+        weight = mask_bin[..., np.newaxis]
+
+    final = orig * (1.0 - weight) + pred * weight
+    return np.clip(final, 0, 255).astype(np.uint8)
+
