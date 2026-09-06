@@ -103,6 +103,19 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        findViewById<Button>(R.id.btnRefine).setOnClickListener {
+            val src = canvasView.getSourceBitmap()
+            val roughMask = canvasView.getMaskBitmap()
+            if (src != null && roughMask != null) {
+                val (refined, latency) = GrabCutEngine.refineMaskSnapToEdges(src, roughMask)
+                canvasView.applyGrabCutMask(refined)
+                updateRouterLogic()
+                Toast.makeText(this, "✨ Mask snapped to edges in ${latency}ms", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Please paint a rough mask first", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         findViewById<Button>(R.id.btnClear).setOnClickListener {
             canvasView.clearMask()
             updateRouterLogic()

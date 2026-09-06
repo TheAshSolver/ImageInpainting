@@ -303,7 +303,8 @@ def run_live_snpe_inference(
     model_key: str = "auto",
     device_base: str = "/data/local/tmp/lama",
     sd_base: str = "/data/local/tmp/sd_runtime",
-    prompt: str = "A high quality detailed cinematic photo"
+    prompt: str = "A high quality detailed cinematic photo",
+    allow_cpu_fallback: bool = False,
 ) -> Tuple[np.ndarray, Dict[str, Any]]:
     """
     Executes live inference on Snapdragon 8 Elite NPU via SNPE net-run or SD RePaint runner.
@@ -327,6 +328,10 @@ def run_live_snpe_inference(
     profile = BENCHMARK_PROFILES.get(selected_model, BENCHMARK_PROFILES["migan"])
     is_connected, dev_name = check_device_status()
     t_start = time.perf_counter()
+
+    if not is_connected:
+        if not allow_cpu_fallback:
+            raise RuntimeError(f"Qualcomm Snapdragon Device Not Connected via ADB ({dev_name}). Ensure board is plugged in and authorized.")
 
     if is_connected:
         try:
@@ -449,7 +454,12 @@ def run_live_snpe_inference(
                                 "route_info": route_info,
                             }
         except Exception as e:
+            if not allow_cpu_fallback:
+                raise RuntimeError(f"Qualcomm NPU Hardware Execution Failed: {e}")
             print(f"⚠️ Live inference warning: {e}. Falling back to simulation.")
+
+    if not allow_cpu_fallback:
+        raise RuntimeError(f"Qualcomm NPU Failed: Inference completed without returning a valid output tensor for model {profile['name']}.")
 
     # High-fidelity CPU Fallback
     inpaint_mode = cv2.INPAINT_TELEA if selected_model == "migan" else cv2.INPAINT_NS

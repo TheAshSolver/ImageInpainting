@@ -74,12 +74,12 @@
                 android:visibility="gone" />
         </FrameLayout>
 
-        <!-- Canvas Tool Buttons -->
+        <!-- Canvas Manual Tool Buttons (Row 1) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="6dp">
 
             <Button
                 android:id="@+id/btnModeBrush"
@@ -87,8 +87,11 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="🖌️ Brush"
+                android:textAllCaps="false"
                 android:textSize="12sp"
-                android:layout_marginEnd="2dp"
+                android:minHeight="38dp"
+                android:paddingHorizontal="4dp"
+                android:layout_marginEnd="3dp"
                 android:backgroundTint="#4B5563" />
 
             <Button
@@ -97,42 +100,72 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="🔲 Box"
+                android:textAllCaps="false"
                 android:textSize="12sp"
-                android:layout_marginStart="2dp"
-                android:layout_marginEnd="2dp"
+                android:minHeight="38dp"
+                android:paddingHorizontal="4dp"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
                 android:backgroundTint="#4B5563" />
-
-            <Button
-                android:id="@+id/btnGrabCut"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.2"
-                android:text="⚡ GrabCut"
-                android:textSize="12sp"
-                android:layout_marginStart="2dp"
-                android:layout_marginEnd="2dp"
-                android:backgroundTint="#2563EB" />
 
             <Button
                 android:id="@+id/btnUndo"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.8"
-                android:text="↩️"
+                android:layout_weight="1"
+                android:text="↩️ Undo"
+                android:textAllCaps="false"
                 android:textSize="12sp"
-                android:layout_marginStart="2dp"
-                android:layout_marginEnd="2dp"
+                android:minHeight="38dp"
+                android:paddingHorizontal="4dp"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
                 android:backgroundTint="#4B5563" />
 
             <Button
                 android:id="@+id/btnClear"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.8"
-                android:text="🗑️"
+                android:layout_weight="1"
+                android:text="🗑️ Clear"
+                android:textAllCaps="false"
                 android:textSize="12sp"
-                android:layout_marginStart="2dp"
+                android:minHeight="38dp"
+                android:paddingHorizontal="4dp"
+                android:layout_marginStart="3dp"
                 android:backgroundTint="#DC2626" />
+        </LinearLayout>
+
+        <!-- Smart Mask AI Tools (Row 2) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="10dp">
+
+            <Button
+                android:id="@+id/btnGrabCut"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="⚡ Auto GrabCut (Box)"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:minHeight="40dp"
+                android:layout_marginEnd="4dp"
+                android:backgroundTint="#2563EB" />
+
+            <Button
+                android:id="@+id/btnRefine"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="✨ Snap to Edges"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:minHeight="40dp"
+                android:layout_marginStart="4dp"
+                android:backgroundTint="#059669" />
         </LinearLayout>
 
         <!-- Router Recommendation Card -->

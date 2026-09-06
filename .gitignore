@@ -39,3 +39,16 @@ qidk-inpaint-app/build/
 qidk-inpaint-app/app/build/
 qidk-inpaint-app/local.properties
 *.apk
+
+# Virtual environment and Python caches
+.venv/
+__pycache__/
+*.pyc
+
+# 102 Benchmark datasets and heavy binary runs
+Benchmark/dataset_previous/
+Benchmark/input_102/
+Benchmark/output/
+StableDiffusion/sd_runtime/
+input_list_102.txt
+

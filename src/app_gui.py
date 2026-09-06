@@ -40,6 +40,7 @@ from src.auto_masking import (
     grabcut_bounding_box_mask,
     tap_to_mask,
     mask_to_raw_tensors,
+    refine_mask_grabcut,
 )
 from src.router import (
     classify_and_route,
@@ -179,6 +180,70 @@ def analyze_current_canvas(editor_data: Any, current_mask_img: Any):
     return mask_pil, overlay_pil, router_md, msg
 
 
+def refine_mask_interaction(
+    editor_data: Any,
+    current_mask_img: Any,
+):
+    """Snaps rough brush strokes tightly to object boundaries using OpenCV GrabCut."""
+    if editor_data is None:
+        return None, None, "", "⚠️ Please provide an input image first."
+
+    if isinstance(editor_data, dict):
+        base_img = editor_data.get("background") or editor_data.get("composite")
+    else:
+        base_img = editor_data
+
+    if base_img is None:
+        return None, None, "", "⚠️ No image loaded."
+
+    img_512 = ensure_512_image(base_img)
+
+    # Extract rough mask
+    if isinstance(editor_data, dict) and editor_data.get("layers") and len(editor_data["layers"]) > 0:
+        rough_mask = create_brush_mask(editor_data)
+    elif current_mask_img is not None:
+        rough_mask = create_brush_mask(current_mask_img)
+    else:
+        rough_mask = np.zeros((512, 512), dtype=np.uint8)
+
+    if np.sum(rough_mask > 0) == 0:
+        return None, None, "", "⚠️ Please draw brush strokes over the unwanted object first."
+
+    refined_mask, latency_ms = refine_mask_grabcut(img_512, rough_mask, iterations=2)
+    mask_pil = Image.fromarray(refined_mask, mode="L")
+    overlay_pil = create_mask_overlay(img_512, refined_mask, color=(255, 40, 40), alpha=0.45)
+
+    route_res = classify_and_route(img_512, refined_mask)
+    router_md = format_router_markdown(route_res)
+    msg = f"✨ Mask snapped to object edges via GrabCut in {latency_ms:.1f} ms! Recommended: **{route_res['recommended_model'].upper()}**."
+
+    return mask_pil, overlay_pil, router_md, msg
+
+
+def clear_mask_interaction(editor_data: Any):
+    """Instantly resets the inpainting mask to completely clean (0=keep)."""
+    empty_mask = np.zeros((512, 512), dtype=np.uint8)
+    mask_pil = Image.fromarray(empty_mask, mode="L")
+
+    if editor_data is None:
+        return mask_pil, None, "", "🧹 Mask reset to empty (100% keep)."
+
+    if isinstance(editor_data, dict):
+        base_img = editor_data.get("background") or editor_data.get("composite")
+    else:
+        base_img = editor_data
+
+    if base_img is None:
+        return mask_pil, None, "", "🧹 Mask reset to empty (100% keep)."
+
+    img_512 = ensure_512_image(base_img)
+    overlay_pil = Image.fromarray(img_512, mode="RGB")
+    route_res = classify_and_route(img_512, empty_mask)
+    router_md = format_router_markdown(route_res)
+
+    return mask_pil, overlay_pil, router_md, "🧹 Mask cleared! Canvas reset to 100% keep."
+
+
 def execute_inpainting_pipeline(
     editor_data: Any,
     current_mask_img: Any,
@@ -224,12 +289,28 @@ def execute_inpainting_pipeline(
     else:
         selected_key = "auto"
 
-    inpaint_result, meta = run_live_snpe_inference(img_512, mask_512, model_key=selected_key)
-    res_pil = Image.fromarray(inpaint_result, mode="RGB")
+    # Enforce Real NPU Execution - Kill silent CPU simulation
+    try:
+        inpaint_result, meta = run_live_snpe_inference(
+            img_512, mask_512, model_key=selected_key, allow_cpu_fallback=False
+        )
+        res_pil = Image.fromarray(inpaint_result, mode="RGB")
+        telemetry_md = format_telemetry_markdown(meta)
+        status_msg = f"✨ Inpainting finished successfully using **{meta['model_executed']}** [{meta['execution_mode']}]."
+        return res_pil, telemetry_md, status_msg
 
-    telemetry_md = format_telemetry_markdown(meta)
-    status_msg = f"✨ Inpainting finished successfully using **{meta['model_executed']}** [{meta['execution_mode']}]."
-    return res_pil, telemetry_md, status_msg
+    except Exception as e:
+        err_msg = str(e)
+        error_card = f"""### ❌ Qualcomm Snapdragon 8 Elite NPU Execution Failure
+<div style="background-color: #ef444420; border-left: 5px solid #ef4444; padding: 14px; border-radius: 6px; margin-bottom: 14px;">
+  <span style="font-size: 1.2em; font-weight: bold; color: #ef4444;">NPU Communication / Inference Failed</span>
+  <p style="margin-top: 8px; color: #fca5a5; font-family: monospace;"><b>Error:</b> {err_msg}</p>
+  <p style="margin-top: 6px; font-size: 0.9em; color: #cbd5e1;">
+    <i>Real hardware NPU execution is strictly enforced. Silent CPU simulation fallback is disabled. Ensure device permissions ('adb devices -l') are authorized and the board is awake.</i>
+  </p>
+</div>"""
+        gr.Warning(f"NPU Hardware Failure: {err_msg}")
+        return None, error_card, f"❌ NPU Hardware Execution Failed: {err_msg}"
 
 
 # -----------------------------------------------------------------------------
@@ -356,6 +437,10 @@ def build_app():
                     grabcut_btn = gr.Button("⚡ Run GrabCut Auto-Mask (<50ms)", variant="primary")
 
                 with gr.Row():
+                    refine_btn = gr.Button("✨ Refine Mask (Snap to Edges)", variant="secondary")
+                    reset_btn = gr.Button("🧹 Reset / Clear Mask", variant="stop")
+
+                with gr.Row():
                     analyze_btn = gr.Button("🔍 Update Mask & Run Router", variant="secondary")
                     inpaint_btn = gr.Button("🚀 Run Inpainting on Hexagon NPU", variant="primary")
 
@@ -416,6 +501,18 @@ def build_app():
         grabcut_btn.click(
             fn=generate_grabcut_mask,
             inputs=[image_editor, box_x1, box_y1, box_x2, box_y2, fast_gc_checkbox],
+            outputs=[mask_display, overlay_display, router_output, status_box]
+        )
+
+        refine_btn.click(
+            fn=refine_mask_interaction,
+            inputs=[image_editor, mask_display],
+            outputs=[mask_display, overlay_display, router_output, status_box]
+        )
+
+        reset_btn.click(
+            fn=clear_mask_interaction,
+            inputs=[image_editor],
             outputs=[mask_display, overlay_display, router_output, status_box]
         )
 
