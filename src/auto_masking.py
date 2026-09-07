@@ -77,18 +77,23 @@ def create_brush_mask(
     h, w = shape
     canvas = np.zeros((h, w), dtype=np.uint8)
 
-    # 1. Direct array or PIL image input (canvas layer)
+    # 1. Direct array or PIL image input (canvas layer or mask image)
     if isinstance(strokes, (np.ndarray, Image.Image)):
         arr = np.array(strokes)
         if arr.ndim == 3:
-            if arr.shape[2] == 4:
-                alpha = arr[:, :, 3]
-                if np.max(alpha) > 0 and not np.all(alpha == 255):
-                    arr = alpha
+            # If layer is RGBA:
+            if arr.shape[-1] == 4:
+                # If layer has transparency (not uniformly opaque 255 everywhere):
+                if not np.all(arr[:, :, 3] == 255):
+                    stroke_mask = (arr[:, :, 3] > 50) | (arr[:, :, 0] > 150)
                 else:
-                    arr = cv2.cvtColor(arr[:, :, :3], cv2.COLOR_RGB2GRAY)
+                    stroke_mask = (arr[:, :, 0] > 150) | (cv2.cvtColor(arr[:, :, :3], cv2.COLOR_RGB2GRAY) > 128)
             else:
-                arr = cv2.cvtColor(arr, cv2.COLOR_RGB2GRAY)
+                # If layer is RGB:
+                stroke_mask = (arr[:, :, 0] > 150) | (cv2.cvtColor(arr, cv2.COLOR_RGB2GRAY) > 128)
+            arr = np.where(stroke_mask, 255, 0).astype(np.uint8)
+        elif arr.ndim == 2:
+            arr = np.where(arr > 128, 255, 0).astype(np.uint8)
         
         if arr.shape[:2] != (h, w):
             arr = cv2.resize(arr, (w, h), interpolation=cv2.INTER_NEAREST)
@@ -96,21 +101,24 @@ def create_brush_mask(
 
     # 2. Dictionary wrapping editor layers or composite
     if isinstance(strokes, dict):
-        # A. Check explicit layers first
+        # A. Check explicit layers first (Gradio ImageEditor canvas layers)
         if "layers" in strokes and strokes["layers"] and len(strokes["layers"]) > 0:
             for layer in strokes["layers"]:
                 if layer is not None:
                     layer_arr = np.array(layer)
-                    if layer_arr.ndim == 3 and layer_arr.shape[2] == 4:
-                        # Extract alpha or colored stroke
-                        alpha = layer_arr[:, :, 3]
-                        if np.any(alpha > 10):
-                            layer_mask = np.where(alpha > 20, 255, 0).astype(np.uint8)
+                    if layer_arr.ndim == 3:
+                        if layer_arr.shape[-1] == 4:
+                            if not np.all(layer_arr[:, :, 3] == 255):
+                                stroke_mask = (layer_arr[:, :, 3] > 50) | (layer_arr[:, :, 0] > 150)
+                            else:
+                                stroke_mask = (layer_arr[:, :, 0] > 150) | (cv2.cvtColor(layer_arr[:, :, :3], cv2.COLOR_RGB2GRAY) > 128)
                         else:
-                            rgb_sum = np.sum(layer_arr[:, :, :3], axis=2)
-                            layer_mask = np.where(rgb_sum > 20, 255, 0).astype(np.uint8)
+                            stroke_mask = (layer_arr[:, :, 0] > 150) | (cv2.cvtColor(layer_arr, cv2.COLOR_RGB2GRAY) > 128)
+                        layer_mask = np.where(stroke_mask, 255, 0).astype(np.uint8)
+                    elif layer_arr.ndim == 2:
+                        layer_mask = np.where(layer_arr > 128, 255, 0).astype(np.uint8)
                     else:
-                        layer_mask = create_brush_mask(layer, shape=shape)
+                        layer_mask = np.zeros((h, w), dtype=np.uint8)
                     
                     if layer_mask.shape[:2] != (h, w):
                         layer_mask = cv2.resize(layer_mask, (w, h), interpolation=cv2.INTER_NEAREST)
@@ -352,53 +360,67 @@ def refine_mask_grabcut(
 
 def mask_to_raw_tensors(
     image: Union[np.ndarray, Image.Image],
-    mask: np.ndarray,
+    standard_mask: np.ndarray,
     model: str = "standard"
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Converts 512x512 image and mask into float32 NHWC raw tensor binaries."""
+    """
+    Converts 512x512 image and standard mask (255=hole, 0=keep) into float32 NHWC raw tensor binaries.
+    Isolates input tensor polarity per model:
+    - MIGAN expects 0.0 at hole, 1.0 at keep: migan_mask_tensor = 1.0 - (standard_mask / 255.0)
+    - LaMa / AOT-GAN / SD expect 1.0 at hole, 0.0 at keep: standard_mask_tensor = (standard_mask / 255.0)
+    """
     img_512 = ensure_512_image(image)
     img_float = (img_512.astype(np.float32) / 255.0)[np.newaxis, ...]
 
-    mask_bin = (mask >= 128).astype(np.float32)
-    if model.lower() == "migan":
-        mask_val = 1.0 - mask_bin
-    else:
-        mask_val = mask_bin
+    mask_512 = np.array(standard_mask)
+    if mask_512.shape[:2] != TARGET_SIZE:
+        mask_512 = cv2.resize(mask_512, TARGET_SIZE, interpolation=cv2.INTER_NEAREST)
 
-    mask_float = mask_val[np.newaxis, ..., np.newaxis]
+    standard_mask_tensor = (mask_512 >= 128).astype(np.float32)
+
+    if model.lower() == "migan":
+        # MIGAN expects 0.0 at hole, 1.0 at keep:
+        migan_mask_tensor = 1.0 - standard_mask_tensor
+        mask_float = migan_mask_tensor[np.newaxis, ..., np.newaxis]
+    else:
+        # LaMa / AOT-GAN / SD expect 1.0 at hole, 0.0 at keep:
+        mask_float = standard_mask_tensor[np.newaxis, ..., np.newaxis]
+
     return img_float, mask_float
 
 
 def composite_inpaint_result(
     original: Union[np.ndarray, Image.Image],
     model_output: Union[np.ndarray, Image.Image],
-    mask: Union[np.ndarray, Image.Image],
+    standard_mask: Union[np.ndarray, Image.Image],
     feather: bool = True,
 ) -> np.ndarray:
     """
-    Composites inpaint prediction with original image using strict alpha mask:
-    final = original * (1.0 - weight) + model_output * weight
-    where weight is 1.0 inside hole (mask >= 128) and 0.0 outside (unmasked background).
+    Composites inpaint prediction with original image using UN-INVERTED standard mask (255 = hole, 0 = keep):
+    final = original * (1.0 - mask_norm) + model_output * mask_norm
+    where mask_norm is 1.0 inside hole (mask >= 128) and 0.0 outside (unmasked background).
     Ensures background is preserved 1:1 and hole is 100% replaced by model output.
     """
     orig = ensure_512_image(original).astype(np.float32)
     pred = ensure_512_image(model_output).astype(np.float32)
 
-    if isinstance(mask, Image.Image):
-        mask_np = np.array(mask.convert("L").resize(TARGET_SIZE, Image.Resampling.NEAREST))
+    if isinstance(standard_mask, Image.Image):
+        mask_np = np.array(standard_mask.convert("L").resize(TARGET_SIZE, Image.Resampling.NEAREST))
     else:
-        mask_np = mask
+        mask_np = np.array(standard_mask)
         if mask_np.shape[:2] != TARGET_SIZE:
             mask_np = cv2.resize(mask_np, TARGET_SIZE, interpolation=cv2.INTER_NEAREST)
 
-    mask_bin = (mask_np >= 128).astype(np.float32)
+    # Standard mask: 1.0 at hole, 0.0 at background
+    mask_norm = (mask_np >= 128).astype(np.float32)
 
     if feather:
         # Subtle 3x3 gaussian feathering to prevent harsh boundary stepping
-        weight = cv2.GaussianBlur(mask_bin, (3, 3), 0)[..., np.newaxis]
+        weight = cv2.GaussianBlur(mask_norm, (3, 3), 0)[..., np.newaxis]
     else:
-        weight = mask_bin[..., np.newaxis]
+        weight = mask_norm[..., np.newaxis]
 
+    # Hole gets model_output, background gets original
     final = orig * (1.0 - weight) + pred * weight
     return np.clip(final, 0, 255).astype(np.uint8)
 

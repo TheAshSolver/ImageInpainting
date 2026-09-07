@@ -310,9 +310,9 @@ def run_live_snpe_inference(
     Executes live inference on Snapdragon 8 Elite NPU via SNPE net-run or SD RePaint runner.
     """
     img_512 = ensure_512_image(image)
-    mask_512 = np.where(mask >= 128, 255, 0).astype(np.uint8)
+    standard_mask = np.where(mask >= 128, 255, 0).astype(np.uint8)
 
-    route_info = classify_and_route(img_512, mask_512)
+    route_info = classify_and_route(img_512, standard_mask)
     selected_model = route_info["recommended_model"] if model_key == "auto" else model_key.lower()
     
     # Normalize model key
@@ -341,12 +341,13 @@ def run_live_snpe_inference(
                 # -------------------------------------------------------------
                 if selected_model == "sd":
                     img_arr = (img_512.astype(np.float32) / 255.0)  # (512, 512, 3)
-                    mask_arr = (mask_512 >= 128).astype(np.float32)[..., np.newaxis]  # (512, 512, 1)
+                    # SD expects 1.0 at hole, 0.0 at keep:
+                    standard_mask_tensor = (standard_mask.astype(np.float32) / 255.0)[..., np.newaxis]  # (512, 512, 1)
 
                     local_img = os.path.join(tmpdir, "image.raw")
                     local_mask = os.path.join(tmpdir, "mask.raw")
                     img_arr.tofile(local_img)
-                    mask_arr.tofile(local_mask)
+                    standard_mask_tensor.tofile(local_mask)
 
                     # Push to device sd_runtime
                     subprocess.run(["adb", "push", local_img, f"{sd_base}/image.raw"], check=True, timeout=10)
@@ -368,7 +369,7 @@ def run_live_snpe_inference(
 
                     if os.path.isfile(local_out):
                         sd_img = np.array(Image.open(local_out).convert("RGB"))
-                        sd_final = composite_inpaint_result(img_512, sd_img, mask_512, feather=True)
+                        sd_final = composite_inpaint_result(img_512, sd_img, standard_mask, feather=True)
                         return sd_final, {
                             "execution_mode": "QUALCOMM_HEXAGON_NPU_LIVE (SD 1.5 RePaint)",
                             "device": dev_name,
@@ -385,7 +386,7 @@ def run_live_snpe_inference(
                 # 2. Feed-Forward GANs (MIGAN, LaMa Dilated, AOT-GAN)
                 # -------------------------------------------------------------
                 else:
-                    img_raw, mask_raw = mask_to_raw_tensors(img_512, mask_512, model=selected_model)
+                    img_raw, mask_raw = mask_to_raw_tensors(img_512, standard_mask, model=selected_model)
                     local_img_raw = os.path.join(tmpdir, "live_img.raw")
                     local_mask_raw = os.path.join(tmpdir, "live_mask.raw")
                     img_raw.tofile(local_img_raw)
@@ -442,7 +443,7 @@ def run_live_snpe_inference(
                                 else:
                                     raw_arr = raw_arr * 255.0
                             raw_u8 = np.clip(raw_arr, 0, 255).astype(np.uint8).reshape((512, 512, 3))
-                            final_u8 = composite_inpaint_result(img_512, raw_u8, mask_512, feather=True)
+                            final_u8 = composite_inpaint_result(img_512, raw_u8, standard_mask, feather=True)
                             total_ms = (time.perf_counter() - t_start) * 1000.0
                             return final_u8, {
                                 "execution_mode": "QUALCOMM_HEXAGON_NPU_LIVE",
@@ -465,8 +466,8 @@ def run_live_snpe_inference(
 
     # High-fidelity CPU Fallback
     inpaint_mode = cv2.INPAINT_TELEA if selected_model == "migan" else cv2.INPAINT_NS
-    inpainted = cv2.inpaint(img_512, mask_512, inpaintRadius=5, flags=inpaint_mode)
-    final_u8 = composite_inpaint_result(img_512, inpainted, mask_512, feather=False)
+    inpainted = cv2.inpaint(img_512, standard_mask, inpaintRadius=5, flags=inpaint_mode)
+    final_u8 = composite_inpaint_result(img_512, inpainted, standard_mask, feather=False)
     total_ms = (time.perf_counter() - t_start) * 1000.0
 
     return final_u8, {

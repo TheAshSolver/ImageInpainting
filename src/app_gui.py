@@ -34,6 +34,7 @@ from PIL import Image
 import gradio as gr
 
 from src.auto_masking import (
+    TARGET_SIZE,
     ensure_512_image,
     create_brush_mask,
     create_mask_overlay,
@@ -142,6 +143,35 @@ def generate_grabcut_mask(
     return mask_pil, overlay_pil, router_md, msg
 
 
+def extract_active_mask(editor_data: Any, current_mask_img: Any) -> np.ndarray:
+    """
+    Extracts active inpainting mask ensuring standard polarity: 255 = hole, 0 = keep.
+    Prefers user-drawn brush strokes from editor_data if present and non-empty.
+    Falls back to current_mask_img (e.g. GrabCut result or benchmark sample mask).
+    """
+    mask_512 = np.zeros(TARGET_SIZE, dtype=np.uint8)
+
+    # 1. Check if user drew brush strokes in ImageEditor layers
+    if isinstance(editor_data, dict) and editor_data.get("layers") and len(editor_data["layers"]) > 0:
+        brush_mask = create_brush_mask(editor_data)
+        if np.any(brush_mask > 0):
+            mask_512 = brush_mask
+
+    # 2. If no brush strokes on canvas, check current_mask_img
+    if np.sum(mask_512 > 0) == 0 and current_mask_img is not None:
+        cand_mask = create_brush_mask(current_mask_img)
+        if np.any(cand_mask > 0):
+            mask_512 = cand_mask
+
+    # 3. If still empty, check composite diff
+    if np.sum(mask_512 > 0) == 0 and isinstance(editor_data, dict):
+        comp_mask = create_brush_mask(editor_data)
+        if np.any(comp_mask > 0):
+            mask_512 = comp_mask
+
+    return mask_512
+
+
 def analyze_current_canvas(editor_data: Any, current_mask_img: Any):
     """Analyzes user drawing or current mask and runs the router classifier."""
     if editor_data is None:
@@ -160,15 +190,7 @@ def analyze_current_canvas(editor_data: Any, current_mask_img: Any):
         return empty, empty_rgb, "", "⚠️ No valid image found."
 
     img_512 = ensure_512_image(base_img)
-
-    # Extract mask from editor brush stroke layer or current mask
-    mask_512 = None
-    if isinstance(editor_data, dict) and editor_data.get("layers") and len(editor_data["layers"]) > 0:
-        mask_512 = create_brush_mask(editor_data)
-    elif current_mask_img is not None:
-        mask_512 = create_brush_mask(current_mask_img)
-    else:
-        mask_512 = np.zeros((512, 512), dtype=np.uint8)
+    mask_512 = extract_active_mask(editor_data, current_mask_img)
 
     mask_pil = Image.fromarray(mask_512, mode="L")
     overlay_pil = create_mask_overlay(img_512, mask_512, color=(255, 40, 40), alpha=0.45)
@@ -197,14 +219,7 @@ def refine_mask_interaction(
         return None, None, "", "⚠️ No image loaded."
 
     img_512 = ensure_512_image(base_img)
-
-    # Extract rough mask
-    if isinstance(editor_data, dict) and editor_data.get("layers") and len(editor_data["layers"]) > 0:
-        rough_mask = create_brush_mask(editor_data)
-    elif current_mask_img is not None:
-        rough_mask = create_brush_mask(current_mask_img)
-    else:
-        rough_mask = np.zeros((512, 512), dtype=np.uint8)
+    rough_mask = extract_active_mask(editor_data, current_mask_img)
 
     if np.sum(rough_mask > 0) == 0:
         return None, None, "", "⚠️ Please draw brush strokes over the unwanted object first."
@@ -262,14 +277,7 @@ def execute_inpainting_pipeline(
         return None, "", "⚠️ No image found."
 
     img_512 = ensure_512_image(base_img)
-
-    # Determine mask: prefer brush strokes from canvas if present
-    if isinstance(editor_data, dict) and editor_data.get("layers") and len(editor_data["layers"]) > 0:
-        mask_512 = create_brush_mask(editor_data)
-    elif current_mask_img is not None:
-        mask_512 = create_brush_mask(current_mask_img)
-    else:
-        return None, "", "⚠️ Please specify an inpainting mask via Brush or GrabCut Bounding Box."
+    mask_512 = extract_active_mask(editor_data, current_mask_img)
 
     if np.sum(mask_512 > 0) == 0:
         return None, "", "⚠️ Inpainting mask is empty. Please draw brush strokes or select a target box."
@@ -576,6 +584,17 @@ def run_headless_test():
     assert res_sd is not None
     assert "finished successfully" in status_sd
     print("7. Stable Diffusion 1.5 RePaint executed successfully.")
+
+    print("8. Testing Red Brush Stroke (#ff3333) Extraction from Transparent Canvas Layer...")
+    test_layer = np.zeros((512, 512, 4), dtype=np.uint8)
+    # Draw red brush stroke (#ff3333)
+    test_layer[150:250, 150:250] = [255, 51, 51, 255]
+    ed_brush = {"background": ed_010["background"], "layers": [test_layer], "composite": ed_010["background"]}
+    extracted = extract_active_mask(ed_brush, None)
+    assert extracted[200, 200] == 255, "Red brush stroke must evaluate to 255 (hole)"
+    assert extracted[10, 10] == 0, "Unpainted canvas must evaluate to 0 (background)"
+    assert np.sum(extracted == 255) == 100 * 100
+    print("9. Red Brush Stroke correctly extracted (255=hole, 0=background) without grayscale trap!")
 
     print("\n🎉 ALL HEADLESS VALIDATION TESTS PASSED CLEANLY (Zero GUI Lockup)!")
     print("=" * 70)
