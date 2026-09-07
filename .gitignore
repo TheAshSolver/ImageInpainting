@@ -1,54 +1,44 @@
+# Qualcomm binary model containers & builds
 *.dlc
 /StableDiffusion/build
-*lama
-# Raw binary dumps and benchmark outputs
-*.raw
-SNPE_Diagnostic.log
+StableDiffusion/sd_runtime/
 
-# Raw model output directories (large raw dumps)
+# Raw binary dumps, logs, and diagnostic traces
+*.raw
+*.bin
+*.log
+SNPE_Diagnostic.log
+SNPEDiag*.log
+
+# Raw model intermediate execution dumps
 Benchmark/output/Result_*
+Benchmark/output/*/Result_*
 Benchmark/output/aotgan/
 Benchmark/output/lama/
 Benchmark/output/migan/
-Benchmark/output/sd/
-Benchmark/output/results/
+Benchmark/output/sd/results/
+Benchmark/output/sd/Result_*
+Benchmark/output/*/*.log
 
-# Large uncompressed figure files
-Benchmark/output/figures/*.png
-Benchmark/output/figures/*_compressed.webp
+# Obsolete / temporary test runs
+Benchmark/dataset_previous/
 Benchmark/pulled_artifacts/
 Benchmark/qualitative_6x6/
 scripts/Benchmark/
 
-# Benchmark test inputs & raw tensor dumps
-Benchmark/input/
-Benchmark/pulled_artifacts/
-*.raw
-*.bin
+# Exclude oversized uncompressed multi-megapixel raw plot dumps (lightweight 300 DPI JPG/WebP versions are tracked)
+Benchmark/output/figures/*_6grid.png
+Benchmark/output/figures/*_5grid.png
 
-# Root artifacts and loose CSV logs
-/*_metrics.csv
-/evaluation_suite.py
-/master_benchmark.py
-/DEEP_DIVE_STATISTICAL_REPORT.md
-/FINAL_EVALUATION_REPORT.md
-
-# Android build outputs & caches
+# Android build outputs & local properties
 qidk-inpaint-app/.gradle/
 qidk-inpaint-app/build/
 qidk-inpaint-app/app/build/
 qidk-inpaint-app/local.properties
 *.apk
 
-# Virtual environment and Python caches
+# Virtual environments and Python caches
 .venv/
 __pycache__/
 *.pyc
-
-# 102 Benchmark datasets and heavy binary runs
-Benchmark/dataset_previous/
-Benchmark/input_102/
-Benchmark/output/
-StableDiffusion/sd_runtime/
-input_list_102.txt
-
+*/__pycache__/

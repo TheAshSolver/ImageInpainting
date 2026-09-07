@@ -1,0 +1,7 @@
+Index,Output_File,Prompt,Inference_Latency_sec,Push_Latency_sec,Pull_Latency_sec,Status
+1,1_sd.png,A cinematic shot of sunset,50.883,0.043,0.022,SUCCESS
+2,2_sd.png,A cinematic shot of sunset,50.812,0.054,0.021,SUCCESS
+3,3_sd.png,A cinematic shot of sunset,50.653,0.064,0.021,SUCCESS
+4,4_sd.png,A cinematic shot of sunset,50.81,0.057,0.019,SUCCESS
+5,5_sd.png,A cinematic shot of sunset,50.736,0.066,0.023,SUCCESS
+AVERAGE,5 samples,-,50.779,-,-,-
