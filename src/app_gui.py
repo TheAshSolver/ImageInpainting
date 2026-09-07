@@ -70,26 +70,47 @@ AVAILABLE_SAMPLES = get_available_samples()
 # Callback Functions for Gradio UI
 # -----------------------------------------------------------------------------
 
-def load_benchmark_sample(sample_id: str):
-    """Loads image and mask for a selected benchmark sample."""
+def find_sample_file(folder: str, sample_id: str) -> Optional[str]:
+    """Finds image or mask file for a sample ID handling padding and extensions."""
     if not sample_id:
-        empty = Image.new("RGB", (512, 512), (0, 0, 0))
-        empty_mask = Image.new("L", (512, 512), 0)
-        return {"background": empty, "layers": [], "composite": empty}, empty_mask, empty, "No sample selected.", "No sample selected."
+        return None
+    padded_id = sample_id.zfill(3) if sample_id.isdigit() else sample_id
+    candidates = [
+        f"{padded_id}.png", f"{padded_id}.jpg", f"{padded_id}.jpeg",
+        f"{sample_id}.png", f"{sample_id}.jpg", f"{sample_id}.jpeg",
+    ]
+    for c in candidates:
+        p = os.path.join(BENCHMARK_102_DIR, folder, c)
+        if os.path.isfile(p):
+            return p
+    return None
 
-    img_path = os.path.join(BENCHMARK_102_DIR, "image", f"{sample_id}.png")
-    mask_path = os.path.join(BENCHMARK_102_DIR, "mask", f"{sample_id}.png")
 
-    if not os.path.isfile(img_path):
-        empty = Image.new("RGB", (512, 512), (0, 0, 0))
-        empty_mask = Image.new("L", (512, 512), 0)
-        return {"background": empty, "layers": [], "composite": empty}, empty_mask, empty, f"Sample '{img_path}' not found.", f"Sample '{img_path}' not found."
+def load_benchmark_sample(sample_id: Optional[str] = "001"):
+    """Loads image and mask for a selected benchmark sample and updates active_mask_state."""
+    if not sample_id:
+        sample_id = "001"
+
+    img_path = find_sample_file("image", sample_id)
+    mask_path = find_sample_file("mask", sample_id)
+
+    if not img_path or not os.path.isfile(img_path):
+        empty = Image.new("RGB", TARGET_SIZE, (0, 0, 0))
+        empty_mask = Image.new("L", TARGET_SIZE, 0)
+        empty_np = np.zeros(TARGET_SIZE, dtype=np.uint8)
+        return {"background": empty, "layers": [], "composite": empty}, empty_mask, empty, f"Sample '{sample_id}' not found.", f"Sample '{sample_id}' not found.", empty_np
 
     img = Image.open(img_path).convert("RGB")
-    mask = Image.open(mask_path).convert("L") if os.path.isfile(mask_path) else Image.new("L", (512, 512), 0)
+    if mask_path and os.path.isfile(mask_path):
+        mask_pil_raw = Image.open(mask_path).convert("L")
+        mask_arr = np.array(mask_pil_raw.resize(TARGET_SIZE, Image.Resampling.NEAREST))
+        mask_np = np.where(mask_arr >= 128, 255, 0).astype(np.uint8)
+        mask = Image.fromarray(mask_np, mode="L")
+    else:
+        mask_np = np.zeros(TARGET_SIZE, dtype=np.uint8)
+        mask = Image.new("L", TARGET_SIZE, 0)
 
     # Pre-render translucent overlay layer for ImageEditor
-    mask_np = np.array(mask)
     overlay_pil = create_mask_overlay(img, mask_np, color=(255, 40, 40), alpha=0.45)
 
     editor_value = {
@@ -98,11 +119,11 @@ def load_benchmark_sample(sample_id: str):
         "composite": img,
     }
 
-    route_res = classify_and_route(img, mask)
+    route_res = classify_and_route(img, mask_np)
     router_md = format_router_markdown(route_res)
     status_msg = f"✅ Loaded Benchmark Sample **{sample_id}** (512x512 RGB). Router recommendation: **{route_res['recommended_model'].upper()}**."
 
-    return editor_value, mask, overlay_pil, router_md, status_msg
+    return editor_value, mask, overlay_pil, router_md, status_msg, mask_np
 
 
 def generate_grabcut_mask(
@@ -112,22 +133,25 @@ def generate_grabcut_mask(
     x2: int,
     y2: int,
     fast_mode: bool = True,
+    sample_id: Optional[str] = None,
 ):
-    """Executes target bounding box GrabCut in <50ms and updates read-only mask previews."""
-    if editor_data is None:
-        empty = Image.new("L", (512, 512), 0)
-        empty_rgb = Image.new("RGB", (512, 512), (0, 0, 0))
-        return empty, empty_rgb, "", "⚠️ Please load or upload an image first."
-
+    """Executes target bounding box GrabCut in <50ms and updates read-only mask previews and state."""
+    base_img = None
     if isinstance(editor_data, dict):
         base_img = editor_data.get("background") or editor_data.get("composite")
-    else:
+    elif editor_data is not None:
         base_img = editor_data
 
+    if base_img is None and sample_id:
+        fpath = find_sample_file("image", sample_id)
+        if fpath and os.path.isfile(fpath):
+            base_img = Image.open(fpath).convert("RGB")
+
     if base_img is None:
-        empty = Image.new("L", (512, 512), 0)
-        empty_rgb = Image.new("RGB", (512, 512), (0, 0, 0))
-        return empty, empty_rgb, "", "⚠️ No image data found in editor."
+        empty = Image.new("L", TARGET_SIZE, 0)
+        empty_rgb = Image.new("RGB", TARGET_SIZE, (0, 0, 0))
+        empty_np = np.zeros(TARGET_SIZE, dtype=np.uint8)
+        return empty, empty_rgb, "", "⚠️ Please load or upload an image first.", empty_np
 
     img_512 = ensure_512_image(base_img)
     bbox = (x1, y1, x2, y2)
@@ -140,14 +164,23 @@ def generate_grabcut_mask(
     router_md = format_router_markdown(route_res)
 
     msg = f"⚡ GrabCut executed in **{latency_ms:.2f} ms** (Target: <50 ms). Isolated foreground: **{int(np.sum(mask_bin > 0))} pixels**."
-    return mask_pil, overlay_pil, router_md, msg
+    return mask_pil, overlay_pil, router_md, msg, mask_bin
 
 
-def extract_active_mask(editor_data: Any, current_mask_img: Any) -> np.ndarray:
+def extract_active_mask(
+    editor_data: Any,
+    current_mask_img: Any,
+    active_mask_state: Any = None,
+    sample_id: Optional[str] = None,
+) -> np.ndarray:
     """
     Extracts active inpainting mask ensuring standard polarity: 255 = hole, 0 = keep.
-    Prefers user-drawn brush strokes from editor_data if present and non-empty.
-    Falls back to current_mask_img (e.g. GrabCut result or benchmark sample mask).
+    Defensive priority order:
+    1. User-drawn brush strokes from ImageEditor canvas layers.
+    2. Active mask state (gr.State).
+    3. Visual mask display preview (current_mask_img).
+    4. Composite vs background difference.
+    5. Automatic disk fallback resolving Benchmark/input_102/mask/{sample_id}.*
     """
     mask_512 = np.zeros(TARGET_SIZE, dtype=np.uint8)
 
@@ -155,42 +188,65 @@ def extract_active_mask(editor_data: Any, current_mask_img: Any) -> np.ndarray:
     if isinstance(editor_data, dict) and editor_data.get("layers") and len(editor_data["layers"]) > 0:
         brush_mask = create_brush_mask(editor_data)
         if np.any(brush_mask > 0):
-            mask_512 = brush_mask
+            return brush_mask
 
-    # 2. If no brush strokes on canvas, check current_mask_img
-    if np.sum(mask_512 > 0) == 0 and current_mask_img is not None:
-        cand_mask = create_brush_mask(current_mask_img)
-        if np.any(cand_mask > 0):
-            mask_512 = cand_mask
+    # 2. Check active_mask_state (gr.State)
+    if active_mask_state is not None:
+        state_mask = create_brush_mask(active_mask_state)
+        if np.any(state_mask > 0):
+            return state_mask
 
-    # 3. If still empty, check composite diff
-    if np.sum(mask_512 > 0) == 0 and isinstance(editor_data, dict):
+    # 3. Check current_mask_img visual preview
+    if current_mask_img is not None:
+        disp_mask = create_brush_mask(current_mask_img)
+        if np.any(disp_mask > 0):
+            return disp_mask
+
+    # 4. Check composite diff if strokes merged
+    if isinstance(editor_data, dict):
         comp_mask = create_brush_mask(editor_data)
         if np.any(comp_mask > 0):
-            mask_512 = comp_mask
+            return comp_mask
+
+    # 5. Defensive auto-fallback to disk for selected sample dropdown
+    sid = sample_id if sample_id else "001"
+    fpath = find_sample_file("mask", sid)
+    if fpath and os.path.isfile(fpath):
+        disk_pil = Image.open(fpath).convert("L")
+        disk_arr = np.array(disk_pil.resize(TARGET_SIZE, Image.Resampling.NEAREST))
+        mask_disk = np.where(disk_arr >= 128, 255, 0).astype(np.uint8)
+        if np.any(mask_disk > 0):
+            return mask_disk
 
     return mask_512
 
 
-def analyze_current_canvas(editor_data: Any, current_mask_img: Any):
-    """Analyzes user drawing or current mask and runs the router classifier."""
-    if editor_data is None:
-        empty = Image.new("L", (512, 512), 0)
-        empty_rgb = Image.new("RGB", (512, 512), (0, 0, 0))
-        return empty, empty_rgb, "", "⚠️ Please provide an image."
-
+def analyze_current_canvas(
+    editor_data: Any,
+    current_mask_img: Any,
+    active_mask_state: Any = None,
+    sample_id: Optional[str] = None,
+):
+    """Analyzes user drawing or current mask, runs router, and syncs active_mask_state."""
+    base_img = None
     if isinstance(editor_data, dict):
         base_img = editor_data.get("background") or editor_data.get("composite")
-    else:
+    elif editor_data is not None:
         base_img = editor_data
 
+    if base_img is None and sample_id:
+        fpath = find_sample_file("image", sample_id)
+        if fpath and os.path.isfile(fpath):
+            base_img = Image.open(fpath).convert("RGB")
+
     if base_img is None:
-        empty = Image.new("L", (512, 512), 0)
-        empty_rgb = Image.new("RGB", (512, 512), (0, 0, 0))
-        return empty, empty_rgb, "", "⚠️ No valid image found."
+        empty = Image.new("L", TARGET_SIZE, 0)
+        empty_rgb = Image.new("RGB", TARGET_SIZE, (0, 0, 0))
+        empty_np = np.zeros(TARGET_SIZE, dtype=np.uint8)
+        return empty, empty_rgb, "", "⚠️ Please provide an image.", empty_np
 
     img_512 = ensure_512_image(base_img)
-    mask_512 = extract_active_mask(editor_data, current_mask_img)
+    mask_512 = extract_active_mask(editor_data, current_mask_img, active_mask_state, sample_id)
 
     mask_pil = Image.fromarray(mask_512, mode="L")
     overlay_pil = create_mask_overlay(img_512, mask_512, color=(255, 40, 40), alpha=0.45)
@@ -199,30 +255,36 @@ def analyze_current_canvas(editor_data: Any, current_mask_img: Any):
     router_md = format_router_markdown(route_res)
     msg = f"🔍 Routing analysis complete. Recommended: **{route_res['recommended_model'].upper()}** (Coverage: {route_res['features']['mask_area_pct']}%)."
 
-    return mask_pil, overlay_pil, router_md, msg
+    return mask_pil, overlay_pil, router_md, msg, mask_512
 
 
 def refine_mask_interaction(
     editor_data: Any,
     current_mask_img: Any,
+    active_mask_state: Any = None,
+    sample_id: Optional[str] = None,
 ):
     """Snaps rough brush strokes tightly to object boundaries using OpenCV GrabCut."""
-    if editor_data is None:
-        return None, None, "", "⚠️ Please provide an input image first."
-
+    base_img = None
     if isinstance(editor_data, dict):
         base_img = editor_data.get("background") or editor_data.get("composite")
-    else:
+    elif editor_data is not None:
         base_img = editor_data
 
+    if base_img is None and sample_id:
+        fpath = find_sample_file("image", sample_id)
+        if fpath and os.path.isfile(fpath):
+            base_img = Image.open(fpath).convert("RGB")
+
     if base_img is None:
-        return None, None, "", "⚠️ No image loaded."
+        empty_np = np.zeros(TARGET_SIZE, dtype=np.uint8)
+        return None, None, "", "⚠️ No image loaded.", empty_np
 
     img_512 = ensure_512_image(base_img)
-    rough_mask = extract_active_mask(editor_data, current_mask_img)
+    rough_mask = extract_active_mask(editor_data, current_mask_img, active_mask_state, sample_id)
 
     if np.sum(rough_mask > 0) == 0:
-        return None, None, "", "⚠️ Please draw brush strokes over the unwanted object first."
+        return None, None, "", "⚠️ Please draw brush strokes over the unwanted object first.", rough_mask
 
     refined_mask, latency_ms = refine_mask_grabcut(img_512, rough_mask, iterations=2)
     mask_pil = Image.fromarray(refined_mask, mode="L")
@@ -232,16 +294,16 @@ def refine_mask_interaction(
     router_md = format_router_markdown(route_res)
     msg = f"✨ Mask snapped to object edges via GrabCut in {latency_ms:.1f} ms! Recommended: **{route_res['recommended_model'].upper()}**."
 
-    return mask_pil, overlay_pil, router_md, msg
+    return mask_pil, overlay_pil, router_md, msg, refined_mask
 
 
 def clear_mask_interaction(editor_data: Any):
     """Instantly resets the inpainting mask to completely clean (0=keep)."""
-    empty_mask = np.zeros((512, 512), dtype=np.uint8)
+    empty_mask = np.zeros(TARGET_SIZE, dtype=np.uint8)
     mask_pil = Image.fromarray(empty_mask, mode="L")
 
     if editor_data is None:
-        return mask_pil, None, "", "🧹 Mask reset to empty (100% keep)."
+        return mask_pil, None, "", "🧹 Mask reset to empty (100% keep).", empty_mask
 
     if isinstance(editor_data, dict):
         base_img = editor_data.get("background") or editor_data.get("composite")
@@ -249,35 +311,55 @@ def clear_mask_interaction(editor_data: Any):
         base_img = editor_data
 
     if base_img is None:
-        return mask_pil, None, "", "🧹 Mask reset to empty (100% keep)."
+        return mask_pil, None, "", "🧹 Mask reset to empty (100% keep).", empty_mask
 
     img_512 = ensure_512_image(base_img)
     overlay_pil = Image.fromarray(img_512, mode="RGB")
     route_res = classify_and_route(img_512, empty_mask)
     router_md = format_router_markdown(route_res)
 
-    return mask_pil, overlay_pil, router_md, "🧹 Mask cleared! Canvas reset to 100% keep."
+    return mask_pil, overlay_pil, router_md, "🧹 Mask cleared! Canvas reset to 100% keep.", empty_mask
 
 
-def execute_inpainting_pipeline(
+def run_inpaint(
     editor_data: Any,
     current_mask_img: Any,
+    active_mask_state: Any = None,
+    sample_id: Optional[str] = None,
     model_choice: str = "Auto (Router Recommended)",
 ):
-    """Executes inpainting on Hexagon NPU via SNPE net-run or SD RePaint runner."""
-    if editor_data is None:
-        return None, "", "⚠️ Please provide an input image."
-
+    """
+    Executes inpainting on Hexagon NPU via SNPE net-run or SD RePaint runner.
+    Includes defensive auto-fallback across:
+    1. Drawn strokes from canvas
+    2. active_mask_state (gr.State)
+    3. current_mask_img preview
+    4. Disk fallback for selected sample
+    Under NO circumstances allows an empty mask to be dispatched when a sample is selected.
+    """
+    base_img = None
     if isinstance(editor_data, dict):
         base_img = editor_data.get("background") or editor_data.get("composite")
-    else:
+    elif editor_data is not None:
         base_img = editor_data
 
+    # Fallback to sample image if editor_data is unset (fresh load)
     if base_img is None:
-        return None, "", "⚠️ No image found."
+        sid = sample_id if sample_id else "001"
+        img_fpath = find_sample_file("image", sid)
+        if img_fpath and os.path.isfile(img_fpath):
+            base_img = Image.open(img_fpath).convert("RGB")
+
+    if base_img is None:
+        return None, "", "⚠️ No valid source image found. Please load or upload an image."
 
     img_512 = ensure_512_image(base_img)
-    mask_512 = extract_active_mask(editor_data, current_mask_img)
+    mask_512 = extract_active_mask(
+        editor_data=editor_data,
+        current_mask_img=current_mask_img,
+        active_mask_state=active_mask_state,
+        sample_id=sample_id,
+    )
 
     if np.sum(mask_512 > 0) == 0:
         return None, "", "⚠️ Inpainting mask is empty. Please draw brush strokes or select a target box."
@@ -319,6 +401,10 @@ def execute_inpainting_pipeline(
 </div>"""
         gr.Warning(f"NPU Hardware Failure: {err_msg}")
         return None, error_card, f"❌ NPU Hardware Execution Failed: {err_msg}"
+
+
+# Alias for backward compatibility
+execute_inpainting_pipeline = run_inpaint
 
 
 # -----------------------------------------------------------------------------
@@ -403,6 +489,9 @@ def build_app():
     device_badge = f"🟢 Connected: {dev_str}" if is_dev_connected else "🟡 Standalone / Simulation Mode"
 
     with gr.Blocks(title="Snapdragon 8 Elite Inpainting Engine") as demo:
+        # Backend active mask state tensor (512x512 uint8)
+        active_mask_state = gr.State(value=None)
+
         gr.Markdown(
             f"""# ⚡ Qualcomm Snapdragon 8 Elite Image Inpainting & Router Prototype
 **Target Acceleration:** Qualcomm Hexagon NPU (HTP v79) via FastRPC & SNPE/QNN DLCs  
@@ -494,45 +583,52 @@ def build_app():
                 telemetry_output = gr.Markdown()
 
         # Wire Events
+        # 1. On Initial Page Load: Sync sample 001 to canvas, visual preview, router, and active_mask_state
+        demo.load(
+            fn=load_benchmark_sample,
+            inputs=[sample_dropdown],
+            outputs=[image_editor, mask_display, overlay_display, router_output, status_box, active_mask_state]
+        )
+
         load_btn.click(
             fn=load_benchmark_sample,
             inputs=[sample_dropdown],
-            outputs=[image_editor, mask_display, overlay_display, router_output, status_box]
+            outputs=[image_editor, mask_display, overlay_display, router_output, status_box, active_mask_state]
         )
 
         sample_dropdown.change(
             fn=load_benchmark_sample,
             inputs=[sample_dropdown],
-            outputs=[image_editor, mask_display, overlay_display, router_output, status_box]
+            outputs=[image_editor, mask_display, overlay_display, router_output, status_box, active_mask_state]
         )
 
         grabcut_btn.click(
             fn=generate_grabcut_mask,
-            inputs=[image_editor, box_x1, box_y1, box_x2, box_y2, fast_gc_checkbox],
-            outputs=[mask_display, overlay_display, router_output, status_box]
+            inputs=[image_editor, box_x1, box_y1, box_x2, box_y2, fast_gc_checkbox, sample_dropdown],
+            outputs=[mask_display, overlay_display, router_output, status_box, active_mask_state]
         )
 
         refine_btn.click(
             fn=refine_mask_interaction,
-            inputs=[image_editor, mask_display],
-            outputs=[mask_display, overlay_display, router_output, status_box]
+            inputs=[image_editor, mask_display, active_mask_state, sample_dropdown],
+            outputs=[mask_display, overlay_display, router_output, status_box, active_mask_state]
         )
 
         reset_btn.click(
             fn=clear_mask_interaction,
             inputs=[image_editor],
-            outputs=[mask_display, overlay_display, router_output, status_box]
+            outputs=[mask_display, overlay_display, router_output, status_box, active_mask_state]
         )
 
         analyze_btn.click(
             fn=analyze_current_canvas,
-            inputs=[image_editor, mask_display],
-            outputs=[mask_display, overlay_display, router_output, status_box]
+            inputs=[image_editor, mask_display, active_mask_state, sample_dropdown],
+            outputs=[mask_display, overlay_display, router_output, status_box, active_mask_state]
         )
 
         inpaint_btn.click(
-            fn=execute_inpainting_pipeline,
-            inputs=[image_editor, mask_display, model_selector],
+            fn=run_inpaint,
+            inputs=[image_editor, mask_display, active_mask_state, sample_dropdown, model_selector],
             outputs=[result_display, telemetry_output, status_box]
         )
 
@@ -554,32 +650,34 @@ def run_headless_test():
     assert len(samples) >= 100, f"Expected at least 100 benchmark samples, found {len(samples)}"
 
     sample_id = "001"
-    editor_val, mask_pil, overlay_pil, router_md, status = load_benchmark_sample(sample_id)
+    editor_val, mask_pil, overlay_pil, router_md, status, mask_state = load_benchmark_sample(sample_id)
     assert editor_val is not None
     assert mask_pil is not None
     assert overlay_pil is not None
+    assert mask_state is not None and np.sum(mask_state > 0) > 0
     assert "MIGAN" in router_md
-    print(f"2. Sample {sample_id} loaded & routed to MIGAN correctly.")
+    print(f"2. Sample {sample_id} loaded, state bound & routed to MIGAN correctly.")
 
     sample_010 = "010"
-    ed_010, _, _, _, _ = load_benchmark_sample(sample_010)
-    gc_mask, gc_overlay, gc_md, gc_status = generate_grabcut_mask(ed_010, 100, 100, 300, 300, fast_mode=True)
+    ed_010, _, _, _, _, _ = load_benchmark_sample(sample_010)
+    gc_mask, gc_overlay, gc_md, gc_status, gc_state = generate_grabcut_mask(ed_010, 100, 100, 300, 300, fast_mode=True, sample_id=sample_010)
     assert gc_mask is not None
     assert gc_overlay is not None
+    assert gc_state is not None and np.sum(gc_state > 0) > 0
     assert "GrabCut executed" in gc_status
-    print("3. Target Bounding Box GrabCut executed cleanly in sub-50ms.")
+    print("3. Target Bounding Box GrabCut executed cleanly in sub-50ms with state synchronization.")
 
     print("4. Testing Inpainting Pipeline execution with MIGAN...")
-    res_img, tele_md, inpaint_status = execute_inpainting_pipeline(
-        editor_val, mask_pil, model_choice="MIGAN"
+    res_img, tele_md, inpaint_status = run_inpaint(
+        editor_val, mask_pil, active_mask_state=mask_state, sample_id=sample_id, model_choice="MIGAN"
     )
     assert res_img is not None
     assert "finished successfully" in inpaint_status
     print("5. MIGAN Inpainting Pipeline executed successfully.")
 
     print("6. Testing Inpainting Pipeline execution with Stable Diffusion 1.5...")
-    res_sd, tele_sd, status_sd = execute_inpainting_pipeline(
-        editor_val, mask_pil, model_choice="Stable Diffusion 1.5 (RePaint)"
+    res_sd, tele_sd, status_sd = run_inpaint(
+        editor_val, mask_pil, active_mask_state=mask_state, sample_id=sample_id, model_choice="Stable Diffusion 1.5 (RePaint)"
     )
     assert res_sd is not None
     assert "finished successfully" in status_sd
@@ -590,11 +688,24 @@ def run_headless_test():
     # Draw red brush stroke (#ff3333)
     test_layer[150:250, 150:250] = [255, 51, 51, 255]
     ed_brush = {"background": ed_010["background"], "layers": [test_layer], "composite": ed_010["background"]}
-    extracted = extract_active_mask(ed_brush, None)
+    extracted = extract_active_mask(ed_brush, None, None, sample_id=sample_010)
     assert extracted[200, 200] == 255, "Red brush stroke must evaluate to 255 (hole)"
     assert extracted[10, 10] == 0, "Unpainted canvas must evaluate to 0 (background)"
     assert np.sum(extracted == 255) == 100 * 100
     print("9. Red Brush Stroke correctly extracted (255=hole, 0=background) without grayscale trap!")
+
+    print("10. Testing Fresh Connection Auto-Fallback (Simulating immediate Run Inpainting click on first load)...")
+    # Simulate first load edge case where user didn't draw strokes, active_mask_state is None, current_mask_img is None
+    fresh_res, fresh_tele, fresh_status = run_inpaint(
+        editor_data=None,
+        current_mask_img=None,
+        active_mask_state=None,
+        sample_id="001",
+        model_choice="MIGAN",
+    )
+    assert fresh_res is not None, "Fresh inpaint with None state must auto-resolve 001 mask from disk!"
+    assert "finished successfully" in fresh_status
+    print("11. Fresh connection auto-fallback successfully inpainted sample 001 on first shot!")
 
     print("\n🎉 ALL HEADLESS VALIDATION TESTS PASSED CLEANLY (Zero GUI Lockup)!")
     print("=" * 70)
