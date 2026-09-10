@@ -2,6 +2,7 @@
 *.dlc
 /StableDiffusion/build
 StableDiffusion/sd_runtime/
+models/StableDiffusion
 
 # Raw binary dumps, logs, and diagnostic traces
 *.raw
