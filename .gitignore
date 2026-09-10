@@ -24,6 +24,8 @@ Benchmark/output/*/*.log
 Benchmark/dataset_previous/
 Benchmark/pulled_artifacts/
 Benchmark/qualitative_6x6/
+Benchmark/output/raw_pulls/
+Benchmark/output/previous_dataset/
 scripts/Benchmark/
 
 # Exclude oversized uncompressed multi-megapixel raw plot dumps (lightweight 300 DPI JPG/WebP versions are tracked)

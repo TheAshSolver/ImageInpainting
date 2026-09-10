@@ -22,8 +22,10 @@ from PIL import Image
 TARGET_SIZE = (512, 512)
 
 
-def ensure_512_image(image: Union[np.ndarray, Image.Image]) -> np.ndarray:
+def ensure_512_image(image: Union[np.ndarray, Image.Image, str, os.PathLike]) -> np.ndarray:
     """Normalizes input image to 512x512 uint8 RGB numpy array."""
+    if isinstance(image, (str, os.PathLike)):
+        image = Image.open(image).convert("RGB")
     if isinstance(image, Image.Image):
         image = np.array(image.convert("RGB"))
     elif isinstance(image, np.ndarray):

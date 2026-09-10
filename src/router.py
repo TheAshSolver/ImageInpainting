@@ -197,6 +197,8 @@ def classify_and_route(
     if mask is None:
         mask_np = np.zeros((512, 512), dtype=np.uint8)
     else:
+        if isinstance(mask, (str, os.PathLike)):
+            mask = Image.open(mask)
         if isinstance(mask, Image.Image):
             mask_np = np.array(mask.convert("L").resize((512, 512), Image.Resampling.NEAREST))
         else:

@@ -1,4 +1,0 @@
-Index,GT_File,Pred_File,Model,PSNR_dB,SSIM,LPIPS_VGG
-1,1.png,1_sd.png,sd,25.4046,0.3702,0.2166
-2,2.png,2_sd.png,sd,21.3369,0.6015,0.4185
-AVERAGE,2 pairs,-,sd,23.3707,0.4858,0.3175

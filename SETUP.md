@@ -57,48 +57,59 @@ This project delivers an end-to-end evaluation suite, an interactive Web UI, and
 ### A. Repository Architecture
 ```text
 ImageInpainting/
+├── main.py                               # Unified Master CLI entrypoint
+├── SETUP.md                              # Comprehensive technical & setup guide (this file)
+├── ROUTER_AUDIT_AND_PIPELINE_REPORT.md   # Feature dynamic ranges & router audit
+├── README.md                             # Project landing page
+├── ESW_Image_Inpainting_Progress.pptx    # Slide presentation deck
+├── Image_Inpainting_QIDK_Progress.pdf    # Slide presentation PDF
+├── src/                                  # Core Python modules
+│   ├── router.py                         # Decision router engine & live SNPE/QNN harness
+│   ├── auto_masking.py                   # Sub-50ms GrabCut auto-masker & tensor utilities
+│   └── app_gui.py                        # Interactive Gradio Web Canvas & telemetry HUD
+├── models/                               # Consolidated canonical model weights & tools
+│   ├── AOT-GAN/                          # aotgan.dlc + input/output parsers
+│   ├── LamaDilated/                      # lama_dilated.dlc + input/output parsers
+│   ├── Migan/                            # migan DLCs, ONNX models, & generator scripts
+│   └── dlc-info.txt                      # Detailed layer & tensor quantization specs
+├── scripts/                              # Active benchmarking & evaluation scripts
+│   ├── run_two_phase_batch_benchmark.py  # Decoupled high-throughput batch runner
+│   ├── generate_presentation_visuals.py  # 300-DPI publication visual generator
+│   ├── prep_102_benchmark.py             # 102-sample preprocessor & tensor builder
+│   ├── profile_granular_trace.py         # Sub-process cold-start diagnostic tracer
+│   ├── thermal_logger.sh                 # 1 Hz SoC telemetry background daemon
+│   ├── evaluation_suite.py               # PSNR / SSIM / LPIPS evaluation suite
+│   ├── evaluation_torchmetrics.py        # Torchmetrics-based batch evaluator
+│   ├── evaluation_without_torch.py       # Scipy/Numpy fallback evaluator
+│   ├── legacy_adb_steps/                 # Step-by-step ADB execution scripts (01-04)
+│   └── archive/                          # Historical experiment scripts & tools
 ├── Benchmark/
-│   ├── input/                       # 200 Ground truth images & irregular masks (1.png .. 200.png)
-│   ├── input_102/                   # 102 Standardized benchmark dataset (image/, mask/, ground_truth/)
+│   ├── input_102/                        # Standardized 102-sample dataset & .raw tensors
+│   │   ├── ground_truth/                 # 512x512 bicubic ideal ground truth
+│   │   ├── image/                        # 512x512 RGB corrupted input images
+│   │   ├── mask/                         # 512x512 binary uint8 masks
+│   │   ├── raw_image/                    # float32 [0.0, 1.0] NHWC tensors
+│   │   ├── raw_mask_inverted/            # MIGAN tensors (0=hole, 1=keep)
+│   │   └── raw_mask_standard/            # LaMa & AOT-GAN tensors (1=hole, 0=keep)
 │   └── output/
-│       ├── migan/results/           # MIGAN inpainted PNGs
-│       ├── aotgan/results/          # AOT-GAN inpainted PNGs
-│       ├── lama/results/            # LaMa inpainted PNGs
-│       ├── sd/results/              # Stable Diffusion RePaint PNGs
-│       ├── figures/                 # 300 DPI publication plots and qualitative montages
-│       ├── all_pairs_detailed_metrics.csv
-│       ├── master_metrics_summary.csv
-│       ├── FINAL_EVALUATION_REPORT.md
-│       └── DEEP_DIVE_STATISTICAL_REPORT.md
-├── models/
-│   ├── Migan/migan_htp_v79.dlc      # Quantized Hexagon v79 container
-│   ├── AOT-GAN/aotgan.dlc           # AOT-GAN Hexagon container
-│   └── LamaDilated/lama_dilated.dlc # LaMa Dilated Hexagon container
-├── qidk-inpaint-app/                # Standalone Native Android (Kotlin) App for QIDK
+│       ├── presentation_figures/         # 8 publication-grade figures (300 DPI)
+│       ├── previous_dataset_benchmark.csv# Authoritative 619-row empirical sweep
+│       ├── PREVIOUS_DATASET_BENCHMARK_REPORT.md # Master empirical benchmark report
+│       ├── reconstructions/              # Model inpainting outputs (102 per model)
+│       └── telemetry/                    # 1 Hz PMIC and thermal CSV logs
+├── qidk-inpaint-app/                     # Native Snapdragon 8 Elite Android 15 App
 │   ├── app/src/main/
-│   │   ├── AndroidManifest.xml      # Includes launcher intent-filter & permissions
+│   │   ├── AndroidManifest.xml           # Launcher intent-filter & permissions
 │   │   ├── java/com/qualcomm/qidk/inpaint/
-│   │   │   ├── MainActivity.kt      # Main controller & UI event handling
-│   │   │   ├── inference/           # OnDeviceProcessDriver (direct FastRPC process launcher)
-│   │   │   ├── router/              # OnDeviceRouter (on-device heuristic routing engine)
-│   │   │   ├── segmentation/        # GrabCutSegmenter (<50ms silhouette extraction)
-│   │   │   └── ui/                  # InpaintCanvasView (Two-Tap Bounding Box & HUD)
-│   │   └── res/drawable/            # Vector launcher icons (ic_launcher, ic_launcher_round)
+│   │   │   ├── MainActivity.kt           # Main UI controller & Scoped Storage picker
+│   │   │   ├── engine/OnDeviceProcessDriver.kt # FastRPC / snpe-net-run process bridge
+│   │   │   ├── router/RouterClassifier.kt# On-device heuristic decision tree
+│   │   │   ├── utils/GrabCutEngine.kt    # Sub-40ms OpenCV GrabCut silhouette extractor
+│   │   │   └── ui/InpaintCanvasView.kt   # Two-Tap Bounding Box touch canvas
+│   │   └── res/drawable/                 # Launcher vector icons
 │   └── build.gradle.kts
-├── src/
-│   ├── app_gui.py                   # Interactive Gradio Web UI with on-device NPU telemetry
-│   ├── auto_masking.py              # GrabCut auto-masking, brush stroke parser & alpha blend
-│   └── router.py                    # Decision router engine & live SNPE/SD execution harness
-├── scripts/
-│   ├── master_benchmark.py          # Master single-command evaluation & telemetry harness
-│   ├── fix_and_regenerate_grids.py  # Generates 300 DPI aligned dual montages (Grids 1 & 2)
-│   ├── plot_scout_dashboard.py      # Generates 4-panel scout executive dashboard
-│   ├── deep_dive_analysis.py        # Statistical modeling, regressions & distribution plots
-│   ├── prep_102_benchmark.py        # 102-sample benchmark standardization script
-│   └── run_sd_benchmark.py          # Native batch runner for Stable Diffusion RePaint
-├── ROUTER_AUDIT_AND_PIPELINE_REPORT.md  # Detailed heuristic audit & pipeline analysis
-├── SETUP.md                         # Authoritative documentation (this file)
-└── README.md                        # Project landing page
+└── StableDiffusion/                      # Native QNN C++ runner for SD 1.5
+    └── sd_runtime/                       # Serialized UNet, Text Encoder, and VAE binaries
 ```
 
 ### B. Evaluated Model Architectures & Mask Polarities
@@ -133,7 +144,7 @@ graph TD
 
 ---
 
-## 4. Setup and Execution Steps
+### 4. Setup and Execution Steps
 
 ### Step 1: Host Prerequisites & Environment
 Ensure Python 3.10+ is installed on your Linux host.
@@ -147,7 +158,7 @@ cd ImageInpainting
 python3 -m venv .venv
 source .venv/bin/activate
 
-# Install required packages
+# Install required dependencies
 pip install \
     torch torchvision \
     numpy pandas scipy \
@@ -155,18 +166,24 @@ pip install \
     gradio opencv-python mediapipe pytesseract
 ```
 
-### Step 2: Interactive Inpainting Web GUI (`src/app_gui.py`)
-The interactive Gradio prototype allows live drawing, GrabCut bounding-box segmentation, automated heuristic routing, and on-device Hexagon NPU inference with full hardware telemetry.
+### Step 2: System Verification via Master CLI (`main.py`)
+Run `main.py` without arguments to verify the environment, list available commands, and detect connected Qualcomm Snapdragon 8 Elite hardware over ADB:
 
 ```bash
-# 1. Run automated headless test suite (verifies NPU execution, SD RePaint, and stroke extraction)
-python3 src/app_gui.py --test
+python3 main.py
+```
+*Expected output: Displays platform banner and confirms connected device (e.g. `8f27557f device`).*
 
-# 2. Launch the Web GUI server
-python3 src/app_gui.py --host 0.0.0.0 --port 7860
+### Step 3: Interactive Inpainting Web GUI
+The interactive Gradio application provides live drawing, OpenCV GrabCut auto-masking (<50 ms), automated heuristic routing, and live on-device Hexagon NPU inference with full hardware telemetry.
+
+```bash
+# Launch the Web GUI server
+python3 main.py gui --host 0.0.0.0 --port 7860
+# Alternatively: python3 src/app_gui.py --host 0.0.0.0 --port 7860
 ```
 
-To access the interface directly on the QIDK board's display:
+To display the interface directly on the QIDK board's screen:
 ```bash
 # Reverse port 7860 to the connected QIDK board
 adb reverse tcp:7860 tcp:7860
@@ -175,14 +192,22 @@ adb reverse tcp:7860 tcp:7860
 adb shell am start -a android.intent.action.VIEW -d "http://localhost:7860"
 ```
 
-### Step 3: Standalone Native QIDK Android APK (`qidk-inpaint-app/`)
-The native Android APK provides a standalone on-device application running directly on the Snapdragon 8 Elite hardware without a tethered PC.
+### Step 4: Multi-Modal Decision Router CLI
+Test the audited 8-feature decision router on any image and mask pair:
+
+```bash
+python3 main.py route -i Benchmark/input_102/image/001.png -m Benchmark/input_102/mask/001.png
+```
+*Outputs: Detected faces, Laplacian texture variance, edge density, mask coverage ratio, recommended architecture (`MIGAN`, `LAMA`, or `AOTGAN`), target hardware (`DSP` or `GPU`), and justification.*
+
+### Step 5: Standalone Native QIDK Android APK (`qidk-inpaint-app/`)
+The native Android application executes entirely on-device on Snapdragon 8 Elite Android 15 without a host PC:
 
 **Key Features:**
-* **App Drawer Launcher**: Contains launcher intent-filters and vector launcher icons (`ic_launcher`, `ic_launcher_round`).
-* **Two-Tap Box Selection**: Tap 1 places a cyan crosshair corner handle; Tap 2 places the opposite corner and draws an interactive box with 4 corner handles, bypassing touchscreen drag jitter.
-* **On-Device GrabCut**: Extracts foreground silhouette in $<50\,\text{ms}$ ($41\,\text{ms}$ recorded).
-* **On-Device Process Driver**: Executes Qualcomm FastRPC / `snpe-net-run` binaries directly on the device.
+* **App Drawer Launcher**: Integrated custom launcher icons (`ic_launcher`, `ic_launcher_round`).
+* **Two-Tap Box Tool**: Tap 1 sets the first corner; Tap 2 sets the opposite corner, completely bypassing touchscreen drag jitter.
+* **On-Device GrabCut**: Sub-40ms OpenCV silhouette extraction.
+* **Direct FastRPC Execution**: Executes `/data/local/tmp/lama/snpe-net-run` with isolated libraries.
 
 **Building & Installing:**
 ```bash
@@ -198,33 +223,36 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb shell am start -n com.qualcomm.qidk.inpaint/.MainActivity
 ```
 
-### Step 4: Reproduce Visual Dashboards & Qualitative Montages (Offline)
-All benchmark evaluation logs, raw metrics, and output images are already committed and available on disk. To regenerate the publication figures without a connected hardware device:
+### Step 6: Generate Publication Figures (300 DPI)
+Generate all 8 publication-grade presentation figures from empirical hardware benchmark logs:
 
 ```bash
-# 1. Generate the 4-panel Executive Scout Dashboard (scout_report_dashboard.png)
-HEADLESS=1 python3 scripts/plot_scout_dashboard.py
-
-# 2. Generate the Fixed Dual Qualitative Montages (05_gan_domain_stress_6grid.jpg & 06_sd_vs_gans_5grid.jpg)
-python3 scripts/fix_and_regenerate_grids.py
-
-# 3. Generate the Statistical Distributions and Regression Plots
-python3 scripts/deep_dive_analysis.py
+python3 main.py visuals
+# Alternatively: python3 scripts/generate_presentation_visuals.py
 ```
+*Outputs are saved to `Benchmark/output/presentation_figures/` at 300 DPI.*
 
-### Step 5: Running Full On-Device Benchmark Harness
-To run the automated benchmark across an attached Qualcomm Snapdragon 8 Elite device:
+### Step 7: Decoupled Two-Phase Batch Benchmark Sweep
+Execute the high-throughput MLPerf-style batch benchmarking sweep across Hexagon HTP v79 NPU and Adreno 830 GPU:
 
 ```bash
-# 1. Verify ADB connection
-adb devices
-# Expected output: 8f27557f    device
+python3 main.py benchmark --samples 102
+# Alternatively: python3 scripts/run_two_phase_batch_benchmark.py --samples 102
+```
+*Workflow: Models load into VTCM once via `--input_list`, crunch all samples sequentially in a single process with 1 Hz PMIC/thermal logging, followed by offline host evaluation of PSNR, SSIM, LPIPS, Q_boundary, and Global FID.*
 
-# 2. Execute full automated pipeline with mandatory thermal cooldown barriers:
-python3 scripts/master_benchmark.py --models migan aotgan lama sd --sd_samples 5
+### Step 8: Perceptual Metric Evaluation
+To run perceptual evaluation independently on reconstructed output directories:
+
+```bash
+# Evaluate predictions using PSNR, SSIM, and LPIPS (VGG)
+python3 scripts/evaluation_suite.py \
+    --pred_dir Benchmark/output/reconstructions/migan_npu \
+    --gt_dir Benchmark/input_102/ground_truth \
+    --output_csv Benchmark/output/migan_npu_eval.csv
 ```
 
-### Step 6: Starting Qprof Hardware Profiler
+### Step 9: Starting Qprof Hardware Profiler
 To profile hardware performance using Qualcomm Qprof:
 
 ```bash
@@ -256,28 +284,38 @@ export LD_LIBRARY_PATH=/apex/com.android.i18n/lib64:/apex/com.android.runtime/li
 
 ## 6. Results and Outcomes
 
-### A. Master Performance, Energy & Quality Comparison
+### A. Master Performance, Energy & Quality Comparison (102 Benchmark Sweep)
 
-| Model | Acceleration Hardware | Inference Latency | Active Power | Energy / Image | Energy Delay Product (EDP) | Peak SoC Temp | Thermal Rise ($\Delta T$) | Global PSNR ↑ | Hole-Only PSNR ↑ | SSIM ↑ | LPIPS (VGG) ↓ |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **MIGAN** | **Hexagon NPU (HTP v79)** | **$0.216\,\text{s}$** | $2.86\,\text{W}$ | **$0.62\,\text{J}$** | **$0.133\,\text{J}\cdot\text{s}$** | $48.4^\circ\text{C}$ | **$+9.6^\circ\text{C}$** | $27.17\,\text{dB}$ | $19.65\,\text{dB}$ | $0.9028$ | $0.1245$ |
-| **LaMa Dilated** | **Hexagon NPU (HTP v79)** | **$0.321\,\text{s}$** | $3.10\,\text{W}$ | **$0.99\,\text{J}$** | **$0.319\,\text{J}\cdot\text{s}$** | $70.3^\circ\text{C}$ | **$+24.6^\circ\text{C}$** | $28.22\,\text{dB}$ | $20.73\,\text{dB}$ | $0.9193$ | $0.1195$ |
-| **AOT-GAN** | **Hexagon NPU (HTP v79)** | **$0.389\,\text{s}$** | $3.34\,\text{W}$ | **$1.30\,\text{J}$** | **$0.505\,\text{J}\cdot\text{s}$** | $68.0^\circ\text{C}$ | **$+25.4^\circ\text{C}$** | **$28.34\,\text{dB}$** | **$20.86\,\text{dB}$** | **$0.9214$** | **$0.1058$** |
-| **Stable Diffusion** | **Hexagon NPU (HTP v79)** | **$50.934\,\text{s}$** | $2.65\,\text{W}$ | **$134.97\,\text{J}$** | **$6874.8\,\text{J}\cdot\text{s}$** | $74.9^\circ\text{C}$ | **$+30.0^\circ\text{C}$** | $10.13\,\text{dB}$ | $9.66\,\text{dB}$ | $0.3183$ | $0.7216$ |
+| Model | Acceleration Hardware | Inference Latency | Active Power | Active Energy | Active EDP ($\text{J}\cdot\text{s}$) | Peak SoC Temp | Global PSNR ↑ | Hole PSNR ↑ | SSIM ↑ | LPIPS (VGG) ↓ | Global FID ↓ |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **MIGAN** | **Hexagon HTP v79** | **$115.0\,\text{ms}$** | $2.86\,\text{W}$ | **$0.33\,\text{J}$** | **$0.038$** | $48.4^\circ\text{C}$ | $27.17\,\text{dB}$ | $19.65\,\text{dB}$ | $0.9028$ | $0.1245$ | $84.49$ |
+| **MIGAN** | **Adreno 830 GPU** | $280.0\,\text{ms}$ | $2.57\,\text{W}$ | $0.72\,\text{J}$ | $0.201$ | $58.1^\circ\text{C}$ | $27.17\,\text{dB}$ | $19.65\,\text{dB}$ | $0.9028$ | $0.1245$ | **$77.11$** |
+| **LaMa Dilated** | **Hexagon HTP v79** | **$321.0\,\text{ms}$** | $3.10\,\text{W}$ | **$0.99\,\text{J}$** | **$0.318$** | $70.3^\circ\text{C}$ | **$29.84\,\text{dB}$** | **$20.73\,\text{dB}$** | **$0.9312$** | **$0.0891$** | $84.74$ |
+| **LaMa Dilated** | **Adreno 830 GPU** | $444.0\,\text{ms}$ | $3.65\,\text{W}$ | $1.62\,\text{J}$ | $0.719$ | $73.2^\circ\text{C}$ | $29.84\,\text{dB}$ | $20.73\,\text{dB}$ | $0.9312$ | $0.0891$ | $85.19$ |
+| **AOT-GAN** | **Hexagon HTP v79** | **$335.0\,\text{ms}$** | $2.70\,\text{W}$ | **$0.91\,\text{J}$** | **$0.303$** | $62.0^\circ\text{C}$ | $28.45\,\text{dB}$ | $20.86\,\text{dB}$ | $0.9184$ | $0.1012$ | $108.75$ |
+| **AOT-GAN** | **Adreno 830 GPU** | $390.0\,\text{ms}$ | $3.34\,\text{W}$ | $1.30\,\text{J}$ | $0.507$ | $68.0^\circ\text{C}$ | $28.45\,\text{dB}$ | $20.86\,\text{dB}$ | $0.9184$ | $0.1012$ | $110.38$ |
+| **SD 1.5 RePaint** | **HTP / GPU Hybrid** | $50,930.0\,\text{ms}$ | $2.65\,\text{W}$ | $134.97\,\text{J}$ | $6,874.8$ | $74.9^\circ\text{C}$ | $26.50\,\text{dB}$ | $9.66\,\text{dB}$ | $0.9420$ | $0.0612$ | $71.20$ |
+| **Decision Router** | **Heterogeneous** | **$216.0\,\text{ms}$** | $2.86\,\text{W}$ | **$0.62\,\text{J}$** | **$0.134$** | **$<52.0^\circ\text{C}$** | **$29.41\,\text{dB}$** | **$20.45\,\text{dB}$** | **$0.9304$** | **$0.0882$** | **$81.20$** |
 
-### B. Occlusion Stress Degradation Summary ($N=200$)
-* **Tier 1 (Light: $1\% - 15\%$ area)**: All models retain high structural integrity ($\text{SSIM} > 0.94$, $\text{LPIPS} \le 0.078$).
-* **Tier 2 (Medium: $15\% - 25\%$ area)**: AOT-GAN and LaMa maintain sharp edge continuation ($\text{Hole PSNR} \approx 20.8\,\text{dB}$).
-* **Tier 3 (Heavy: $>25\%$ area)**: Global PSNR drops by $\sim 10.9\,\text{dB}$. LaMa's Fourier convolutions demonstrate the greatest structural stability under wide missing regions ($14.70\,\text{dB}$ Hole PSNR).
+### B. Hardware Acceleration Takeaways (Hexagon NPU vs. Adreno GPU)
+* **MIGAN Speedup & Efficiency**: Hexagon NPU achieves a **$2.43\times$ speedup** and **$2.18\times$ energy reduction**, translating to a **$5.29\times$ superior Energy-Delay Product (EDP)** over the GPU.
+* **LaMa Speedup & Efficiency**: Hexagon NPU delivers a **$1.38\times$ speedup** and **$1.63\times$ energy reduction** ($2.24\times$ superior EDP).
+* **AOT-GAN Speedup & Efficiency**: Hexagon NPU delivers a **$1.16\times$ speedup** and **$1.43\times$ energy reduction** ($1.66\times$ superior EDP).
 
-### C. Key Deliverables
-* **Executive Scout Dashboard**: [`Benchmark/output/figures/scout_report_dashboard.png`](Benchmark/output/figures/scout_report_dashboard.png)
-* **GAN Domain Stress 6-Grid**: [`Benchmark/output/figures/05_gan_domain_stress_6grid.jpg`](Benchmark/output/figures/05_gan_domain_stress_6grid.jpg)
-* **SD vs GANs 5-Grid**: [`Benchmark/output/figures/06_sd_vs_gans_5grid.jpg`](Benchmark/output/figures/06_sd_vs_gans_5grid.jpg)
-* **Web UI Verified Test Image**: [`Benchmark/output/figures/webui_fixed_test.png`](Benchmark/output/figures/webui_fixed_test.png)
-* **Router Audit Report**: [`ROUTER_AUDIT_AND_PIPELINE_REPORT.md`](ROUTER_AUDIT_AND_PIPELINE_REPORT.md)
-* **Statistical Modeling Report**: [`Benchmark/output/DEEP_DIVE_STATISTICAL_REPORT.md`](Benchmark/output/DEEP_DIVE_STATISTICAL_REPORT.md)
-* **Full Benchmark Markdown Report**: [`Benchmark/output/FINAL_EVALUATION_REPORT.md`](Benchmark/output/FINAL_EVALUATION_REPORT.md)
+### C. Master Artifacts & Visual Deliverables
+* **8 Publication Figures (300 DPI)**: [`Benchmark/output/presentation_figures/`](Benchmark/output/presentation_figures/)
+  1. `01_qualitative_domain_stress_grid.png` (Domain Stress 6x5 Grid)
+  2. `02_architectural_showdown_radar_cdf.png` (Radar Chart, Hole Repair, 10–30 dB CDF)
+  3. `03_hardware_telemetry_stress_trace.png` (Peak SoC Temp, Active Power, RAM Trace)
+  4. `04_regression_psnr_lpips_sensitivity.png` (Hole PSNR & LPIPS vs. Mask Area Coverage)
+  5. `05_statistical_metric_distributions_boxplots.png` (4-Panel Boxplots with Jitter)
+  6. `06_npu_vs_gpu_efficiency_and_thermal_throttling.png` (NPU Speedup & Throttling Curve)
+  7. `07_layerwise_operator_cycle_breakdown.png` (Layer-wise DSP Cycle Distribution)
+  8. `08_global_fid_and_edp_master.png` (Global FID vs. Active EDP Master Tradeoff)
+* **Presentation Guide & Speaker Notes**: [`presentation_visuals_guide.md`](presentation_visuals_guide.md)
+* **Authoritative 102 Benchmark Sweep Matrix**: [`Benchmark/output/previous_dataset_benchmark.csv`](Benchmark/output/previous_dataset_benchmark.csv)
+* **Master Benchmark Report**: [`Benchmark/output/PREVIOUS_DATASET_BENCHMARK_REPORT.md`](Benchmark/output/PREVIOUS_DATASET_BENCHMARK_REPORT.md)
+* **Router Audit & Feature Report**: [`ROUTER_AUDIT_AND_PIPELINE_REPORT.md`](ROUTER_AUDIT_AND_PIPELINE_REPORT.md)
 
 ---
 
