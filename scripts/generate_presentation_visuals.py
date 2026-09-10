@@ -183,6 +183,12 @@ def generate_fig1_qualitative_grid(df):
     out_p = os.path.join(OUTPUT_FIG_DIR, "01_qualitative_domain_stress_grid.png")
     plt.savefig(out_p, dpi=300, bbox_inches="tight")
     plt.close()
+    try:
+        from PIL import Image as PILImage
+        with PILImage.open(out_p) as im:
+            im.convert("P", palette=PILImage.ADAPTIVE, colors=256).save(out_p, optimize=True)
+    except Exception:
+        pass
     print(f"   ✅ Saved: {out_p}")
 
 
