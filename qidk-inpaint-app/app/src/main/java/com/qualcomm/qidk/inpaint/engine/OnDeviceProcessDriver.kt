@@ -52,7 +52,7 @@ object OnDeviceProcessDriver {
                     "export LD_LIBRARY_PATH=$DEVICE_SD_DIR:\$LD_LIBRARY_PATH && " +
                     "export ADSP_LIBRARY_PATH='$DEVICE_SD_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp' && " +
                     "rm -f sd_output.png 2>/dev/null; " +
-                    "./sd_qidk_runner_inpaint 'high quality clean photo restoration'"
+                    "./sd_qidk_runner_inpaint ''"
                 )
 
                 val process = ProcessBuilder(*cmd).redirectErrorStream(true).start()
