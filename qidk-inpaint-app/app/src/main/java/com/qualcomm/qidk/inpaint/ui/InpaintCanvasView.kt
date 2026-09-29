@@ -113,6 +113,7 @@ class InpaintCanvasView @JvmOverloads constructor(
     private var firstCorner: PointF? = null
     private var currentBBox: RectF? = null
     var onBoxSelectionStatusChanged: ((String) -> Unit)? = null
+    var onMaskChanged: (() -> Unit)? = null
 
     init {
         clearMask(saveUndo = false)
@@ -162,6 +163,19 @@ class InpaintCanvasView @JvmOverloads constructor(
 
     fun getSelectionBox(): RectF? = currentBBox
 
+    fun getRawMaskBitmap(): Bitmap {
+        return maskBitmap.copy(Bitmap.Config.ARGB_8888, false)
+    }
+
+    fun setRawMaskBitmap(bitmap: Bitmap) {
+        val scaled = Bitmap.createScaledBitmap(bitmap, canonicalSize, canonicalSize, false)
+        maskBitmap = scaled.copy(Bitmap.Config.ARGB_8888, true)
+        maskCanvas = Canvas(maskBitmap)
+        resetBoxSelection()
+        invalidate()
+        onMaskChanged?.invoke()
+    }
+
     fun applyGrabCutMask(binaryMask: Bitmap) {
         saveUndoState()
         val scaled = Bitmap.createScaledBitmap(binaryMask, canonicalSize, canonicalSize, false)
@@ -178,6 +192,7 @@ class InpaintCanvasView @JvmOverloads constructor(
         maskBitmap.setPixels(pixels, 0, canonicalSize, 0, 0, canonicalSize, canonicalSize)
         resetBoxSelection()
         invalidate()
+        onMaskChanged?.invoke()
     }
 
     fun clearMask(saveUndo: Boolean = true) {
@@ -185,6 +200,7 @@ class InpaintCanvasView @JvmOverloads constructor(
         maskBitmap.eraseColor(Color.TRANSPARENT)
         resetBoxSelection()
         invalidate()
+        onMaskChanged?.invoke()
     }
 
     fun undo() {
@@ -194,6 +210,7 @@ class InpaintCanvasView @JvmOverloads constructor(
             maskCanvas = Canvas(maskBitmap)
             resetBoxSelection()
             invalidate()
+            onMaskChanged?.invoke()
         }
     }
 
@@ -247,6 +264,7 @@ class InpaintCanvasView @JvmOverloads constructor(
                         currentPath.reset()
                         canonicalPath.reset()
                         invalidate()
+                        onMaskChanged?.invoke()
                         return true
                     }
                 }

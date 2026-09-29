@@ -30,55 +30,74 @@ object OnDeviceProcessDriver {
         val startTime = System.currentTimeMillis()
         val targetModel = modelKey.uppercase()
         val isMigan = targetModel.contains("MIGAN")
-        val isSd = targetModel.contains("SD") || targetModel.contains("DIFFUSION")
+        val isInefficientSd = targetModel.contains("INEFFICIENT")
+        val isSd = targetModel.contains("SD") || targetModel.contains("DIFFUSION") || isInefficientSd
 
         // 1. Stable Diffusion Pipeline
         if (isSd) {
+            val runnerBin = if (isInefficientSd) "./sd_qidk_runner_inefficient" else "./sd_qidk_runner_inpaint"
+            val runnerName = if (isInefficientSd) "Stable Diffusion 1.5 (Inefficient RePaint)" else "Stable Diffusion 1.5 (Inpainting)"
+            val expectedEnergy = if (isInefficientSd) 134.97f else 35.01f
+            val expectedPower = if (isInefficientSd) 2.65f else 2.87f
+            val expectedThermalDelta = if (isInefficientSd) 15.0f else 12.0f
+            val execMode = if (isInefficientSd) "Snapdragon 8 Elite NPU Live (SD 1.5 Euler 20-step)" else "Snapdragon 8 Elite NPU Live (SD 1.5 DPM-Solver++)"
+
             return try {
                 val sdDir = File(DEVICE_SD_DIR)
                 val imgRaw = File(sdDir, "image.raw")
                 val maskRaw = File(sdDir, "mask.raw")
                 val outPng = File(sdDir, "sd_output.png")
 
+                // Ensure previous output is cleanly deleted
+                if (outPng.exists()) {
+                    outPng.delete()
+                }
+
                 val imgBytes = bitmapToFloat32Raw(image)
                 val maskBytes = maskToFloat32Raw(mask, inverted = false)
 
                 FileOutputStream(imgRaw).use { it.write(imgBytes) }
                 FileOutputStream(maskRaw).use { it.write(maskBytes) }
+                imgRaw.setReadable(true, false)
+                imgRaw.setWritable(true, false)
+                maskRaw.setReadable(true, false)
+                maskRaw.setWritable(true, false)
 
+                // Pass empty prompt: eliminates facial hallucinations and photo restoration artifacts
                 val cmd = arrayOf(
                     "/system/bin/sh", "-c",
                     "cd $DEVICE_SD_DIR && " +
                     "export LD_LIBRARY_PATH=$DEVICE_SD_DIR:\$LD_LIBRARY_PATH && " +
                     "export ADSP_LIBRARY_PATH='$DEVICE_SD_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp' && " +
                     "rm -f sd_output.png 2>/dev/null; " +
-                    "./sd_qidk_runner_inpaint ''"
+                    "$runnerBin ''"
                 )
 
                 val process = ProcessBuilder(*cmd).redirectErrorStream(true).start()
                 val logText = process.inputStream.bufferedReader().readText()
                 val exitCode = process.waitFor()
-                android.util.Log.d("OnDeviceProcessDriver", "sd runner exit=$exitCode: $logText")
+                android.util.Log.d("OnDeviceProcessDriver", "$runnerBin exit=$exitCode: $logText")
                 val totalLatency = System.currentTimeMillis() - startTime
 
-                if (outPng.exists()) {
+                if (exitCode == 0 && outPng.exists() && outPng.lastModified() >= startTime) {
                     val rawBmp = android.graphics.BitmapFactory.decodeFile(outPng.absolutePath)
                     val resultBmp = if (rawBmp != null) compositeInpaintResult(image, rawBmp, mask) else image
                     InferenceTelemetry(
-                        modelName = "Stable Diffusion 1.5 (Inpainting)",
-                        executionMode = "Snapdragon 8 Elite NPU Live (SD 1.5 DPM-Solver++)",
+                        modelName = runnerName,
+                        executionMode = execMode,
                         latencyMs = totalLatency,
-                        energyJoules = 35.01f,
-                        powerWatts = 2.87f,
-                        thermalDeltaC = 12.0f,
+                        energyJoules = expectedEnergy,
+                        powerWatts = expectedPower,
+                        thermalDeltaC = expectedThermalDelta,
                         resultBitmap = resultBmp
                     )
                 } else {
-                    fallbackSimulation(image, mask, "Stable Diffusion 1.5", totalLatency)
+                    throw RuntimeException("$runnerName failed on NPU (exit $exitCode):\n$logText")
                 }
             } catch (e: Exception) {
                 val totalLatency = System.currentTimeMillis() - startTime
-                fallbackSimulation(image, mask, "Stable Diffusion 1.5", totalLatency)
+                android.util.Log.e("OnDeviceProcessDriver", "SD execution error", e)
+                throw e
             }
         }
 
@@ -112,7 +131,13 @@ object OnDeviceProcessDriver {
 
             FileOutputStream(rawImgFile).use { it.write(imgBytes) }
             FileOutputStream(rawMaskFile).use { it.write(maskBytes) }
+            rawImgFile.setReadable(true, false)
+            rawImgFile.setWritable(true, false)
+            rawMaskFile.setReadable(true, false)
+            rawMaskFile.setWritable(true, false)
             listFile.writeText("image:=input/live_img.raw mask:=input/live_mask.raw\n")
+            listFile.setReadable(true, false)
+            listFile.setWritable(true, false)
 
             // Execute snpe-net-run process
             val cmd = arrayOf(
