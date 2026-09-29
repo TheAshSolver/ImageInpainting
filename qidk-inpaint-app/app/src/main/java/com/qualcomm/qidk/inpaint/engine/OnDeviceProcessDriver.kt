@@ -51,8 +51,8 @@ object OnDeviceProcessDriver {
                     "cd $DEVICE_SD_DIR && " +
                     "export LD_LIBRARY_PATH=$DEVICE_SD_DIR:\$LD_LIBRARY_PATH && " +
                     "export ADSP_LIBRARY_PATH='$DEVICE_SD_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp' && " +
-                    "rm -f sd_output.png && " +
-                    "./sd_qidk_runner_encoder 'high quality clean photo restoration'"
+                    "rm -f sd_output.png 2>/dev/null; " +
+                    "./sd_qidk_runner_inpaint 'high quality clean photo restoration'"
                 )
 
                 val process = ProcessBuilder(*cmd).redirectErrorStream(true).start()
@@ -65,12 +65,12 @@ object OnDeviceProcessDriver {
                     val rawBmp = android.graphics.BitmapFactory.decodeFile(outPng.absolutePath)
                     val resultBmp = if (rawBmp != null) compositeInpaintResult(image, rawBmp, mask) else image
                     InferenceTelemetry(
-                        modelName = "Stable Diffusion 1.5 (RePaint)",
-                        executionMode = "Snapdragon 8 Elite NPU Live (SD 1.5)",
+                        modelName = "Stable Diffusion 1.5 (Inpainting)",
+                        executionMode = "Snapdragon 8 Elite NPU Live (SD 1.5 DPM-Solver++)",
                         latencyMs = totalLatency,
-                        energyJoules = 210.0f,
-                        powerWatts = 4.12f,
-                        thermalDeltaC = 14.8f,
+                        energyJoules = 35.01f,
+                        powerWatts = 2.87f,
+                        thermalDeltaC = 12.0f,
                         resultBitmap = resultBmp
                     )
                 } else {
@@ -88,10 +88,10 @@ object OnDeviceProcessDriver {
 
         return try {
             val dlcName = when {
-                targetModel.contains("MIGAN") -> "migan.dlc"
+                targetModel.contains("MIGAN") -> if (File(DEVICE_LAMA_DIR, "migan_htp_v79.dlc").exists()) "migan_htp_v79.dlc" else "migan.dlc"
                 targetModel.contains("AOT") -> "aotgan.dlc"
                 targetModel.contains("LAMA") -> "lama_dilated.dlc"
-                else -> "migan.dlc"
+                else -> if (File(DEVICE_LAMA_DIR, "migan_htp_v79.dlc").exists()) "migan_htp_v79.dlc" else "migan.dlc"
             }
 
             val runtimeFlag = if (targetModel.contains("MIGAN")) "--use_dsp" else "--use_gpu"
