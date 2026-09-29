@@ -58,7 +58,10 @@ class MainActivity : AppCompatActivity() {
 
         setupModelSpinner()
         setupButtons()
-        loadDefaultSample()
+
+        if (savedInstanceState == null) {
+            loadDefaultSample()
+        }
     }
 
     private fun setupModelSpinner() {
@@ -67,7 +70,8 @@ class MainActivity : AppCompatActivity() {
             "MIGAN (Portraits & Speed)",
             "LaMa Dilated (Large Voids)",
             "AOT-GAN (Dense Texture)",
-            "Stable Diffusion 1.5 (RePaint)"
+            "Stable Diffusion 1.5 (Inpainting - DPM 12-step)",
+            "Stable Diffusion 1.5 (Inefficient RePaint - Euler 20-step)"
         )
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, models)
         modelSpinner.adapter = adapter
@@ -80,6 +84,10 @@ class MainActivity : AppCompatActivity() {
 
         canvasView.onBoxSelectionStatusChanged = { msg ->
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        }
+
+        canvasView.onMaskChanged = {
+            updateRouterLogic()
         }
 
         findViewById<Button>(R.id.btnCamera).setOnClickListener {
@@ -311,8 +319,12 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        val btnRunInpaint = findViewById<Button>(R.id.btnRunInpaint)
+        btnRunInpaint.isEnabled = false
+        modelSpinner.isEnabled = false
         progressBar.visibility = View.VISIBLE
-        val selectedOption = modelSpinner.selectedItem.toString()
+
+        val selectedOption = modelSpinner.selectedItem?.toString() ?: "Auto"
 
         val targetModel = when {
             selectedOption.contains("Auto") -> {
@@ -322,25 +334,47 @@ class MainActivity : AppCompatActivity() {
             selectedOption.contains("MIGAN") -> "MIGAN"
             selectedOption.contains("LaMa") -> "LAMA"
             selectedOption.contains("AOT") -> "AOTGAN"
-            selectedOption.contains("Diffusion") -> "SD"
+            selectedOption.contains("Inefficient") -> "SD_INEFFICIENT"
+            selectedOption.contains("Inpainting") || selectedOption.contains("Diffusion") || selectedOption.contains("SD") -> "SD"
             else -> "MIGAN"
         }
 
         Thread {
-            val telemetry = OnDeviceProcessDriver.executeInference(src, mask, targetModel)
-            runOnUiThread {
-                progressBar.visibility = View.GONE
-                resultImageView.setImageBitmap(telemetry.resultBitmap)
-                telemetryCard.visibility = View.VISIBLE
-                telemetryText.text = """
-                    Status: ${telemetry.executionMode}
-                    Model Executed: ${telemetry.modelName}
-                    Latency: ${telemetry.latencyMs} ms
-                    Active Energy: ${telemetry.energyJoules} Joules
-                    Active Power: ${telemetry.powerWatts} Watts
-                    Thermal Delta: +${telemetry.thermalDeltaC} °C
-                """.trimIndent()
+            try {
+                val telemetry = OnDeviceProcessDriver.executeInference(src, mask, targetModel)
+                runOnUiThread {
+                    progressBar.visibility = View.GONE
+                    btnRunInpaint.isEnabled = true
+                    modelSpinner.isEnabled = true
+                    resultImageView.setImageBitmap(telemetry.resultBitmap)
+                    telemetryCard.visibility = View.VISIBLE
+                    telemetryText.text = """
+                        Status: ${telemetry.executionMode}
+                        Model Executed: ${telemetry.modelName}
+                        Latency: ${telemetry.latencyMs} ms
+                        Active Energy: ${telemetry.energyJoules} Joules
+                        Active Power: ${telemetry.powerWatts} Watts
+                        Thermal Delta: +${telemetry.thermalDeltaC} °C
+                    """.trimIndent()
+                    Toast.makeText(this, "✨ Inpainting complete with ${telemetry.modelName}", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    progressBar.visibility = View.GONE
+                    btnRunInpaint.isEnabled = true
+                    modelSpinner.isEnabled = true
+                    AlertDialog.Builder(this)
+                        .setTitle("❌ Inference Error")
+                        .setMessage(e.message ?: "An unexpected error occurred during inference")
+                        .setPositiveButton("OK", null)
+                        .show()
+                }
             }
         }.start()
+    }
+
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        canvasView.invalidate()
     }
 }
