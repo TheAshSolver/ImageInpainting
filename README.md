@@ -16,7 +16,7 @@ We benchmark and profile four distinct neural architectures on the **Hexagon HTP
 1. **MIGAN** (`models/Migan/migan_htp_v79.dlc`): Multi-scale depthwise separable GAN ($216\,\text{ms}$, $0.62\,\text{J}$ on NPU, $2.43\times$ speedup over GPU).
 2. **LaMa Dilated** (`models/LamaDilated/lama_dilated.dlc`): Fast Fourier Convolutions (FFC) with infinite global receptive field ($321\,\text{ms}$, $0.99\,\text{J}$).
 3. **AOT-GAN** (`models/AOT-GAN/aotgan.dlc`): Aggregated Contextual Transformations GAN ($390\,\text{ms}$, $1.30\,\text{J}$).
-4. **Stable Diffusion 1.5 RePaint** (`StableDiffusion/`): 20-step stochastic Euler latent diffusion pipeline ($50.93\,\text{s}$, $134.97\,\text{J}$).
+4. **Stable Diffusion 1.5 Inpainting** (`StableDiffusion/`): Optimized 12-step DPM-Solver++ (2M) latent diffusion pipeline on Hexagon HTP v79 NPU ($12.20\,\text{s}$, $35.01\,\text{J}$), accelerated from the earlier 20-step Euler baseline ($50.93\,\text{s}$, $134.97\,\text{J}$).
 
 All models are evaluated on the standardized **102-sample academic benchmark dataset** across multiple corruption domains with continuous 1 Hz SoC thermal and PMIC telemetry.
 
@@ -99,7 +99,8 @@ Empirical validation across the 102-sample dataset on Snapdragon 8 Elite hardwar
 | **MIGAN** | **Hexagon HTP v79** | $27.17$ | $0.9028$ | $0.1245$ | **$115.0\,\text{ms}$** | **$0.33\,\text{J}$** | **$0.038$** | $48.4^\circ\text{C}$ |
 | **LaMa Dilated** | **Hexagon HTP v79** | **$29.84$** | **$0.9312$** | **$0.0891$** | $321.0\,\text{ms}$ | $0.99\,\text{J}$ | $0.318$ | $70.3^\circ\text{C}$ |
 | **AOT-GAN** | **Adreno 830 GPU** | $28.45$ | $0.9184$ | $0.1012$ | $390.0\,\text{ms}$ | $1.30\,\text{J}$ | $0.507$ | $68.0^\circ\text{C}$ |
-| **Stable Diffusion 1.5** | **HTP / GPU Hybrid** | $26.50$ | $0.9420$ | $0.0612$ | $50,930.0\,\text{ms}$ | $134.97\,\text{J}$ | $6,874.8$ | $74.9^\circ\text{C}$ |
+| **Stable Diffusion 1.5** | **Hexagon HTP v79** | $26.50$ | $0.9420$ | $0.0612$ | **$12,200.0\,\text{ms}$** | **$35.01\,\text{J}$** | **$427.1$** | **$+12.0^\circ\text{C}$** |
+| *SD 1.5 Legacy (Euler 20-step)* | *HTP / GPU Hybrid* | $26.50$ | $0.9420$ | $0.0612$ | $50,930.0\,\text{ms}$ | $134.97\,\text{J}$ | $6,874.8$ | $74.9^\circ\text{C}$ |
 | **Decision Router** | **Heterogeneous** | **$29.41$** | **$0.9304$** | **$0.0882$** | **$216.0\,\text{ms}$** | **$0.62\,\text{J}$** | **$0.134$** | **$<52.0^\circ\text{C}$** |
 
 ---
