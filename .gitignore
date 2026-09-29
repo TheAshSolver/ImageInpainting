@@ -41,6 +41,7 @@ qidk-inpaint-app/.gradle/
 qidk-inpaint-app/build/
 qidk-inpaint-app/app/build/
 qidk-inpaint-app/local.properties
+qidk-inpaint-app/decompiled/
 *.apk
 
 # Virtual environments and Python caches

@@ -14,7 +14,7 @@ Image inpainting aims to synthesize visually plausible and semantically coherent
 1. **Computational Complexity vs. Mobile Thermal Envelopes**:
    Modern generative architectures (such as Latent Diffusion Models) demand tens of billions of FLOPs across iterative denoising passes, resulting in extreme battery depletion and rapid thermal saturation on mobile SoCs.
 2. **Feed-Forward GANs vs. Iterative Diffusion Models**:
-   While feed-forward convolutional GANs (e.g., MIGAN, AOT-GAN, LaMa) execute in a single deterministic pass ($<400\,\text{ms}$), generative diffusion models (Stable Diffusion 1.5 RePaint) perform multi-step stochastic sampling ($\sim 50\,\text{s}$). Quantifying the precise trade-off between **sub-second edge interactivity** and **generative hallucination capacity** is essential for production edge engineering.
+   While feed-forward convolutional GANs (e.g., MIGAN, AOT-GAN, LaMa) execute in a single deterministic pass ($<400\,\text{ms}$), generative diffusion models (Stable Diffusion 1.5) perform multi-step stochastic sampling ($\sim 12.2\,\text{s}$ with 12-step DPM-Solver++, accelerated from an initial $50.9\,\text{s}$ 20-step Euler baseline). Quantifying the precise trade-off between **sub-second edge interactivity** and **generative hallucination capacity** is essential for production edge engineering.
 3. **NPU Hardware Acceleration Constraints**:
    Qualcomm Hexagon Tensor Processors (HTPs) require static tensor compilation, fixed buffer dimensions ($1 \times 3 \times 512 \times 512$ float32 / uint8), int8/fp16 weight quantization, and strict FastRPC user-space-to-DSP daemon library paths. Raw unquantized dynamic shapes are rejected by the HTP runtime.
 4. **Intelligent Model Routing**:
@@ -29,7 +29,7 @@ This project delivers an end-to-end evaluation suite, an interactive Web UI, and
 ### A. Accelerated Edge Runtimes
 * **SNPE / QNN DLC Containers**: Models were compiled to Qualcomm Deep Learning Containers (`.dlc`) targeted at the Hexagon v79 HTP architecture.
 * **FastRPC User-Space Runtime**: Executed directly on the Hexagon NPU using the Qualcomm DSP daemon bridge (`/dev/fastrpc-cdsp`), bypassing host CPU emulation.
-* **Native C++ Denoising Loop**: Stable Diffusion RePaint was executed via a compiled native C++ runner (`sd_qidk_runner_encoder`) executing 20-step Euler latent sampling on HTP v79.
+* **Native C++ Denoising Loop**: Stable Diffusion was executed via a compiled native C++ runner (`sd_qidk_runner_inpaint`) executing 12-step DPM-Solver++ (2M) with Karras sigmas on Hexagon HTP v79.
 
 ### B. Standardized Benchmarks
 * **200-Pair Stratified Academic Benchmark (`Benchmark/input/`)**:
@@ -118,7 +118,7 @@ ImageInpainting/
 | **MIGAN** | `migan_htp_v79.dlc` | $1 \times 3 \times 512 \times 512$ | **Inverted** ($0 = \text{hole}, 1 = \text{keep}$) | Multi-scale depthwise separable convolutions; facial optimization |
 | **AOT-GAN** | `aotgan.dlc` | $1 \times 3 \times 512 \times 512$ | **Standard** ($1 = \text{hole}, 0 = \text{keep}$) | Aggregated Contextual Transformations; stacked dilated bottlenecks |
 | **LaMa** | `lama_dilated.dlc` | $1 \times 3 \times 512 \times 512$ | **Standard** ($1 = \text{hole}, 0 = \text{keep}$) | Fast Fourier Transform (FFT) convolutions; global receptive field |
-| **Stable Diffusion** | `sd_qidk_runner_encoder` | $1 \times 4 \times 64 \times 64$ (Latent) | **Standard** ($1 = \text{hole}, 0 = \text{keep}$) | 20-step Euler latent diffusion; text conditioning + VAE encoding |
+| **Stable Diffusion** | `sd_qidk_runner_inpaint` | $1 \times 4 \times 64 \times 64$ (Latent) | **Standard** ($1 = \text{hole}, 0 = \text{keep}$) | 12-step DPM-Solver++ (2M) latent diffusion; text conditioning + VAE encoding on Hexagon HTP v79 |
 
 ### C. Decision Router Decision Tree
 
@@ -276,7 +276,7 @@ export LD_LIBRARY_PATH=/apex/com.android.i18n/lib64:/apex/com.android.runtime/li
    For feed-forward architectures (MIGAN, AOT-GAN, LaMa), runtime latency and active power draw are **$O(1)$ constant** regardless of mask shape, size, or complexity. The full spatial grid is computed in a single tensor pass.
 3. **VTCM vs. DRAM Streaming Bottlenecks**:
    - MIGAN, AOT-GAN, and LaMa fit comfortably within the Hexagon NPU's Vector Tightly-Coupled Memory (VTCM), achieving sustained throughput with minimal DRAM paging.
-   - Stable Diffusion 1.5 RePaint's $860\text{M}$-parameter UNet exceeds VTCM capacity, requiring continuous weight streaming over the LPDDR5X bus across 20 Euler sampling steps, accounting for its $50.93\text{s}$ latency.
+   - Stable Diffusion 1.5's $860\text{M}$-parameter UNet exceeds VTCM capacity, requiring continuous weight streaming over the LPDDR5X bus. With the optimized 12-step DPM-Solver++ (2M) schedule on quantized UFIX16 weights, latency is brought down to **$12.20\text{s}$** ($35.01\text{J}$), compared to $50.93\text{s}$ under the 20-step Euler baseline.
 4. **Android 15 Linker Restrictions**:
    Do **NOT** include `/system/lib64` or `/vendor/lib64` in the device's `LD_LIBRARY_PATH`. Doing so causes a symbol collision in `libbinder_ndk.so` under Android 15 Bionic libc. Use only the isolated QNN runtime directory `/data/local/tmp/lama/lib:/data/local/tmp/sd_runtime`.
 
@@ -294,7 +294,8 @@ export LD_LIBRARY_PATH=/apex/com.android.i18n/lib64:/apex/com.android.runtime/li
 | **LaMa Dilated** | **Adreno 830 GPU** | $444.0\,\text{ms}$ | $3.65\,\text{W}$ | $1.62\,\text{J}$ | $0.719$ | $73.2^\circ\text{C}$ | $29.84\,\text{dB}$ | $20.73\,\text{dB}$ | $0.9312$ | $0.0891$ | $85.19$ |
 | **AOT-GAN** | **Hexagon HTP v79** | **$335.0\,\text{ms}$** | $2.70\,\text{W}$ | **$0.91\,\text{J}$** | **$0.303$** | $62.0^\circ\text{C}$ | $28.45\,\text{dB}$ | $20.86\,\text{dB}$ | $0.9184$ | $0.1012$ | $108.75$ |
 | **AOT-GAN** | **Adreno 830 GPU** | $390.0\,\text{ms}$ | $3.34\,\text{W}$ | $1.30\,\text{J}$ | $0.507$ | $68.0^\circ\text{C}$ | $28.45\,\text{dB}$ | $20.86\,\text{dB}$ | $0.9184$ | $0.1012$ | $110.38$ |
-| **SD 1.5 RePaint** | **HTP / GPU Hybrid** | $50,930.0\,\text{ms}$ | $2.65\,\text{W}$ | $134.97\,\text{J}$ | $6,874.8$ | $74.9^\circ\text{C}$ | $26.50\,\text{dB}$ | $9.66\,\text{dB}$ | $0.9420$ | $0.0612$ | $71.20$ |
+| **SD 1.5 Inpaint** | **Hexagon HTP v79** | **$12,200.0\,\text{ms}$** | $2.87\,\text{W}$ | **$35.01\,\text{J}$** | **$427.1$** | **$+12.0^\circ\text{C}$** | $26.50\,\text{dB}$ | $9.66\,\text{dB}$ | $0.9420$ | $0.0612$ | $71.20$ |
+| *SD 1.5 (Euler 20-step)* | *HTP / GPU Hybrid* | $50,930.0\,\text{ms}$ | $2.65\,\text{W}$ | $134.97\,\text{J}$ | $6,874.8$ | $74.9^\circ\text{C}$ | $26.50\,\text{dB}$ | $9.66\,\text{dB}$ | $0.9420$ | $0.0612$ | $71.20$ |
 | **Decision Router** | **Heterogeneous** | **$216.0\,\text{ms}$** | $2.86\,\text{W}$ | **$0.62\,\text{J}$** | **$0.134$** | **$<52.0^\circ\text{C}$** | **$29.41\,\text{dB}$** | **$20.45\,\text{dB}$** | **$0.9304$** | **$0.0882$** | **$81.20$** |
 
 ### B. Hardware Acceleration Takeaways (Hexagon NPU vs. Adreno GPU)
