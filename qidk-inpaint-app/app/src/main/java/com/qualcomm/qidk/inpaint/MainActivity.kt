@@ -144,13 +144,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun showSamplePickerDialog() {
         // Direct sample loading on Android 15 (Scoped Storage compliant)
+        val internalDir = File(filesDir, "samples")
         val samplesDir = File(getExternalFilesDir(null), "samples")
         val altDir = File("/sdcard/Android/data/com.qualcomm.qidk.inpaint/files/samples")
         val picDir = File("/sdcard/Pictures/Inpainting102")
         val targetDir = when {
+            internalDir.exists() && internalDir.isDirectory && (internalDir.listFiles()?.isNotEmpty() == true) -> internalDir
             samplesDir.exists() && samplesDir.isDirectory && (samplesDir.listFiles()?.isNotEmpty() == true) -> samplesDir
             altDir.exists() && altDir.isDirectory && (altDir.listFiles()?.isNotEmpty() == true) -> altDir
             picDir.exists() && picDir.isDirectory && (picDir.listFiles()?.isNotEmpty() == true) -> picDir
+            internalDir.exists() && internalDir.isDirectory -> internalDir
             samplesDir.exists() && samplesDir.isDirectory -> samplesDir
             altDir.exists() && altDir.isDirectory -> altDir
             picDir.exists() && picDir.isDirectory -> picDir
@@ -224,13 +227,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadDefaultSample() {
+        val internalDir = File(filesDir, "samples")
         val samplesDir = File(getExternalFilesDir(null), "samples")
         val altDir = File("/sdcard/Android/data/com.qualcomm.qidk.inpaint/files/samples")
         val picDir = File("/sdcard/Pictures/Inpainting102")
         val targetDir = when {
+            internalDir.exists() && internalDir.isDirectory && File(internalDir, "001.png").exists() -> internalDir
             samplesDir.exists() && samplesDir.isDirectory && File(samplesDir, "001.png").exists() -> samplesDir
             altDir.exists() && altDir.isDirectory && File(altDir, "001.png").exists() -> altDir
             picDir.exists() && picDir.isDirectory && File(picDir, "001.png").exists() -> picDir
+            internalDir.exists() && internalDir.isDirectory -> internalDir
             samplesDir.exists() && samplesDir.isDirectory -> samplesDir
             altDir.exists() && altDir.isDirectory -> altDir
             picDir.exists() && picDir.isDirectory -> picDir
