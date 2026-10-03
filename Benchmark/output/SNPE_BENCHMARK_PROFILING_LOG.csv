@@ -1,0 +1,1447 @@
+model,layer_name,op_id,op_type,cycles,est_time_us
+MIGAN,node_clamp_66,1634,Activation (ReLU/Clip),472178,472.18
+MIGAN,node_add_30,1632,Elementwise Add/Sub,10000,10.0
+MIGAN,node_mul_97,1630,Elementwise Mul,10000,10.0
+MIGAN,node_sub_2,1628,Elementwise Add/Sub,2688,2.69
+MIGAN,node_mul_96,1626,Elementwise Mul,10000,10.0
+MIGAN,node_convolution,1625,Convolution,10000,10.0
+MIGAN,node_pad_14,1617,Padding,10000,10.0
+MIGAN,node_max_pool2d,1614,Pooling,10000,10.0
+MIGAN,node_clamp_65,1604,Activation (ReLU/Clip),649959,649.96
+MIGAN,node_add_29,1602,Elementwise Add/Sub,10000,10.0
+MIGAN,node_mul_95,1600,Elementwise Mul,10000,10.0
+MIGAN,node_add_28,1598,Elementwise Add/Sub,10000,10.0
+MIGAN,node_conv2d_93,1595,Convolution,10000,10.0
+MIGAN,node_Conv_910,1589,Convolution,128321,128.32
+MIGAN,node_mul_94,1583,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_13,1579,Upsample / Interpolate,10000,10.0
+MIGAN,node_Clip_909,1572,Activation (ReLU/Clip),675274,675.27
+MIGAN,node_mul_93,1570,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_64,1569,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_27_post_transpose_0231,1567,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_27,1564,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_91_0312,1562,Convolution,5933,5.93
+MIGAN,node_Conv_908,1558,Convolution,429232,429.23
+MIGAN,node_Clip_907,1546,Activation (ReLU/Clip),676416,676.42
+MIGAN,node_mul_91,1544,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_63,1543,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_90,1541,Convolution,10000,10.0
+MIGAN,node_add_26,1534,Elementwise Add/Sub,10000,10.0
+MIGAN,node_Clip_906,1527,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_90,1525,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_62,1524,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_25_post_transpose_0231,1522,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_25,1519,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_89_0312,1517,Convolution,10000,10.0
+MIGAN,node_Conv_905,1515,Convolution,255746,255.75
+MIGAN,node_mul_88,1508,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_12,1504,Upsample / Interpolate,10000,10.0
+MIGAN,node_Conv_904,1501,Convolution,119211,119.21
+MIGAN,node_Clip_903,1489,Activation (ReLU/Clip),338304,338.3
+MIGAN,node_mul_87,1487,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_61,1486,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_87,1484,Convolution,10000,10.0
+MIGAN,node_add_24,1477,Elementwise Add/Sub,10000,10.0
+MIGAN,node_conv2d_86,1474,Convolution,10000,10.0
+MIGAN,node_Conv_902,1468,Convolution,38581,38.58
+MIGAN,node_mul_86,1462,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_11,1458,Upsample / Interpolate,10000,10.0
+MIGAN,node_Clip_901,1451,Activation (ReLU/Clip),447456,447.46
+MIGAN,node_mul_85,1449,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_60,1448,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_23_post_transpose_0231,1446,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_23,1443,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_84_0312,1441,Convolution,10000,10.0
+MIGAN,node_Conv_900,1437,Convolution,328152,328.15
+MIGAN,node_Clip_899,1425,Activation (ReLU/Clip),337980,337.98
+MIGAN,node_mul_83,1423,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_59,1422,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_83,1420,Convolution,10000,10.0
+MIGAN,node_add_22,1413,Elementwise Add/Sub,10000,10.0
+MIGAN,node_Clip_898,1406,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_82,1404,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_58,1403,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_21_post_transpose_0231,1401,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_21,1398,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_82_0312,1396,Convolution,10000,10.0
+MIGAN,node_Conv_897,1394,Convolution,133363,133.36
+MIGAN,node_mul_80,1387,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_10,1383,Upsample / Interpolate,10000,10.0
+MIGAN,node_Conv_896,1380,Convolution,37096,37.1
+MIGAN,node_Clip_895,1368,Activation (ReLU/Clip),168465,168.47
+MIGAN,node_mul_79,1366,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_57,1365,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_80,1363,Convolution,10000,10.0
+MIGAN,node_add_20,1356,Elementwise Add/Sub,10000,10.0
+MIGAN,node_conv2d_79,1353,Convolution,10000,10.0
+MIGAN,node_Conv_894,1347,Convolution,9272,9.27
+MIGAN,node_mul_78,1341,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_9,1337,Upsample / Interpolate,24217,24.22
+MIGAN,node_Clip_893,1330,Activation (ReLU/Clip),217644,217.64
+MIGAN,node_mul_77,1328,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_56,1327,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_19_post_transpose_0231,1325,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_19,1322,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_77_0312,1320,Convolution,10000,10.0
+MIGAN,node_Conv_892,1316,Convolution,74197,74.2
+MIGAN,node_Clip_891,1304,Activation (ReLU/Clip),170835,170.84
+MIGAN,node_mul_75,1302,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_55,1301,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_76,1299,Convolution,10000,10.0
+MIGAN,node_add_18,1292,Elementwise Add/Sub,10000,10.0
+MIGAN,node_Clip_890,1285,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_74,1283,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_54,1282,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_17_post_transpose_0231,1280,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_17,1277,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_75_0312,1275,Convolution,10000,10.0
+MIGAN,node_Conv_889,1273,Convolution,71485,71.48
+MIGAN,node_mul_72,1266,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_8,1262,Upsample / Interpolate,93812,93.81
+MIGAN,node_Conv_888,1259,Convolution,36984,36.98
+MIGAN,node_Clip_887,1247,Activation (ReLU/Clip),86168,86.17
+MIGAN,node_mul_71,1245,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_53,1244,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_73,1242,Convolution,10000,10.0
+MIGAN,node_add_16,1235,Elementwise Add/Sub,10000,10.0
+MIGAN,node_conv2d_72,1232,Convolution,10000,10.0
+MIGAN,node_Conv_886,1226,Convolution,4535,4.54
+MIGAN,node_mul_70,1220,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_7,1216,Upsample / Interpolate,18039,18.04
+MIGAN,node_Clip_885,1209,Activation (ReLU/Clip),120675,120.67
+MIGAN,node_mul_69,1207,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_52,1206,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_15_post_transpose_0231,1204,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_15,1201,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_70_0312,1199,Convolution,10000,10.0
+MIGAN,node_Conv_884,1195,Convolution,73317,73.32
+MIGAN,node_Clip_883,1183,Activation (ReLU/Clip),86399,86.4
+MIGAN,node_mul_67,1181,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_51,1180,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_69,1178,Convolution,10000,10.0
+MIGAN,node_add_14,1171,Elementwise Add/Sub,10000,10.0
+MIGAN,node_Clip_882,1164,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_66,1162,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_50,1161,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_13_post_transpose_0231,1159,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_13,1156,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_68_0312,1154,Convolution,10000,10.0
+MIGAN,node_Conv_881,1152,Convolution,39725,39.73
+MIGAN,node_mul_64,1145,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_6,1141,Upsample / Interpolate,49430,49.43
+MIGAN,node_Conv_880,1138,Convolution,18395,18.39
+MIGAN,node_Clip_879,1126,Activation (ReLU/Clip),23008,23.01
+MIGAN,node_mul_63,1124,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_49,1123,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_66,1121,Convolution,10000,10.0
+MIGAN,node_add_12,1114,Elementwise Add/Sub,10000,10.0
+MIGAN,node_conv2d_65,1111,Convolution,10000,10.0
+MIGAN,node_Conv_878,1105,Convolution,4319,4.32
+MIGAN,node_mul_62,1099,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_5,1096,Upsample / Interpolate,10273,10.27
+MIGAN,node_Clip_877,1089,Activation (ReLU/Clip),43724,43.72
+MIGAN,node_mul_61,1087,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_48,1086,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_11_post_transpose_0231,1084,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_11,1081,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_63_0312,1079,Convolution,10000,10.0
+MIGAN,node_Conv_876,1075,Convolution,19324,19.32
+MIGAN,node_Clip_875,1063,Activation (ReLU/Clip),22566,22.57
+MIGAN,node_mul_59,1061,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_47,1060,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_62,1058,Convolution,10000,10.0
+MIGAN,node_add_10,1051,Elementwise Add/Sub,10000,10.0
+MIGAN,node_Clip_874,1044,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_58,1042,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_46,1041,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_9_post_transpose_0231,1039,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_9,1036,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_61_0312,1034,Convolution,10000,10.0
+MIGAN,node_Conv_873,1032,Convolution,14978,14.98
+MIGAN,node_mul_56,1025,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_4,1021,Upsample / Interpolate,14124,14.12
+MIGAN,node_Conv_872,1018,Convolution,5638,5.64
+MIGAN,node_Clip_871,1006,Activation (ReLU/Clip),7971,7.97
+MIGAN,node_mul_55,1004,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_45,1003,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_59,1001,Convolution,10000,10.0
+MIGAN,node_add_8,994,Elementwise Add/Sub,1771,1.77
+MIGAN,node_conv2d_58,991,Convolution,2091,2.09
+MIGAN,node_Conv_870,985,Convolution,385539,385.54
+MIGAN,node_mul_54,979,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_3,976,Upsample / Interpolate,1798659,1798.66
+MIGAN,node_Clip_869,969,Activation (ReLU/Clip),3914499,3914.5
+MIGAN,node_mul_53,967,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_44,966,Activation (ReLU/Clip),67206,67.21
+MIGAN,add_7_post_transpose_0231,964,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_7,961,Elementwise Add/Sub,151061,151.06
+MIGAN,conv2d_56_0312,959,Convolution,24197,24.2
+MIGAN,node_Conv_868,955,Convolution,1725443,1725.44
+MIGAN,node_Clip_867,943,Activation (ReLU/Clip),1543427,1543.43
+MIGAN,node_mul_51,941,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_43,940,Activation (ReLU/Clip),5863,5.86
+MIGAN,node_conv2d_55,938,Convolution,10000,10.0
+MIGAN,node_add_6,931,Elementwise Add/Sub,12824,12.82
+MIGAN,node_Clip_866,924,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_50,922,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_42,921,Activation (ReLU/Clip),66338,66.34
+MIGAN,add_5_post_transpose_0231,919,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_5,916,Elementwise Add/Sub,154967,154.97
+MIGAN,conv2d_54_0312,914,Convolution,24310,24.31
+MIGAN,node_Conv_865,912,Convolution,1081859,1081.86
+MIGAN,node_mul_48,905,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_2,901,Upsample / Interpolate,2030339,2030.34
+MIGAN,node_Conv_864,898,Convolution,1666307,1666.31
+MIGAN,node_Clip_863,886,Activation (ReLU/Clip),377603,377.6
+MIGAN,node_mul_47,884,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_41,883,Activation (ReLU/Clip),2443,2.44
+MIGAN,node_conv2d_52,881,Convolution,10000,10.0
+MIGAN,node_add_4,874,Elementwise Add/Sub,5021,5.02
+MIGAN,node_conv2d_51,871,Convolution,1513,1.51
+MIGAN,node_Conv_862,865,Convolution,1403395,1403.39
+MIGAN,node_mul_46,858,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_1,855,Upsample / Interpolate,877571,877.57
+MIGAN,node_Clip_861,848,Activation (ReLU/Clip),643843,643.84
+MIGAN,node_mul_45,846,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_40,845,Activation (ReLU/Clip),39014,39.01
+MIGAN,add_3_post_transpose_0231,843,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_3,840,Elementwise Add/Sub,104820,104.82
+MIGAN,conv2d_49_0312,838,Convolution,12540,12.54
+MIGAN,node_Conv_860,834,Convolution,1448963,1448.96
+MIGAN,node_Clip_859,822,Activation (ReLU/Clip),711427,711.43
+MIGAN,node_mul_43,820,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_39,819,Activation (ReLU/Clip),2364,2.36
+MIGAN,node_conv2d_48,817,Convolution,10000,10.0
+MIGAN,node_add_2,810,Elementwise Add/Sub,2577,2.58
+MIGAN,node_Clip_858,803,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_42,801,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_38,800,Activation (ReLU/Clip),55344,55.34
+MIGAN,add_1_post_transpose_0231,798,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_1,795,Elementwise Add/Sub,170543,170.54
+MIGAN,conv2d_47_0312,793,Convolution,15349,15.35
+MIGAN,node_Conv_857,791,Convolution,738819,738.82
+MIGAN,node_mul_40,784,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d,780,Upsample / Interpolate,10000,10.0
+MIGAN,node_Conv_856,777,Convolution,1543939,1543.94
+MIGAN,node_Clip_855,765,Activation (ReLU/Clip),495875,495.88
+MIGAN,node_mul_39,763,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_37,762,Activation (ReLU/Clip),7484,7.48
+MIGAN,node_conv2d_45,760,Convolution,10000,10.0
+MIGAN,node_conv2d_44,752,Convolution,1539,1.54
+MIGAN,node_Clip_854,740,Activation (ReLU/Clip),866563,866.56
+MIGAN,node_mul_38,738,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_36,737,Activation (ReLU/Clip),3736,3.74
+MIGAN,node_Conv_853,733,Convolution,10000,10.0
+MIGAN,node_Clip_852,721,Activation (ReLU/Clip),560387,560.39
+MIGAN,node_mul_37,719,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_35,718,Activation (ReLU/Clip),3339,3.34
+MIGAN,node_conv2d_42,716,Convolution,10000,10.0
+MIGAN,node_add,709,Elementwise Add/Sub,10000,10.0
+MIGAN,node_Clip_851,702,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_36,700,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_34,699,Activation (ReLU/Clip),7447,7.45
+MIGAN,node_Conv_850,695,Convolution,10000,10.0
+MIGAN,node_Clip_849,683,Activation (ReLU/Clip),609795,609.79
+MIGAN,node_mul_35,681,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_33,680,Activation (ReLU/Clip),3623,3.62
+MIGAN,node_conv2d_40,678,Convolution,10000,10.0
+MIGAN,node_Clip_848,666,Activation (ReLU/Clip),428803,428.8
+MIGAN,node_mul_34,664,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_32,663,Activation (ReLU/Clip),7239,7.24
+MIGAN,node_Conv_847,659,Convolution,10000,10.0
+MIGAN,node_Clip_846,647,Activation (ReLU/Clip),605187,605.19
+MIGAN,node_mul_33,645,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_31,644,Activation (ReLU/Clip),3548,3.55
+MIGAN,node_conv2d_38,642,Convolution,10000,10.0
+MIGAN,node_Clip_845,630,Activation (ReLU/Clip),656131,656.13
+MIGAN,node_mul_32,628,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_30,627,Activation (ReLU/Clip),4469,4.47
+MIGAN,node_Conv_844,623,Convolution,10000,10.0
+MIGAN,node_Clip_843,611,Activation (ReLU/Clip),374531,374.53
+MIGAN,node_mul_31,609,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_29,608,Activation (ReLU/Clip),12682,12.68
+MIGAN,node_conv2d_36,606,Convolution,10000,10.0
+MIGAN,node_Clip_842,594,Activation (ReLU/Clip),688643,688.64
+MIGAN,node_mul_30,592,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_28,591,Activation (ReLU/Clip),5971,5.97
+MIGAN,node_Conv_841,587,Convolution,10000,10.0
+MIGAN,node_Conv_840,581,Convolution,6660099,6660.1
+MIGAN,node_Clip_839,569,Activation (ReLU/Clip),594691,594.69
+MIGAN,node_mul_29,567,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_27,566,Activation (ReLU/Clip),2746,2.75
+MIGAN,node_conv2d_33,564,Convolution,10000,10.0
+MIGAN,node_Clip_838,552,Activation (ReLU/Clip),684803,684.8
+MIGAN,node_mul_28,550,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_26,549,Activation (ReLU/Clip),6967,6.97
+MIGAN,node_Conv_837,545,Convolution,10000,10.0
+MIGAN,node_Clip_836,533,Activation (ReLU/Clip),667395,667.39
+MIGAN,node_mul_27,531,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_25,530,Activation (ReLU/Clip),3111,3.11
+MIGAN,node_conv2d_31,528,Convolution,10000,10.0
+MIGAN,node_Clip_835,516,Activation (ReLU/Clip),673795,673.79
+MIGAN,node_mul_26,514,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_24,513,Activation (ReLU/Clip),6900,6.9
+MIGAN,node_Conv_834,509,Convolution,10000,10.0
+MIGAN,node_Conv_833,503,Convolution,10312195,10312.19
+MIGAN,node_Clip_832,491,Activation (ReLU/Clip),2139907,2139.91
+MIGAN,node_mul_25,489,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_23,488,Activation (ReLU/Clip),7514,7.51
+MIGAN,node_conv2d_28,486,Convolution,10000,10.0
+MIGAN,node_Clip_831,474,Activation (ReLU/Clip),1815555,1815.56
+MIGAN,node_mul_24,472,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_22,471,Activation (ReLU/Clip),5555,5.55
+MIGAN,node_Conv_830,467,Convolution,10000,10.0
+MIGAN,node_Clip_829,455,Activation (ReLU/Clip),1744899,1744.9
+MIGAN,node_mul_23,453,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_21,452,Activation (ReLU/Clip),6646,6.65
+MIGAN,node_conv2d_26,450,Convolution,10000,10.0
+MIGAN,node_Clip_828,438,Activation (ReLU/Clip),2050819,2050.82
+MIGAN,node_mul_22,436,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_20,435,Activation (ReLU/Clip),5656,5.66
+MIGAN,node_Conv_827,431,Convolution,10000,10.0
+MIGAN,node_Conv_826,425,Convolution,30053123,30053.12
+MIGAN,node_Clip_825,413,Activation (ReLU/Clip),9278723,9278.72
+MIGAN,node_mul_21,411,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_19,410,Activation (ReLU/Clip),16891,16.89
+MIGAN,node_conv2d_23,408,Convolution,10000,10.0
+MIGAN,node_Clip_824,396,Activation (ReLU/Clip),6000131,6000.13
+MIGAN,node_mul_20,394,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_18,393,Activation (ReLU/Clip),19996,20.0
+MIGAN,node_Conv_823,389,Convolution,10000,10.0
+MIGAN,node_Clip_822,377,Activation (ReLU/Clip),5641731,5641.73
+MIGAN,node_mul_19,375,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_17,374,Activation (ReLU/Clip),16148,16.15
+MIGAN,node_conv2d_21,372,Convolution,10000,10.0
+MIGAN,node_Clip_821,360,Activation (ReLU/Clip),6052867,6052.87
+MIGAN,node_mul_18,358,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_16,357,Activation (ReLU/Clip),20013,20.01
+MIGAN,node_Conv_820,353,Convolution,10000,10.0
+MIGAN,node_Conv_819,347,Convolution,10000,10.0
+MIGAN,node_Clip_818,335,Activation (ReLU/Clip),32023555,32023.56
+MIGAN,node_mul_17,333,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_15,332,Activation (ReLU/Clip),44861,44.86
+MIGAN,node_conv2d_18,330,Convolution,10000,10.0
+MIGAN,node_Clip_817,318,Activation (ReLU/Clip),22379779,22379.78
+MIGAN,node_mul_16,316,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_14,315,Activation (ReLU/Clip),77224,77.22
+MIGAN,node_Conv_816,311,Convolution,10000,10.0
+MIGAN,node_Clip_815,299,Activation (ReLU/Clip),21945859,21945.86
+MIGAN,node_mul_15,297,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_13,296,Activation (ReLU/Clip),40704,40.7
+MIGAN,node_conv2d_16,294,Convolution,10000,10.0
+MIGAN,node_Clip_814,282,Activation (ReLU/Clip),22235139,22235.14
+MIGAN,node_mul_14,280,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_12,279,Activation (ReLU/Clip),41861,41.86
+MIGAN,node_Conv_813,275,Convolution,10000,10.0
+MIGAN,node_Conv_812,269,Convolution,10000,10.0
+MIGAN,node_Clip_811,257,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_13,255,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_11,254,Activation (ReLU/Clip),74801,74.8
+MIGAN,node_conv2d_13,252,Convolution,10000,10.0
+MIGAN,node_Clip_810,240,Activation (ReLU/Clip),44796163,44796.16
+MIGAN,node_mul_12,238,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_10,237,Activation (ReLU/Clip),202300,202.3
+MIGAN,node_Conv_809,233,Convolution,10000,10.0
+MIGAN,node_Clip_808,221,Activation (ReLU/Clip),43127299,43127.3
+MIGAN,node_mul_11,219,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_9,218,Activation (ReLU/Clip),17002243,17002.24
+MIGAN,node_conv2d_11,216,Convolution,10000,10.0
+MIGAN,node_Clip_807,204,Activation (ReLU/Clip),43518723,43518.72
+MIGAN,node_mul_10,202,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_8,201,Activation (ReLU/Clip),15735299,15735.3
+MIGAN,node_Conv_806,197,Convolution,10000,10.0
+MIGAN,node_Conv_805,191,Convolution,10000,10.0
+MIGAN,node_Clip_804,179,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_9,177,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_7,176,Activation (ReLU/Clip),30023683,30023.68
+MIGAN,node_conv2d_8,174,Convolution,10000,10.0
+MIGAN,node_Clip_803,162,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_8,160,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_6,159,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_Conv_802,155,Convolution,10000,10.0
+MIGAN,node_Clip_801,143,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_7,141,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_5,140,Activation (ReLU/Clip),29674499,29674.5
+MIGAN,node_conv2d_6,138,Convolution,10000,10.0
+MIGAN,node_Clip_800,126,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_6,124,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_4,123,Activation (ReLU/Clip),29148931,29148.93
+MIGAN,node_Conv_799,119,Convolution,10000,10.0
+MIGAN,node_Conv_798,113,Convolution,10000,10.0
+MIGAN,node_Clip_797,101,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_5,99,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_3,98,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_3,96,Convolution,10000,10.0
+MIGAN,node_Clip_796,84,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_4,82,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_2,81,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_Conv_795,77,Convolution,10000,10.0
+MIGAN,node_Clip_794,65,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_3,63,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_1,62,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_1,60,Convolution,10000,10.0
+MIGAN,node_Clip_793,48,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_2,46,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu,44,Activation (ReLU/Clip),185551,185.55
+MIGAN,node_conv2d,40,Convolution,10000,10.0
+MIGAN,cat_0231,34,Other,10000,10.0
+MIGAN,node_cat,31,Other,10000,10.0
+MIGAN,node_mul_1,29,Elementwise Mul,17906947,17906.95
+MIGAN,node_sub_1,27,Elementwise Add/Sub,30546947,30546.95
+MIGAN,node_sub,24,Elementwise Add/Sub,10000,10.0
+MIGAN,node_mul,21,Elementwise Mul,10000,10.0
+MIGAN,node_Reshape_1,19,Other,10000,10.0
+MIGAN,node_permute,17,Other,10000,10.0
+MIGAN,node_clamp_66,1634,Activation (ReLU/Clip),471932,471.93
+MIGAN,node_add_30,1632,Elementwise Add/Sub,10000,10.0
+MIGAN,node_mul_97,1630,Elementwise Mul,10000,10.0
+MIGAN,node_sub_2,1628,Elementwise Add/Sub,2695,2.69
+MIGAN,node_mul_96,1626,Elementwise Mul,10000,10.0
+MIGAN,node_convolution,1625,Convolution,10000,10.0
+MIGAN,node_pad_14,1617,Padding,10000,10.0
+MIGAN,node_max_pool2d,1614,Pooling,10000,10.0
+MIGAN,node_clamp_65,1604,Activation (ReLU/Clip),648961,648.96
+MIGAN,node_add_29,1602,Elementwise Add/Sub,10000,10.0
+MIGAN,node_mul_95,1600,Elementwise Mul,10000,10.0
+MIGAN,node_add_28,1598,Elementwise Add/Sub,10000,10.0
+MIGAN,node_conv2d_93,1595,Convolution,10000,10.0
+MIGAN,node_Conv_910,1589,Convolution,128399,128.4
+MIGAN,node_mul_94,1583,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_13,1579,Upsample / Interpolate,10000,10.0
+MIGAN,node_Clip_909,1572,Activation (ReLU/Clip),677002,677.0
+MIGAN,node_mul_93,1570,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_64,1569,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_27_post_transpose_0231,1567,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_27,1564,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_91_0312,1562,Convolution,5952,5.95
+MIGAN,node_Conv_908,1558,Convolution,440600,440.6
+MIGAN,node_Clip_907,1546,Activation (ReLU/Clip),676462,676.46
+MIGAN,node_mul_91,1544,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_63,1543,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_90,1541,Convolution,10000,10.0
+MIGAN,node_add_26,1534,Elementwise Add/Sub,10000,10.0
+MIGAN,node_Clip_906,1527,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_90,1525,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_62,1524,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_25_post_transpose_0231,1522,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_25,1519,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_89_0312,1517,Convolution,10000,10.0
+MIGAN,node_Conv_905,1515,Convolution,256493,256.49
+MIGAN,node_mul_88,1508,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_12,1504,Upsample / Interpolate,10000,10.0
+MIGAN,node_Conv_904,1501,Convolution,119214,119.21
+MIGAN,node_Clip_903,1489,Activation (ReLU/Clip),337918,337.92
+MIGAN,node_mul_87,1487,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_61,1486,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_87,1484,Convolution,10000,10.0
+MIGAN,node_add_24,1477,Elementwise Add/Sub,10000,10.0
+MIGAN,node_conv2d_86,1474,Convolution,10000,10.0
+MIGAN,node_Conv_902,1468,Convolution,37758,37.76
+MIGAN,node_mul_86,1462,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_11,1458,Upsample / Interpolate,10000,10.0
+MIGAN,node_Clip_901,1451,Activation (ReLU/Clip),449330,449.33
+MIGAN,node_mul_85,1449,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_60,1448,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_23_post_transpose_0231,1446,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_23,1443,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_84_0312,1441,Convolution,10000,10.0
+MIGAN,node_Conv_900,1437,Convolution,323348,323.35
+MIGAN,node_Clip_899,1425,Activation (ReLU/Clip),338171,338.17
+MIGAN,node_mul_83,1423,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_59,1422,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_83,1420,Convolution,10000,10.0
+MIGAN,node_add_22,1413,Elementwise Add/Sub,10000,10.0
+MIGAN,node_Clip_898,1406,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_82,1404,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_58,1403,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_21_post_transpose_0231,1401,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_21,1398,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_82_0312,1396,Convolution,10000,10.0
+MIGAN,node_Conv_897,1394,Convolution,133493,133.49
+MIGAN,node_mul_80,1387,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_10,1383,Upsample / Interpolate,10000,10.0
+MIGAN,node_Conv_896,1380,Convolution,36535,36.53
+MIGAN,node_Clip_895,1368,Activation (ReLU/Clip),169760,169.76
+MIGAN,node_mul_79,1366,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_57,1365,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_80,1363,Convolution,10000,10.0
+MIGAN,node_add_20,1356,Elementwise Add/Sub,10000,10.0
+MIGAN,node_conv2d_79,1353,Convolution,10000,10.0
+MIGAN,node_Conv_894,1347,Convolution,9607,9.61
+MIGAN,node_mul_78,1341,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_9,1337,Upsample / Interpolate,28066,28.07
+MIGAN,node_Clip_893,1330,Activation (ReLU/Clip),217737,217.74
+MIGAN,node_mul_77,1328,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_56,1327,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_19_post_transpose_0231,1325,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_19,1322,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_77_0312,1320,Convolution,10000,10.0
+MIGAN,node_Conv_892,1316,Convolution,75113,75.11
+MIGAN,node_Clip_891,1304,Activation (ReLU/Clip),170675,170.68
+MIGAN,node_mul_75,1302,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_55,1301,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_76,1299,Convolution,10000,10.0
+MIGAN,node_add_18,1292,Elementwise Add/Sub,10000,10.0
+MIGAN,node_Clip_890,1285,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_74,1283,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_54,1282,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_17_post_transpose_0231,1280,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_17,1277,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_75_0312,1275,Convolution,10000,10.0
+MIGAN,node_Conv_889,1273,Convolution,71345,71.34
+MIGAN,node_mul_72,1266,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_8,1262,Upsample / Interpolate,93928,93.93
+MIGAN,node_Conv_888,1259,Convolution,36392,36.39
+MIGAN,node_Clip_887,1247,Activation (ReLU/Clip),86178,86.18
+MIGAN,node_mul_71,1245,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_53,1244,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_73,1242,Convolution,10000,10.0
+MIGAN,node_add_16,1235,Elementwise Add/Sub,10000,10.0
+MIGAN,node_conv2d_72,1232,Convolution,10000,10.0
+MIGAN,node_Conv_886,1226,Convolution,4468,4.47
+MIGAN,node_mul_70,1220,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_7,1216,Upsample / Interpolate,17740,17.74
+MIGAN,node_Clip_885,1209,Activation (ReLU/Clip),118203,118.2
+MIGAN,node_mul_69,1207,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_52,1206,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_15_post_transpose_0231,1204,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_15,1201,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_70_0312,1199,Convolution,10000,10.0
+MIGAN,node_Conv_884,1195,Convolution,73404,73.4
+MIGAN,node_Clip_883,1183,Activation (ReLU/Clip),87151,87.15
+MIGAN,node_mul_67,1181,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_51,1180,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_69,1178,Convolution,10000,10.0
+MIGAN,node_add_14,1171,Elementwise Add/Sub,10000,10.0
+MIGAN,node_Clip_882,1164,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_66,1162,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_50,1161,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_13_post_transpose_0231,1159,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_13,1156,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_68_0312,1154,Convolution,10000,10.0
+MIGAN,node_Conv_881,1152,Convolution,39864,39.86
+MIGAN,node_mul_64,1145,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_6,1141,Upsample / Interpolate,49500,49.5
+MIGAN,node_Conv_880,1138,Convolution,18517,18.52
+MIGAN,node_Clip_879,1126,Activation (ReLU/Clip),23470,23.47
+MIGAN,node_mul_63,1124,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_49,1123,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_66,1121,Convolution,10000,10.0
+MIGAN,node_add_12,1114,Elementwise Add/Sub,10000,10.0
+MIGAN,node_conv2d_65,1111,Convolution,10000,10.0
+MIGAN,node_Conv_878,1105,Convolution,4847,4.85
+MIGAN,node_mul_62,1099,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_5,1096,Upsample / Interpolate,7928,7.93
+MIGAN,node_Clip_877,1089,Activation (ReLU/Clip),43599,43.6
+MIGAN,node_mul_61,1087,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_48,1086,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_11_post_transpose_0231,1084,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_11,1081,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_63_0312,1079,Convolution,10000,10.0
+MIGAN,node_Conv_876,1075,Convolution,19316,19.32
+MIGAN,node_Clip_875,1063,Activation (ReLU/Clip),22369,22.37
+MIGAN,node_mul_59,1061,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_47,1060,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_62,1058,Convolution,10000,10.0
+MIGAN,node_add_10,1051,Elementwise Add/Sub,10000,10.0
+MIGAN,node_Clip_874,1044,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_58,1042,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_46,1041,Activation (ReLU/Clip),10000,10.0
+MIGAN,add_9_post_transpose_0231,1039,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_9,1036,Elementwise Add/Sub,10000,10.0
+MIGAN,conv2d_61_0312,1034,Convolution,10000,10.0
+MIGAN,node_Conv_873,1032,Convolution,15093,15.09
+MIGAN,node_mul_56,1025,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_4,1021,Upsample / Interpolate,14214,14.21
+MIGAN,node_Conv_872,1018,Convolution,5716,5.72
+MIGAN,node_Clip_871,1006,Activation (ReLU/Clip),7109,7.11
+MIGAN,node_mul_55,1004,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_45,1003,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_59,1001,Convolution,10000,10.0
+MIGAN,node_add_8,994,Elementwise Add/Sub,1537,1.54
+MIGAN,node_conv2d_58,991,Convolution,2232,2.23
+MIGAN,node_Conv_870,985,Convolution,403203,403.2
+MIGAN,node_mul_54,979,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_3,976,Upsample / Interpolate,1693443,1693.44
+MIGAN,node_Clip_869,969,Activation (ReLU/Clip),3953155,3953.16
+MIGAN,node_mul_53,967,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_44,966,Activation (ReLU/Clip),66682,66.68
+MIGAN,add_7_post_transpose_0231,964,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_7,961,Elementwise Add/Sub,152881,152.88
+MIGAN,conv2d_56_0312,959,Convolution,25163,25.16
+MIGAN,node_Conv_868,955,Convolution,2001411,2001.41
+MIGAN,node_Clip_867,943,Activation (ReLU/Clip),1545475,1545.47
+MIGAN,node_mul_51,941,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_43,940,Activation (ReLU/Clip),5831,5.83
+MIGAN,node_conv2d_55,938,Convolution,10000,10.0
+MIGAN,node_add_6,931,Elementwise Add/Sub,12029,12.03
+MIGAN,node_Clip_866,924,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_50,922,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_42,921,Activation (ReLU/Clip),66917,66.92
+MIGAN,add_5_post_transpose_0231,919,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_5,916,Elementwise Add/Sub,157065,157.06
+MIGAN,conv2d_54_0312,914,Convolution,24487,24.49
+MIGAN,node_Conv_865,912,Convolution,1083651,1083.65
+MIGAN,node_mul_48,905,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_2,901,Upsample / Interpolate,2141699,2141.7
+MIGAN,node_Conv_864,898,Convolution,1676803,1676.8
+MIGAN,node_Clip_863,886,Activation (ReLU/Clip),382723,382.72
+MIGAN,node_mul_47,884,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_41,883,Activation (ReLU/Clip),2506,2.51
+MIGAN,node_conv2d_52,881,Convolution,10000,10.0
+MIGAN,node_add_4,874,Elementwise Add/Sub,5173,5.17
+MIGAN,node_conv2d_51,871,Convolution,3075,3.08
+MIGAN,node_Conv_862,865,Convolution,1166083,1166.08
+MIGAN,node_mul_46,858,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d_1,855,Upsample / Interpolate,533251,533.25
+MIGAN,node_Clip_861,848,Activation (ReLU/Clip),631555,631.55
+MIGAN,node_mul_45,846,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_40,845,Activation (ReLU/Clip),39018,39.02
+MIGAN,add_3_post_transpose_0231,843,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_3,840,Elementwise Add/Sub,103485,103.48
+MIGAN,conv2d_49_0312,838,Convolution,12559,12.56
+MIGAN,node_Conv_860,834,Convolution,1449219,1449.22
+MIGAN,node_Clip_859,822,Activation (ReLU/Clip),710147,710.15
+MIGAN,node_mul_43,820,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_39,819,Activation (ReLU/Clip),2859,2.86
+MIGAN,node_conv2d_48,817,Convolution,10000,10.0
+MIGAN,node_add_2,810,Elementwise Add/Sub,2562,2.56
+MIGAN,node_Clip_858,803,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_42,801,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_38,800,Activation (ReLU/Clip),50021,50.02
+MIGAN,add_1_post_transpose_0231,798,Elementwise Add/Sub,10000,10.0
+MIGAN,node_add_1,795,Elementwise Add/Sub,169297,169.3
+MIGAN,conv2d_47_0312,793,Convolution,16145,16.14
+MIGAN,node_Conv_857,791,Convolution,948227,948.23
+MIGAN,node_mul_40,784,Elementwise Mul,10000,10.0
+MIGAN,node_upsample_nearest2d,780,Upsample / Interpolate,10000,10.0
+MIGAN,node_Conv_856,777,Convolution,1501955,1501.95
+MIGAN,node_Clip_855,765,Activation (ReLU/Clip),487427,487.43
+MIGAN,node_mul_39,763,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_37,762,Activation (ReLU/Clip),7582,7.58
+MIGAN,node_conv2d_45,760,Convolution,10000,10.0
+MIGAN,node_conv2d_44,752,Convolution,1437,1.44
+MIGAN,node_Clip_854,740,Activation (ReLU/Clip),866819,866.82
+MIGAN,node_mul_38,738,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_36,737,Activation (ReLU/Clip),3363,3.36
+MIGAN,node_Conv_853,733,Convolution,10000,10.0
+MIGAN,node_Clip_852,721,Activation (ReLU/Clip),493059,493.06
+MIGAN,node_mul_37,719,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_35,718,Activation (ReLU/Clip),3263,3.26
+MIGAN,node_conv2d_42,716,Convolution,10000,10.0
+MIGAN,node_add,709,Elementwise Add/Sub,10000,10.0
+MIGAN,node_Clip_851,702,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_36,700,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_34,699,Activation (ReLU/Clip),6458,6.46
+MIGAN,node_Conv_850,695,Convolution,10000,10.0
+MIGAN,node_Clip_849,683,Activation (ReLU/Clip),635907,635.91
+MIGAN,node_mul_35,681,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_33,680,Activation (ReLU/Clip),3628,3.63
+MIGAN,node_conv2d_40,678,Convolution,10000,10.0
+MIGAN,node_Clip_848,666,Activation (ReLU/Clip),432643,432.64
+MIGAN,node_mul_34,664,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_32,663,Activation (ReLU/Clip),7659,7.66
+MIGAN,node_Conv_847,659,Convolution,10000,10.0
+MIGAN,node_Clip_846,647,Activation (ReLU/Clip),679683,679.68
+MIGAN,node_mul_33,645,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_31,644,Activation (ReLU/Clip),3534,3.53
+MIGAN,node_conv2d_38,642,Convolution,10000,10.0
+MIGAN,node_Clip_845,630,Activation (ReLU/Clip),649987,649.99
+MIGAN,node_mul_32,628,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_30,627,Activation (ReLU/Clip),6674,6.67
+MIGAN,node_Conv_844,623,Convolution,10000,10.0
+MIGAN,node_Clip_843,611,Activation (ReLU/Clip),374019,374.02
+MIGAN,node_mul_31,609,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_29,608,Activation (ReLU/Clip),13596,13.6
+MIGAN,node_conv2d_36,606,Convolution,10000,10.0
+MIGAN,node_Clip_842,594,Activation (ReLU/Clip),647427,647.43
+MIGAN,node_mul_30,592,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_28,591,Activation (ReLU/Clip),6121,6.12
+MIGAN,node_Conv_841,587,Convolution,10000,10.0
+MIGAN,node_Conv_840,581,Convolution,6800131,6800.13
+MIGAN,node_Clip_839,569,Activation (ReLU/Clip),792323,792.32
+MIGAN,node_mul_29,567,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_27,566,Activation (ReLU/Clip),2803,2.8
+MIGAN,node_conv2d_33,564,Convolution,10000,10.0
+MIGAN,node_Clip_838,552,Activation (ReLU/Clip),662531,662.53
+MIGAN,node_mul_28,550,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_26,549,Activation (ReLU/Clip),6869,6.87
+MIGAN,node_Conv_837,545,Convolution,10000,10.0
+MIGAN,node_Clip_836,533,Activation (ReLU/Clip),649731,649.73
+MIGAN,node_mul_27,531,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_25,530,Activation (ReLU/Clip),3080,3.08
+MIGAN,node_conv2d_31,528,Convolution,10000,10.0
+MIGAN,node_Clip_835,516,Activation (ReLU/Clip),668163,668.16
+MIGAN,node_mul_26,514,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_24,513,Activation (ReLU/Clip),6665,6.67
+MIGAN,node_Conv_834,509,Convolution,10000,10.0
+MIGAN,node_Conv_833,503,Convolution,10251267,10251.27
+MIGAN,node_Clip_832,491,Activation (ReLU/Clip),1992707,1992.71
+MIGAN,node_mul_25,489,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_23,488,Activation (ReLU/Clip),7789,7.79
+MIGAN,node_conv2d_28,486,Convolution,10000,10.0
+MIGAN,node_Clip_831,474,Activation (ReLU/Clip),1854467,1854.47
+MIGAN,node_mul_24,472,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_22,471,Activation (ReLU/Clip),5647,5.65
+MIGAN,node_Conv_830,467,Convolution,10000,10.0
+MIGAN,node_Clip_829,455,Activation (ReLU/Clip),1532931,1532.93
+MIGAN,node_mul_23,453,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_21,452,Activation (ReLU/Clip),6737,6.74
+MIGAN,node_conv2d_26,450,Convolution,10000,10.0
+MIGAN,node_Clip_828,438,Activation (ReLU/Clip),1971459,1971.46
+MIGAN,node_mul_22,436,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_20,435,Activation (ReLU/Clip),5661,5.66
+MIGAN,node_Conv_827,431,Convolution,10000,10.0
+MIGAN,node_Conv_826,425,Convolution,30248451,30248.45
+MIGAN,node_Clip_825,413,Activation (ReLU/Clip),9210371,9210.37
+MIGAN,node_mul_21,411,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_19,410,Activation (ReLU/Clip),17169,17.17
+MIGAN,node_conv2d_23,408,Convolution,10000,10.0
+MIGAN,node_Clip_824,396,Activation (ReLU/Clip),5997827,5997.83
+MIGAN,node_mul_20,394,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_18,393,Activation (ReLU/Clip),20311,20.31
+MIGAN,node_Conv_823,389,Convolution,10000,10.0
+MIGAN,node_Clip_822,377,Activation (ReLU/Clip),5676547,5676.55
+MIGAN,node_mul_19,375,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_17,374,Activation (ReLU/Clip),16394,16.39
+MIGAN,node_conv2d_21,372,Convolution,10000,10.0
+MIGAN,node_Clip_821,360,Activation (ReLU/Clip),6069251,6069.25
+MIGAN,node_mul_18,358,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_16,357,Activation (ReLU/Clip),19753,19.75
+MIGAN,node_Conv_820,353,Convolution,10000,10.0
+MIGAN,node_Conv_819,347,Convolution,10000,10.0
+MIGAN,node_Clip_818,335,Activation (ReLU/Clip),31925507,31925.51
+MIGAN,node_mul_17,333,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_15,332,Activation (ReLU/Clip),44673,44.67
+MIGAN,node_conv2d_18,330,Convolution,10000,10.0
+MIGAN,node_Clip_817,318,Activation (ReLU/Clip),22568451,22568.45
+MIGAN,node_mul_16,316,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_14,315,Activation (ReLU/Clip),76108,76.11
+MIGAN,node_Conv_816,311,Convolution,10000,10.0
+MIGAN,node_Clip_815,299,Activation (ReLU/Clip),22022147,22022.15
+MIGAN,node_mul_15,297,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_13,296,Activation (ReLU/Clip),42724,42.72
+MIGAN,node_conv2d_16,294,Convolution,10000,10.0
+MIGAN,node_Clip_814,282,Activation (ReLU/Clip),22145027,22145.03
+MIGAN,node_mul_14,280,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_12,279,Activation (ReLU/Clip),42650,42.65
+MIGAN,node_Conv_813,275,Convolution,10000,10.0
+MIGAN,node_Conv_812,269,Convolution,10000,10.0
+MIGAN,node_Clip_811,257,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_13,255,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_11,254,Activation (ReLU/Clip),77711,77.71
+MIGAN,node_conv2d_13,252,Convolution,10000,10.0
+MIGAN,node_Clip_810,240,Activation (ReLU/Clip),44962819,44962.82
+MIGAN,node_mul_12,238,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_10,237,Activation (ReLU/Clip),202418,202.42
+MIGAN,node_Conv_809,233,Convolution,10000,10.0
+MIGAN,node_Clip_808,221,Activation (ReLU/Clip),43075331,43075.33
+MIGAN,node_mul_11,219,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_9,218,Activation (ReLU/Clip),16770051,16770.05
+MIGAN,node_conv2d_11,216,Convolution,10000,10.0
+MIGAN,node_Clip_807,204,Activation (ReLU/Clip),43567107,43567.11
+MIGAN,node_mul_10,202,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_8,201,Activation (ReLU/Clip),15687171,15687.17
+MIGAN,node_Conv_806,197,Convolution,10000,10.0
+MIGAN,node_Conv_805,191,Convolution,10000,10.0
+MIGAN,node_Clip_804,179,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_9,177,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_7,176,Activation (ReLU/Clip),29928963,29928.96
+MIGAN,node_conv2d_8,174,Convolution,10000,10.0
+MIGAN,node_Clip_803,162,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_8,160,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_6,159,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_Conv_802,155,Convolution,10000,10.0
+MIGAN,node_Clip_801,143,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_7,141,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_5,140,Activation (ReLU/Clip),29221891,29221.89
+MIGAN,node_conv2d_6,138,Convolution,10000,10.0
+MIGAN,node_Clip_800,126,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_6,124,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_4,123,Activation (ReLU/Clip),29018115,29018.12
+MIGAN,node_Conv_799,119,Convolution,10000,10.0
+MIGAN,node_Conv_798,113,Convolution,10000,10.0
+MIGAN,node_Clip_797,101,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_5,99,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_3,98,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_3,96,Convolution,10000,10.0
+MIGAN,node_Clip_796,84,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_4,82,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_2,81,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_Conv_795,77,Convolution,10000,10.0
+MIGAN,node_Clip_794,65,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_3,63,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu_1,62,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_conv2d_1,60,Convolution,10000,10.0
+MIGAN,node_Clip_793,48,Activation (ReLU/Clip),10000,10.0
+MIGAN,node_mul_2,46,Elementwise Mul,10000,10.0
+MIGAN,node_leaky_relu,44,Activation (ReLU/Clip),186919,186.92
+MIGAN,node_conv2d,40,Convolution,10000,10.0
+MIGAN,cat_0231,34,Other,10000,10.0
+MIGAN,node_cat,31,Other,10000,10.0
+MIGAN,node_mul_1,29,Elementwise Mul,17697283,17697.28
+MIGAN,node_sub_1,27,Elementwise Add/Sub,30378243,30378.24
+MIGAN,node_sub,24,Elementwise Add/Sub,10000,10.0
+MIGAN,node_mul,21,Elementwise Mul,10000,10.0
+MIGAN,node_Reshape_1,19,Other,10000,10.0
+MIGAN,node_permute,17,Other,10000,10.0
+LaMa,node_add_81,1691,Elementwise Add/Sub,10000,10.0
+LaMa,node_mul_1,1689,Elementwise Mul,10000,10.0
+LaMa,node_sigmoid,1682,Activation (ReLU/Clip),10000,10.0
+LaMa,node_conv2d_76_token_393,1679,Convolution,10000,10.0
+LaMa,node_pad_73,1671,Padding,10000,10.0
+LaMa,node_relu_15,1663,Activation (ReLU/Clip),10000,10.0
+LaMa,node_ConvTranspose_197_token_389,1661,Convolution,10000,10.0
+LaMa,node_relu_14,1649,Activation (ReLU/Clip),10000,10.0
+LaMa,node_ConvTranspose_196_token_385,1647,Convolution,10000,10.0
+LaMa,node_relu_13,1635,Activation (ReLU/Clip),10000,10.0
+LaMa,node_ConvTranspose_195_token_381,1633,Convolution,10000,10.0
+LaMa,node_add_80,1626,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_21__0_token_377,1625,Normalization,307175,307.18
+LaMa,node_add_79,1621,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_78,1619,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_77,1617,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_73_token_361,1614,Convolution,10000,10.0
+LaMa,node_pad_70,1606,Padding,10000,10.0
+LaMa,node_Slice_4277,1600,Other,10000,10.0
+LaMa,node_conv2d_72_token_365,1596,Convolution,10000,10.0
+LaMa,node_pad_69,1588,Padding,10000,10.0
+LaMa,node_Slice_4274,1582,Other,10000,10.0
+LaMa,node_conv2d_74_token_369,1578,Convolution,10000,10.0
+LaMa,node_pad_71,1570,Padding,10000,10.0
+LaMa,node_Slice_4280,1564,Other,10000,10.0
+LaMa,node_conv2d_75_token_373,1560,Convolution,10000,10.0
+LaMa,node_pad_72,1552,Padding,10000,10.0
+LaMa,node_Slice_4283,1546,Other,10000,10.0
+LaMa,node_relu_12,1538,Activation (ReLU/Clip),28066051,28066.05
+LaMa,node__native_batch_norm_legit_no_training_20__0_token_357,1537,Normalization,307496,307.5
+LaMa,node_add_75,1533,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_74,1531,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_73,1529,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_69_token_341,1526,Convolution,10000,10.0
+LaMa,node_pad_66,1518,Padding,10000,10.0
+LaMa,node_Slice_484,1512,Other,10000,10.0
+LaMa,node_conv2d_68_token_345,1508,Convolution,10000,10.0
+LaMa,node_pad_65,1500,Padding,10000,10.0
+LaMa,node_Slice_481,1494,Other,10000,10.0
+LaMa,node_conv2d_70_token_349,1490,Convolution,10000,10.0
+LaMa,node_pad_67,1482,Padding,10000,10.0
+LaMa,node_Slice_487,1476,Other,10000,10.0
+LaMa,node_conv2d_71_token_353,1472,Convolution,10000,10.0
+LaMa,node_pad_68,1464,Padding,10000,10.0
+LaMa,node_Slice_490,1458,Other,10000,10.0
+LaMa,node_add_71,1455,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_19__0_token_337,1454,Normalization,305913,305.91
+LaMa,node_add_70,1450,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_69,1448,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_68,1446,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_65_token_321,1443,Convolution,10000,10.0
+LaMa,node_pad_62,1435,Padding,10000,10.0
+LaMa,node_Slice_471,1429,Other,10000,10.0
+LaMa,node_conv2d_64_token_325,1425,Convolution,10000,10.0
+LaMa,node_pad_61,1417,Padding,10000,10.0
+LaMa,node_Slice_468,1411,Other,10000,10.0
+LaMa,node_conv2d_66_token_329,1407,Convolution,10000,10.0
+LaMa,node_pad_63,1399,Padding,10000,10.0
+LaMa,node_Slice_474,1393,Other,10000,10.0
+LaMa,node_conv2d_67_token_333,1389,Convolution,10000,10.0
+LaMa,node_pad_64,1381,Padding,10000,10.0
+LaMa,node_Slice_477,1375,Other,10000,10.0
+LaMa,node_relu_11,1367,Activation (ReLU/Clip),49876227,49876.23
+LaMa,node__native_batch_norm_legit_no_training_18__0_token_317,1366,Normalization,306412,306.41
+LaMa,node_add_66,1362,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_65,1360,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_64,1358,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_61_token_301,1355,Convolution,10000,10.0
+LaMa,node_pad_58,1347,Padding,10000,10.0
+LaMa,node_Slice_458,1341,Other,10000,10.0
+LaMa,node_conv2d_60_token_305,1337,Convolution,10000,10.0
+LaMa,node_pad_57,1329,Padding,10000,10.0
+LaMa,node_Slice_455,1323,Other,10000,10.0
+LaMa,node_conv2d_62_token_309,1319,Convolution,10000,10.0
+LaMa,node_pad_59,1311,Padding,10000,10.0
+LaMa,node_Slice_461,1305,Other,10000,10.0
+LaMa,node_conv2d_63_token_313,1301,Convolution,10000,10.0
+LaMa,node_pad_60,1293,Padding,10000,10.0
+LaMa,node_Slice_464,1287,Other,10000,10.0
+LaMa,node_add_62,1284,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_17__0_token_297,1283,Normalization,345599,345.6
+LaMa,node_add_61,1279,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_60,1277,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_59,1275,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_57_token_281,1272,Convolution,10000,10.0
+LaMa,node_pad_54,1264,Padding,10000,10.0
+LaMa,node_Slice_445,1258,Other,10000,10.0
+LaMa,node_conv2d_56_token_285,1254,Convolution,10000,10.0
+LaMa,node_pad_53,1246,Padding,10000,10.0
+LaMa,node_Slice_442,1240,Other,10000,10.0
+LaMa,node_conv2d_58_token_289,1236,Convolution,10000,10.0
+LaMa,node_pad_55,1228,Padding,10000,10.0
+LaMa,node_Slice_448,1222,Other,10000,10.0
+LaMa,node_conv2d_59_token_293,1218,Convolution,10000,10.0
+LaMa,node_pad_56,1210,Padding,10000,10.0
+LaMa,node_Slice_451,1204,Other,10000,10.0
+LaMa,node_relu_10,1196,Activation (ReLU/Clip),47141379,47141.38
+LaMa,node__native_batch_norm_legit_no_training_16__0_token_277,1195,Normalization,318445,318.44
+LaMa,node_add_57,1191,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_56,1189,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_55,1187,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_53_token_261,1184,Convolution,10000,10.0
+LaMa,node_pad_50,1176,Padding,10000,10.0
+LaMa,node_Slice_432,1170,Other,10000,10.0
+LaMa,node_conv2d_52_token_265,1166,Convolution,10000,10.0
+LaMa,node_pad_49,1158,Padding,10000,10.0
+LaMa,node_Slice_429,1152,Other,10000,10.0
+LaMa,node_conv2d_54_token_269,1148,Convolution,10000,10.0
+LaMa,node_pad_51,1140,Padding,10000,10.0
+LaMa,node_Slice_435,1134,Other,10000,10.0
+LaMa,node_conv2d_55_token_273,1130,Convolution,10000,10.0
+LaMa,node_pad_52,1122,Padding,10000,10.0
+LaMa,node_Slice_438,1116,Other,10000,10.0
+LaMa,node_add_53,1113,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_15__0_token_257,1112,Normalization,340375,340.38
+LaMa,node_add_52,1108,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_51,1106,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_50,1104,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_49_token_241,1101,Convolution,10000,10.0
+LaMa,node_pad_46,1093,Padding,10000,10.0
+LaMa,node_Slice_419,1087,Other,10000,10.0
+LaMa,node_conv2d_48_token_245,1083,Convolution,10000,10.0
+LaMa,node_pad_45,1075,Padding,10000,10.0
+LaMa,node_Slice_416,1069,Other,10000,10.0
+LaMa,node_conv2d_50_token_249,1065,Convolution,10000,10.0
+LaMa,node_pad_47,1057,Padding,10000,10.0
+LaMa,node_Slice_422,1051,Other,10000,10.0
+LaMa,node_conv2d_51_token_253,1047,Convolution,10000,10.0
+LaMa,node_pad_48,1039,Padding,10000,10.0
+LaMa,node_Slice_425,1033,Other,10000,10.0
+LaMa,node_relu_9,1025,Activation (ReLU/Clip),10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_14__0_token_237,1024,Normalization,306016,306.02
+LaMa,node_add_48,1020,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_47,1018,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_46,1016,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_45_token_221,1013,Convolution,10000,10.0
+LaMa,node_pad_42,1005,Padding,10000,10.0
+LaMa,node_Slice_406,999,Other,10000,10.0
+LaMa,node_conv2d_44_token_225,995,Convolution,10000,10.0
+LaMa,node_pad_41,987,Padding,10000,10.0
+LaMa,node_Slice_403,981,Other,10000,10.0
+LaMa,node_conv2d_46_token_229,977,Convolution,10000,10.0
+LaMa,node_pad_43,969,Padding,10000,10.0
+LaMa,node_Slice_409,963,Other,10000,10.0
+LaMa,node_conv2d_47_token_233,959,Convolution,10000,10.0
+LaMa,node_pad_44,951,Padding,10000,10.0
+LaMa,node_Slice_412,945,Other,10000,10.0
+LaMa,node_add_44,942,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_13__0_token_217,941,Normalization,10000,10.0
+LaMa,node_add_43,937,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_42,935,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_41,933,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_41_token_201,930,Convolution,10000,10.0
+LaMa,node_pad_38,922,Padding,10000,10.0
+LaMa,node_Slice_2734,916,Other,10000,10.0
+LaMa,node_conv2d_40_token_205,912,Convolution,10000,10.0
+LaMa,node_pad_37,904,Padding,10000,10.0
+LaMa,node_Slice_2731,898,Other,10000,10.0
+LaMa,node_conv2d_42_token_209,894,Convolution,10000,10.0
+LaMa,node_pad_39,886,Padding,10000,10.0
+LaMa,node_Slice_2737,880,Other,10000,10.0
+LaMa,node_conv2d_43_token_213,876,Convolution,10000,10.0
+LaMa,node_pad_40,868,Padding,10000,10.0
+LaMa,node_Slice_2740,862,Other,10000,10.0
+LaMa,node_relu_8,854,Activation (ReLU/Clip),10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_12__0_token_197,853,Normalization,10000,10.0
+LaMa,node_add_39,849,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_38,847,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_37,845,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_37_token_181,842,Convolution,10000,10.0
+LaMa,node_pad_34,834,Padding,10000,10.0
+LaMa,node_Slice_380,828,Other,10000,10.0
+LaMa,node_conv2d_36_token_185,824,Convolution,10000,10.0
+LaMa,node_pad_33,816,Padding,10000,10.0
+LaMa,node_Slice_377,810,Other,10000,10.0
+LaMa,node_conv2d_38_token_189,806,Convolution,10000,10.0
+LaMa,node_pad_35,798,Padding,10000,10.0
+LaMa,node_Slice_383,792,Other,10000,10.0
+LaMa,node_conv2d_39_token_193,788,Convolution,10000,10.0
+LaMa,node_pad_36,780,Padding,10000,10.0
+LaMa,node_Slice_386,774,Other,10000,10.0
+LaMa,node_add_35,771,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_11__0_token_177,770,Normalization,10000,10.0
+LaMa,node_add_34,766,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_33,764,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_32,762,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_33_token_161,759,Convolution,10000,10.0
+LaMa,node_pad_30,751,Padding,10000,10.0
+LaMa,node_Slice_2721,745,Other,10000,10.0
+LaMa,node_conv2d_32_token_165,741,Convolution,10000,10.0
+LaMa,node_pad_29,733,Padding,10000,10.0
+LaMa,node_Slice_2718,727,Other,10000,10.0
+LaMa,node_conv2d_34_token_169,723,Convolution,10000,10.0
+LaMa,node_pad_31,715,Padding,10000,10.0
+LaMa,node_Slice_2724,709,Other,10000,10.0
+LaMa,node_conv2d_35_token_173,705,Convolution,10000,10.0
+LaMa,node_pad_32,697,Padding,10000,10.0
+LaMa,node_Slice_2727,691,Other,10000,10.0
+LaMa,node_relu_7,683,Activation (ReLU/Clip),10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_10__0_token_157,682,Normalization,10000,10.0
+LaMa,node_add_30,678,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_29,676,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_28,674,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_29_token_141,671,Convolution,10000,10.0
+LaMa,node_pad_26,663,Padding,10000,10.0
+LaMa,node_Slice_2708,657,Other,10000,10.0
+LaMa,node_conv2d_28_token_145,653,Convolution,10000,10.0
+LaMa,node_pad_25,645,Padding,10000,10.0
+LaMa,node_Slice_2705,639,Other,10000,10.0
+LaMa,node_conv2d_30_token_149,635,Convolution,10000,10.0
+LaMa,node_pad_27,627,Padding,10000,10.0
+LaMa,node_Slice_2711,621,Other,10000,10.0
+LaMa,node_conv2d_31_token_153,617,Convolution,10000,10.0
+LaMa,node_pad_28,609,Padding,10000,10.0
+LaMa,node_Slice_2714,603,Other,10000,10.0
+LaMa,node_add_26,600,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_9__0_token_137,599,Normalization,10000,10.0
+LaMa,node_add_25,595,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_24,593,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_23,591,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_25_token_121,588,Convolution,10000,10.0
+LaMa,node_pad_22,580,Padding,10000,10.0
+LaMa,node_Slice_2695,574,Other,10000,10.0
+LaMa,node_conv2d_24_token_125,570,Convolution,10000,10.0
+LaMa,node_pad_21,562,Padding,10000,10.0
+LaMa,node_Slice_2692,556,Other,10000,10.0
+LaMa,node_conv2d_26_token_129,552,Convolution,10000,10.0
+LaMa,node_pad_23,544,Padding,10000,10.0
+LaMa,node_Slice_2698,538,Other,10000,10.0
+LaMa,node_conv2d_27_token_133,534,Convolution,10000,10.0
+LaMa,node_pad_24,526,Padding,10000,10.0
+LaMa,node_Slice_2701,520,Other,10000,10.0
+LaMa,node_relu_6,512,Activation (ReLU/Clip),10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_8__0_token_117,511,Normalization,10000,10.0
+LaMa,node_add_21,507,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_20,505,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_19,503,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_21_token_101,500,Convolution,10000,10.0
+LaMa,node_pad_18,492,Padding,10000,10.0
+LaMa,node_Slice_2682,486,Other,10000,10.0
+LaMa,node_conv2d_20_token_105,482,Convolution,10000,10.0
+LaMa,node_pad_17,474,Padding,10000,10.0
+LaMa,node_Slice_2679,468,Other,10000,10.0
+LaMa,node_conv2d_22_token_109,464,Convolution,10000,10.0
+LaMa,node_pad_19,456,Padding,10000,10.0
+LaMa,node_Slice_2685,450,Other,10000,10.0
+LaMa,node_conv2d_23_token_113,446,Convolution,10000,10.0
+LaMa,node_pad_20,438,Padding,10000,10.0
+LaMa,node_Slice_2688,432,Other,10000,10.0
+LaMa,node_add_17,429,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_7__0_token_97,428,Normalization,10000,10.0
+LaMa,node_add_16,424,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_15,422,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_14,420,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_17_token_81,417,Convolution,10000,10.0
+LaMa,node_pad_14,409,Padding,10000,10.0
+LaMa,node_Slice_2669,403,Other,10000,10.0
+LaMa,node_conv2d_16_token_85,399,Convolution,10000,10.0
+LaMa,node_pad_13,391,Padding,10000,10.0
+LaMa,node_Slice_2666,385,Other,10000,10.0
+LaMa,node_conv2d_18_token_89,381,Convolution,10000,10.0
+LaMa,node_pad_15,373,Padding,10000,10.0
+LaMa,node_Slice_2672,367,Other,10000,10.0
+LaMa,node_conv2d_19_token_93,363,Convolution,10000,10.0
+LaMa,node_pad_16,355,Padding,10000,10.0
+LaMa,node_Slice_2675,349,Other,10000,10.0
+LaMa,node_relu_5,341,Activation (ReLU/Clip),10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_6__0_token_77,340,Normalization,10000,10.0
+LaMa,node_add_12,336,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_11,334,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_10,332,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_13_token_61,329,Convolution,10000,10.0
+LaMa,node_pad_10,321,Padding,10000,10.0
+LaMa,node_Slice_2656,315,Other,10000,10.0
+LaMa,node_conv2d_12_token_65,311,Convolution,10000,10.0
+LaMa,node_pad_9,303,Padding,551779,551.78
+LaMa,node_Slice_2653,297,Other,10000,10.0
+LaMa,node_conv2d_14_token_69,293,Convolution,10000,10.0
+LaMa,node_pad_11,285,Padding,10000,10.0
+LaMa,node_Slice_2659,279,Other,10000,10.0
+LaMa,node_conv2d_15_token_73,275,Convolution,10000,10.0
+LaMa,node_pad_12,267,Padding,10000,10.0
+LaMa,node_Slice_2662,261,Other,10000,10.0
+LaMa,node_add_8,258,Elementwise Add/Sub,372931,372.93
+LaMa,node__native_batch_norm_legit_no_training_5__0_token_57,257,Normalization,10000,10.0
+LaMa,node_add_7,253,Elementwise Add/Sub,38774,38.77
+LaMa,node_add_6,251,Elementwise Add/Sub,38770,38.77
+LaMa,node_add_5,249,Elementwise Add/Sub,103366,103.37
+LaMa,node_conv2d_9_token_41,246,Convolution,626751,626.75
+LaMa,node_pad_6,238,Padding,492465,492.46
+LaMa,node_Slice_4264,232,Other,10000,10.0
+LaMa,node_conv2d_8_token_45,228,Convolution,540351,540.35
+LaMa,node_pad_5,220,Padding,501826,501.83
+LaMa,node_Slice_4261,214,Other,10000,10.0
+LaMa,node_conv2d_10_token_49,210,Convolution,10000,10.0
+LaMa,node_pad_7,202,Padding,518012,518.01
+LaMa,node_Slice_4267,196,Other,10000,10.0
+LaMa,node_conv2d_11_token_53,192,Convolution,10000,10.0
+LaMa,node_pad_8,184,Padding,436123,436.12
+LaMa,node_Slice_4270,178,Other,10000,10.0
+LaMa,node_relu_4,170,Activation (ReLU/Clip),10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_4__0_token_37,169,Normalization,10000,10.0
+LaMa,node_add_3,165,Elementwise Add/Sub,42931,42.93
+LaMa,node_add_2,163,Elementwise Add/Sub,44399,44.4
+LaMa,node_add_1,161,Elementwise Add/Sub,747448,747.45
+LaMa,node_conv2d_5_token_21,158,Convolution,618070,618.07
+LaMa,node_pad_2,150,Padding,487493,487.49
+LaMa,node_Slice_4251,144,Other,10000,10.0
+LaMa,node_conv2d_4_token_25,140,Convolution,547596,547.6
+LaMa,node_pad_1,132,Padding,550183,550.18
+LaMa,node_Slice_4248,126,Other,10000,10.0
+LaMa,node_conv2d_6_token_29,122,Convolution,696793,696.79
+LaMa,node_pad_3,114,Padding,522845,522.85
+LaMa,node_Slice_4254,108,Other,10000,10.0
+LaMa,node_conv2d_7_token_33,104,Convolution,623184,623.18
+LaMa,node_pad_4,96,Padding,10000,10.0
+LaMa,node_Slice_4257,90,Other,10000,10.0
+LaMa,node_relu_3,82,Activation (ReLU/Clip),2296460,2296.46
+LaMa,node_Conv_194_token_17,79,Convolution,10000,10.0
+LaMa,node_relu_2,67,Activation (ReLU/Clip),2597066,2597.07
+LaMa,node_Conv_193_token_13,64,Convolution,10000,10.0
+LaMa,node_relu_1,52,Activation (ReLU/Clip),3453344,3453.34
+LaMa,node_Conv_192_token_9,49,Convolution,10000,10.0
+LaMa,node_relu,37,Activation (ReLU/Clip),10000,10.0
+LaMa,node_Conv_191_token_5,34,Convolution,10000,10.0
+LaMa,node_pad,26,Padding,10000,10.0
+LaMa,node_cat,23,Other,10000,10.0
+LaMa,node_mul,21,Elementwise Mul,10000,10.0
+LaMa,node_mul_2,19,Elementwise Mul,10000,10.0
+LaMa,node_sub,17,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_81,1691,Elementwise Add/Sub,10000,10.0
+LaMa,node_mul_1,1689,Elementwise Mul,10000,10.0
+LaMa,node_sigmoid,1682,Activation (ReLU/Clip),10000,10.0
+LaMa,node_conv2d_76_token_393,1679,Convolution,10000,10.0
+LaMa,node_pad_73,1671,Padding,10000,10.0
+LaMa,node_relu_15,1663,Activation (ReLU/Clip),10000,10.0
+LaMa,node_ConvTranspose_197_token_389,1661,Convolution,10000,10.0
+LaMa,node_relu_14,1649,Activation (ReLU/Clip),10000,10.0
+LaMa,node_ConvTranspose_196_token_385,1647,Convolution,10000,10.0
+LaMa,node_relu_13,1635,Activation (ReLU/Clip),10000,10.0
+LaMa,node_ConvTranspose_195_token_381,1633,Convolution,10000,10.0
+LaMa,node_add_80,1626,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_21__0_token_377,1625,Normalization,307878,307.88
+LaMa,node_add_79,1621,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_78,1619,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_77,1617,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_73_token_361,1614,Convolution,10000,10.0
+LaMa,node_pad_70,1606,Padding,10000,10.0
+LaMa,node_Slice_4277,1600,Other,10000,10.0
+LaMa,node_conv2d_72_token_365,1596,Convolution,10000,10.0
+LaMa,node_pad_69,1588,Padding,10000,10.0
+LaMa,node_Slice_4274,1582,Other,10000,10.0
+LaMa,node_conv2d_74_token_369,1578,Convolution,10000,10.0
+LaMa,node_pad_71,1570,Padding,10000,10.0
+LaMa,node_Slice_4280,1564,Other,10000,10.0
+LaMa,node_conv2d_75_token_373,1560,Convolution,10000,10.0
+LaMa,node_pad_72,1552,Padding,10000,10.0
+LaMa,node_Slice_4283,1546,Other,10000,10.0
+LaMa,node_relu_12,1538,Activation (ReLU/Clip),28161027,28161.03
+LaMa,node__native_batch_norm_legit_no_training_20__0_token_357,1537,Normalization,314039,314.04
+LaMa,node_add_75,1533,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_74,1531,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_73,1529,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_69_token_341,1526,Convolution,10000,10.0
+LaMa,node_pad_66,1518,Padding,10000,10.0
+LaMa,node_Slice_484,1512,Other,10000,10.0
+LaMa,node_conv2d_68_token_345,1508,Convolution,10000,10.0
+LaMa,node_pad_65,1500,Padding,10000,10.0
+LaMa,node_Slice_481,1494,Other,10000,10.0
+LaMa,node_conv2d_70_token_349,1490,Convolution,10000,10.0
+LaMa,node_pad_67,1482,Padding,10000,10.0
+LaMa,node_Slice_487,1476,Other,10000,10.0
+LaMa,node_conv2d_71_token_353,1472,Convolution,10000,10.0
+LaMa,node_pad_68,1464,Padding,10000,10.0
+LaMa,node_Slice_490,1458,Other,10000,10.0
+LaMa,node_add_71,1455,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_19__0_token_337,1454,Normalization,305460,305.46
+LaMa,node_add_70,1450,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_69,1448,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_68,1446,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_65_token_321,1443,Convolution,10000,10.0
+LaMa,node_pad_62,1435,Padding,10000,10.0
+LaMa,node_Slice_471,1429,Other,10000,10.0
+LaMa,node_conv2d_64_token_325,1425,Convolution,10000,10.0
+LaMa,node_pad_61,1417,Padding,10000,10.0
+LaMa,node_Slice_468,1411,Other,10000,10.0
+LaMa,node_conv2d_66_token_329,1407,Convolution,10000,10.0
+LaMa,node_pad_63,1399,Padding,10000,10.0
+LaMa,node_Slice_474,1393,Other,10000,10.0
+LaMa,node_conv2d_67_token_333,1389,Convolution,10000,10.0
+LaMa,node_pad_64,1381,Padding,10000,10.0
+LaMa,node_Slice_477,1375,Other,10000,10.0
+LaMa,node_relu_11,1367,Activation (ReLU/Clip),49160963,49160.96
+LaMa,node__native_batch_norm_legit_no_training_18__0_token_317,1366,Normalization,305974,305.97
+LaMa,node_add_66,1362,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_65,1360,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_64,1358,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_61_token_301,1355,Convolution,10000,10.0
+LaMa,node_pad_58,1347,Padding,10000,10.0
+LaMa,node_Slice_458,1341,Other,10000,10.0
+LaMa,node_conv2d_60_token_305,1337,Convolution,10000,10.0
+LaMa,node_pad_57,1329,Padding,10000,10.0
+LaMa,node_Slice_455,1323,Other,10000,10.0
+LaMa,node_conv2d_62_token_309,1319,Convolution,10000,10.0
+LaMa,node_pad_59,1311,Padding,10000,10.0
+LaMa,node_Slice_461,1305,Other,10000,10.0
+LaMa,node_conv2d_63_token_313,1301,Convolution,10000,10.0
+LaMa,node_pad_60,1293,Padding,10000,10.0
+LaMa,node_Slice_464,1287,Other,10000,10.0
+LaMa,node_add_62,1284,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_17__0_token_297,1283,Normalization,338819,338.82
+LaMa,node_add_61,1279,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_60,1277,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_59,1275,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_57_token_281,1272,Convolution,10000,10.0
+LaMa,node_pad_54,1264,Padding,10000,10.0
+LaMa,node_Slice_445,1258,Other,10000,10.0
+LaMa,node_conv2d_56_token_285,1254,Convolution,10000,10.0
+LaMa,node_pad_53,1246,Padding,10000,10.0
+LaMa,node_Slice_442,1240,Other,10000,10.0
+LaMa,node_conv2d_58_token_289,1236,Convolution,10000,10.0
+LaMa,node_pad_55,1228,Padding,10000,10.0
+LaMa,node_Slice_448,1222,Other,10000,10.0
+LaMa,node_conv2d_59_token_293,1218,Convolution,10000,10.0
+LaMa,node_pad_56,1210,Padding,10000,10.0
+LaMa,node_Slice_451,1204,Other,10000,10.0
+LaMa,node_relu_10,1196,Activation (ReLU/Clip),47611651,47611.65
+LaMa,node__native_batch_norm_legit_no_training_16__0_token_277,1195,Normalization,319187,319.19
+LaMa,node_add_57,1191,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_56,1189,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_55,1187,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_53_token_261,1184,Convolution,10000,10.0
+LaMa,node_pad_50,1176,Padding,10000,10.0
+LaMa,node_Slice_432,1170,Other,10000,10.0
+LaMa,node_conv2d_52_token_265,1166,Convolution,10000,10.0
+LaMa,node_pad_49,1158,Padding,10000,10.0
+LaMa,node_Slice_429,1152,Other,10000,10.0
+LaMa,node_conv2d_54_token_269,1148,Convolution,10000,10.0
+LaMa,node_pad_51,1140,Padding,10000,10.0
+LaMa,node_Slice_435,1134,Other,10000,10.0
+LaMa,node_conv2d_55_token_273,1130,Convolution,10000,10.0
+LaMa,node_pad_52,1122,Padding,10000,10.0
+LaMa,node_Slice_438,1116,Other,10000,10.0
+LaMa,node_add_53,1113,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_15__0_token_257,1112,Normalization,341468,341.47
+LaMa,node_add_52,1108,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_51,1106,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_50,1104,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_49_token_241,1101,Convolution,10000,10.0
+LaMa,node_pad_46,1093,Padding,10000,10.0
+LaMa,node_Slice_419,1087,Other,10000,10.0
+LaMa,node_conv2d_48_token_245,1083,Convolution,10000,10.0
+LaMa,node_pad_45,1075,Padding,10000,10.0
+LaMa,node_Slice_416,1069,Other,10000,10.0
+LaMa,node_conv2d_50_token_249,1065,Convolution,10000,10.0
+LaMa,node_pad_47,1057,Padding,10000,10.0
+LaMa,node_Slice_422,1051,Other,10000,10.0
+LaMa,node_conv2d_51_token_253,1047,Convolution,10000,10.0
+LaMa,node_pad_48,1039,Padding,10000,10.0
+LaMa,node_Slice_425,1033,Other,10000,10.0
+LaMa,node_relu_9,1025,Activation (ReLU/Clip),10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_14__0_token_237,1024,Normalization,307589,307.59
+LaMa,node_add_48,1020,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_47,1018,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_46,1016,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_45_token_221,1013,Convolution,10000,10.0
+LaMa,node_pad_42,1005,Padding,10000,10.0
+LaMa,node_Slice_406,999,Other,10000,10.0
+LaMa,node_conv2d_44_token_225,995,Convolution,10000,10.0
+LaMa,node_pad_41,987,Padding,10000,10.0
+LaMa,node_Slice_403,981,Other,10000,10.0
+LaMa,node_conv2d_46_token_229,977,Convolution,10000,10.0
+LaMa,node_pad_43,969,Padding,10000,10.0
+LaMa,node_Slice_409,963,Other,10000,10.0
+LaMa,node_conv2d_47_token_233,959,Convolution,10000,10.0
+LaMa,node_pad_44,951,Padding,10000,10.0
+LaMa,node_Slice_412,945,Other,10000,10.0
+LaMa,node_add_44,942,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_13__0_token_217,941,Normalization,10000,10.0
+LaMa,node_add_43,937,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_42,935,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_41,933,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_41_token_201,930,Convolution,10000,10.0
+LaMa,node_pad_38,922,Padding,10000,10.0
+LaMa,node_Slice_2734,916,Other,10000,10.0
+LaMa,node_conv2d_40_token_205,912,Convolution,10000,10.0
+LaMa,node_pad_37,904,Padding,10000,10.0
+LaMa,node_Slice_2731,898,Other,10000,10.0
+LaMa,node_conv2d_42_token_209,894,Convolution,10000,10.0
+LaMa,node_pad_39,886,Padding,10000,10.0
+LaMa,node_Slice_2737,880,Other,10000,10.0
+LaMa,node_conv2d_43_token_213,876,Convolution,10000,10.0
+LaMa,node_pad_40,868,Padding,10000,10.0
+LaMa,node_Slice_2740,862,Other,10000,10.0
+LaMa,node_relu_8,854,Activation (ReLU/Clip),10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_12__0_token_197,853,Normalization,10000,10.0
+LaMa,node_add_39,849,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_38,847,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_37,845,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_37_token_181,842,Convolution,10000,10.0
+LaMa,node_pad_34,834,Padding,10000,10.0
+LaMa,node_Slice_380,828,Other,10000,10.0
+LaMa,node_conv2d_36_token_185,824,Convolution,10000,10.0
+LaMa,node_pad_33,816,Padding,10000,10.0
+LaMa,node_Slice_377,810,Other,10000,10.0
+LaMa,node_conv2d_38_token_189,806,Convolution,10000,10.0
+LaMa,node_pad_35,798,Padding,10000,10.0
+LaMa,node_Slice_383,792,Other,10000,10.0
+LaMa,node_conv2d_39_token_193,788,Convolution,10000,10.0
+LaMa,node_pad_36,780,Padding,10000,10.0
+LaMa,node_Slice_386,774,Other,10000,10.0
+LaMa,node_add_35,771,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_11__0_token_177,770,Normalization,10000,10.0
+LaMa,node_add_34,766,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_33,764,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_32,762,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_33_token_161,759,Convolution,10000,10.0
+LaMa,node_pad_30,751,Padding,10000,10.0
+LaMa,node_Slice_2721,745,Other,10000,10.0
+LaMa,node_conv2d_32_token_165,741,Convolution,10000,10.0
+LaMa,node_pad_29,733,Padding,10000,10.0
+LaMa,node_Slice_2718,727,Other,10000,10.0
+LaMa,node_conv2d_34_token_169,723,Convolution,10000,10.0
+LaMa,node_pad_31,715,Padding,10000,10.0
+LaMa,node_Slice_2724,709,Other,10000,10.0
+LaMa,node_conv2d_35_token_173,705,Convolution,10000,10.0
+LaMa,node_pad_32,697,Padding,10000,10.0
+LaMa,node_Slice_2727,691,Other,10000,10.0
+LaMa,node_relu_7,683,Activation (ReLU/Clip),10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_10__0_token_157,682,Normalization,10000,10.0
+LaMa,node_add_30,678,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_29,676,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_28,674,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_29_token_141,671,Convolution,10000,10.0
+LaMa,node_pad_26,663,Padding,10000,10.0
+LaMa,node_Slice_2708,657,Other,10000,10.0
+LaMa,node_conv2d_28_token_145,653,Convolution,10000,10.0
+LaMa,node_pad_25,645,Padding,10000,10.0
+LaMa,node_Slice_2705,639,Other,10000,10.0
+LaMa,node_conv2d_30_token_149,635,Convolution,10000,10.0
+LaMa,node_pad_27,627,Padding,10000,10.0
+LaMa,node_Slice_2711,621,Other,10000,10.0
+LaMa,node_conv2d_31_token_153,617,Convolution,10000,10.0
+LaMa,node_pad_28,609,Padding,10000,10.0
+LaMa,node_Slice_2714,603,Other,10000,10.0
+LaMa,node_add_26,600,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_9__0_token_137,599,Normalization,10000,10.0
+LaMa,node_add_25,595,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_24,593,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_23,591,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_25_token_121,588,Convolution,10000,10.0
+LaMa,node_pad_22,580,Padding,10000,10.0
+LaMa,node_Slice_2695,574,Other,10000,10.0
+LaMa,node_conv2d_24_token_125,570,Convolution,10000,10.0
+LaMa,node_pad_21,562,Padding,10000,10.0
+LaMa,node_Slice_2692,556,Other,10000,10.0
+LaMa,node_conv2d_26_token_129,552,Convolution,10000,10.0
+LaMa,node_pad_23,544,Padding,10000,10.0
+LaMa,node_Slice_2698,538,Other,10000,10.0
+LaMa,node_conv2d_27_token_133,534,Convolution,10000,10.0
+LaMa,node_pad_24,526,Padding,10000,10.0
+LaMa,node_Slice_2701,520,Other,10000,10.0
+LaMa,node_relu_6,512,Activation (ReLU/Clip),10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_8__0_token_117,511,Normalization,10000,10.0
+LaMa,node_add_21,507,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_20,505,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_19,503,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_21_token_101,500,Convolution,10000,10.0
+LaMa,node_pad_18,492,Padding,10000,10.0
+LaMa,node_Slice_2682,486,Other,10000,10.0
+LaMa,node_conv2d_20_token_105,482,Convolution,10000,10.0
+LaMa,node_pad_17,474,Padding,10000,10.0
+LaMa,node_Slice_2679,468,Other,10000,10.0
+LaMa,node_conv2d_22_token_109,464,Convolution,10000,10.0
+LaMa,node_pad_19,456,Padding,10000,10.0
+LaMa,node_Slice_2685,450,Other,10000,10.0
+LaMa,node_conv2d_23_token_113,446,Convolution,10000,10.0
+LaMa,node_pad_20,438,Padding,10000,10.0
+LaMa,node_Slice_2688,432,Other,10000,10.0
+LaMa,node_add_17,429,Elementwise Add/Sub,10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_7__0_token_97,428,Normalization,10000,10.0
+LaMa,node_add_16,424,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_15,422,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_14,420,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_17_token_81,417,Convolution,10000,10.0
+LaMa,node_pad_14,409,Padding,10000,10.0
+LaMa,node_Slice_2669,403,Other,10000,10.0
+LaMa,node_conv2d_16_token_85,399,Convolution,10000,10.0
+LaMa,node_pad_13,391,Padding,10000,10.0
+LaMa,node_Slice_2666,385,Other,10000,10.0
+LaMa,node_conv2d_18_token_89,381,Convolution,10000,10.0
+LaMa,node_pad_15,373,Padding,10000,10.0
+LaMa,node_Slice_2672,367,Other,10000,10.0
+LaMa,node_conv2d_19_token_93,363,Convolution,10000,10.0
+LaMa,node_pad_16,355,Padding,10000,10.0
+LaMa,node_Slice_2675,349,Other,10000,10.0
+LaMa,node_relu_5,341,Activation (ReLU/Clip),10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_6__0_token_77,340,Normalization,10000,10.0
+LaMa,node_add_12,336,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_11,334,Elementwise Add/Sub,10000,10.0
+LaMa,node_add_10,332,Elementwise Add/Sub,10000,10.0
+LaMa,node_conv2d_13_token_61,329,Convolution,10000,10.0
+LaMa,node_pad_10,321,Padding,10000,10.0
+LaMa,node_Slice_2656,315,Other,10000,10.0
+LaMa,node_conv2d_12_token_65,311,Convolution,10000,10.0
+LaMa,node_pad_9,303,Padding,549485,549.49
+LaMa,node_Slice_2653,297,Other,10000,10.0
+LaMa,node_conv2d_14_token_69,293,Convolution,10000,10.0
+LaMa,node_pad_11,285,Padding,10000,10.0
+LaMa,node_Slice_2659,279,Other,10000,10.0
+LaMa,node_conv2d_15_token_73,275,Convolution,10000,10.0
+LaMa,node_pad_12,267,Padding,10000,10.0
+LaMa,node_Slice_2662,261,Other,10000,10.0
+LaMa,node_add_8,258,Elementwise Add/Sub,370223,370.22
+LaMa,node__native_batch_norm_legit_no_training_5__0_token_57,257,Normalization,10000,10.0
+LaMa,node_add_7,253,Elementwise Add/Sub,38617,38.62
+LaMa,node_add_6,251,Elementwise Add/Sub,38667,38.67
+LaMa,node_add_5,249,Elementwise Add/Sub,105857,105.86
+LaMa,node_conv2d_9_token_41,246,Convolution,625289,625.29
+LaMa,node_pad_6,238,Padding,489489,489.49
+LaMa,node_Slice_4264,232,Other,10000,10.0
+LaMa,node_conv2d_8_token_45,228,Convolution,541490,541.49
+LaMa,node_pad_5,220,Padding,497999,498.0
+LaMa,node_Slice_4261,214,Other,10000,10.0
+LaMa,node_conv2d_10_token_49,210,Convolution,10000,10.0
+LaMa,node_pad_7,202,Padding,523770,523.77
+LaMa,node_Slice_4267,196,Other,10000,10.0
+LaMa,node_conv2d_11_token_53,192,Convolution,10000,10.0
+LaMa,node_pad_8,184,Padding,429182,429.18
+LaMa,node_Slice_4270,178,Other,10000,10.0
+LaMa,node_relu_4,170,Activation (ReLU/Clip),10000,10.0
+LaMa,node__native_batch_norm_legit_no_training_4__0_token_37,169,Normalization,10000,10.0
+LaMa,node_add_3,165,Elementwise Add/Sub,43785,43.78
+LaMa,node_add_2,163,Elementwise Add/Sub,45803,45.8
+LaMa,node_add_1,161,Elementwise Add/Sub,744108,744.11
+LaMa,node_conv2d_5_token_21,158,Convolution,617949,617.95
+LaMa,node_pad_2,150,Padding,488525,488.52
+LaMa,node_Slice_4251,144,Other,10000,10.0
+LaMa,node_conv2d_4_token_25,140,Convolution,548087,548.09
+LaMa,node_pad_1,132,Padding,544493,544.49
+LaMa,node_Slice_4248,126,Other,10000,10.0
+LaMa,node_conv2d_6_token_29,122,Convolution,700969,700.97
+LaMa,node_pad_3,114,Padding,514593,514.59
+LaMa,node_Slice_4254,108,Other,10000,10.0
+LaMa,node_conv2d_7_token_33,104,Convolution,633367,633.37
+LaMa,node_pad_4,96,Padding,10000,10.0
+LaMa,node_Slice_4257,90,Other,10000,10.0
+LaMa,node_relu_3,82,Activation (ReLU/Clip),2302722,2302.72
+LaMa,node_Conv_194_token_17,79,Convolution,10000,10.0
+LaMa,node_relu_2,67,Activation (ReLU/Clip),2600889,2600.89
+LaMa,node_Conv_193_token_13,64,Convolution,10000,10.0
+LaMa,node_relu_1,52,Activation (ReLU/Clip),3457868,3457.87
+LaMa,node_Conv_192_token_9,49,Convolution,10000,10.0
+LaMa,node_relu,37,Activation (ReLU/Clip),10000,10.0
+LaMa,node_Conv_191_token_5,34,Convolution,10000,10.0
+LaMa,node_pad,26,Padding,10000,10.0
+LaMa,node_cat,23,Other,10000,10.0
+LaMa,node_mul,21,Elementwise Mul,10000,10.0
+LaMa,node_mul_2,19,Elementwise Mul,10000,10.0
+LaMa,node_sub,17,Elementwise Add/Sub,10000,10.0

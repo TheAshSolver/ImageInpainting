@@ -1,0 +1,51 @@
+# Qualcomm binary model containers & builds
+*.dlc
+/StableDiffusion/build
+StableDiffusion/sd_runtime/
+models/StableDiffusion
+
+# Raw binary dumps, logs, and diagnostic traces
+*.raw
+*.bin
+*.log
+SNPE_Diagnostic.log
+SNPEDiag*.log
+
+# Raw model intermediate execution dumps
+Benchmark/output/Result_*
+Benchmark/output/*/Result_*
+Benchmark/output/aotgan/
+Benchmark/output/lama/
+Benchmark/output/migan/
+Benchmark/output/sd/results/
+Benchmark/output/sd/Result_*
+Benchmark/output/*/*.log
+
+# Obsolete / temporary test runs
+Benchmark/dataset_previous/
+Benchmark/pulled_artifacts/
+Benchmark/qualitative_6x6/
+Benchmark/output/raw_pulls/
+Benchmark/output/previous_dataset/
+Benchmark/output/reconstructions/
+Benchmark/output/telemetry/
+Benchmark/output/legacy_runs/
+scripts/Benchmark/
+
+# Exclude oversized uncompressed multi-megapixel raw plot dumps (lightweight 300 DPI JPG/WebP versions are tracked)
+Benchmark/output/figures/*_6grid.png
+Benchmark/output/figures/*_5grid.png
+
+# Android build outputs & local properties
+qidk-inpaint-app/.gradle/
+qidk-inpaint-app/build/
+qidk-inpaint-app/app/build/
+qidk-inpaint-app/local.properties
+qidk-inpaint-app/decompiled/
+*.apk
+
+# Virtual environments and Python caches
+.venv/
+__pycache__/
+*.pyc
+*/__pycache__/
