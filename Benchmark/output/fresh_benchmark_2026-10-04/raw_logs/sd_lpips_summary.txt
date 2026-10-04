@@ -1,0 +1,5 @@
+SD samples: ['002', '024', '034', '040', '044', '046', '066', '074', '080', '096']
+sd15_inpaint_12step n=10 psnr_full=18.8694 psnr_hole=13.4617 ssim=0.6048 lpips_vgg=0.2815
+migan_npu n=10 psnr_full=20.1728 psnr_hole=16.5332 ssim=0.6382 lpips_vgg=0.2604
+lama_npu n=10 psnr_full=20.3738 psnr_hole=17.2292 ssim=0.6734 lpips_vgg=0.2525
+aotgan_npu n=10 psnr_full=19.9895 psnr_hole=15.3671 ssim=0.6599 lpips_vgg=0.2542

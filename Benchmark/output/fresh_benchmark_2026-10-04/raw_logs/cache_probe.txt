@@ -1,0 +1,27 @@
+﻿--- cache-related flags
+                        Cannot be combined with --userbuffer*.
+                        Must be used with --userbuffer_xxx.
+                        Must be used with --userbuffer_xxx.
+  [ --userbuffer_auto ]
+                        Specifies to use userbuffer for input and output, with auto detection of types enabled.
+  [ --userbuffer_float ]
+                        Specifies to use userbuffer for inference, and the input type is float.
+  [ --userbuffer_floatN=<val> ]
+                        Specifies to use userbuffer for inference, and the input type is float 16 or float 32.
+  [ --userbuffer_tf8 ]  Specifies to use userbuffer for inference, and the input type is tf8exact0.
+  [ --userbuffer_tfN=<val> ]
+                        Overrides the userbuffer output used for inference, and the output type is tf8exact0 or tf16exact0.
+=== lama_dilated : first run WITH --enable_init_cache (builds cache into the copy)
+CACHERUN lama_dilated run=1 rc=0 ms=8050 results=1 dlc_bytes=280480603 orig_bytes=182845316
+CACHERUN lama_dilated run=2 rc=0 ms=470 results=1 dlc_bytes=280480603 orig_bytes=182845316
+CACHERUN lama_dilated run=3 rc=0 ms=500 results=1 dlc_bytes=280480603 orig_bytes=182845316
+Processing DNN input(s):
+bench_in/raw_mask_standard/001_mask.raw
+Successfully executed graph graph_2cdikl3e
+=== aotgan : first run WITH --enable_init_cache (builds cache into the copy)
+CACHERUN aotgan run=1 rc=0 ms=8040 results=1 dlc_bytes=96567123 orig_bytes=61003020
+CACHERUN aotgan run=2 rc=0 ms=580 results=1 dlc_bytes=96567123 orig_bytes=61003020
+CACHERUN aotgan run=3 rc=0 ms=560 results=1 dlc_bytes=96567123 orig_bytes=61003020
+Processing DNN input(s):
+bench_in/raw_mask_standard/001_mask.raw
+Successfully executed graph graph_xvgj3gl0

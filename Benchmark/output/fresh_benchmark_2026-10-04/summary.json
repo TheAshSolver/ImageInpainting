@@ -1,0 +1,556 @@
+{
+  "migan_npu": {
+    "cold_ms_mean": 320.0,
+    "cold_ms_all": [
+      350,
+      310,
+      300
+    ],
+    "batch102_ms": [
+      5330,
+      5350,
+      5380
+    ],
+    "steady_ms_per_img": [
+      49.6,
+      49.8,
+      50.1
+    ],
+    "steady_ms_per_img_mean": 49.8,
+    "steady_fps": 20.07,
+    "init_ms_est": 270.0,
+    "throttle_slowdown_pct": 0.9,
+    "end_temp_c_cpu": 46.1,
+    "end_temp_c_gpu": 44.2,
+    "end_temp_c_nsp": 44.8,
+    "start_temp_c_cpu": 40.7,
+    "start_temp_c_gpu": 39.2,
+    "start_temp_c_nsp": 38.6,
+    "psnr_full": 23.008,
+    "psnr_full_std": 6.029,
+    "psnr_hole": 17.303,
+    "psnr_hole_std": 5.0167,
+    "ssim": 0.7112,
+    "ssim_std": 0.2129,
+    "lpips_vgg": 0.2412,
+    "lpips_vgg_std": 0.1321,
+    "n_quality": 102,
+    "by_mask_tier": {
+      "light(<15%)": {
+        "n": 68,
+        "psnr_hole": 18.35,
+        "ssim": 0.7343,
+        "lpips_vgg": 0.2034
+      },
+      "medium(15-30%)": {
+        "n": 25,
+        "psnr_hole": 15.15,
+        "ssim": 0.6788,
+        "lpips_vgg": 0.2947
+      },
+      "heavy(>30%)": {
+        "n": 9,
+        "psnr_hole": 15.41,
+        "ssim": 0.6265,
+        "lpips_vgg": 0.3788
+      }
+    }
+  },
+  "lama_npu": {
+    "cold_ms_mean": 7926.7,
+    "cold_ms_all": [
+      7850,
+      8100,
+      7830
+    ],
+    "batch102_ms": [
+      18420,
+      18480,
+      18440
+    ],
+    "steady_ms_per_img": [
+      103.9,
+      104.5,
+      104.1
+    ],
+    "steady_ms_per_img_mean": 104.2,
+    "steady_fps": 9.6,
+    "init_ms_est": 7823.0,
+    "throttle_slowdown_pct": 0.1,
+    "end_temp_c_cpu": 62.3,
+    "end_temp_c_gpu": 58.8,
+    "end_temp_c_nsp": 61.2,
+    "start_temp_c_cpu": 49.2,
+    "start_temp_c_gpu": 48.4,
+    "start_temp_c_nsp": 47.4,
+    "psnr_full": 23.5378,
+    "psnr_full_std": 6.2016,
+    "psnr_hole": 18.1766,
+    "psnr_hole_std": 5.341,
+    "ssim": 0.7381,
+    "ssim_std": 0.2153,
+    "lpips_vgg": 0.2355,
+    "lpips_vgg_std": 0.1297,
+    "n_quality": 102,
+    "by_mask_tier": {
+      "light(<15%)": {
+        "n": 68,
+        "psnr_hole": 18.99,
+        "ssim": 0.7456,
+        "lpips_vgg": 0.2006
+      },
+      "medium(15-30%)": {
+        "n": 25,
+        "psnr_hole": 16.28,
+        "ssim": 0.7219,
+        "lpips_vgg": 0.2877
+      },
+      "heavy(>30%)": {
+        "n": 9,
+        "psnr_hole": 17.27,
+        "ssim": 0.7263,
+        "lpips_vgg": 0.3537
+      }
+    }
+  },
+  "aotgan_npu": {
+    "cold_ms_mean": 8150.0,
+    "cold_ms_all": [
+      7970,
+      7960,
+      8520
+    ],
+    "batch102_ms": [
+      24170,
+      24300,
+      24110
+    ],
+    "steady_ms_per_img": [
+      158.6,
+      159.9,
+      158.0
+    ],
+    "steady_ms_per_img_mean": 158.8,
+    "steady_fps": 6.3,
+    "init_ms_est": 7991.0,
+    "throttle_slowdown_pct": -0.2,
+    "end_temp_c_cpu": 73.4,
+    "end_temp_c_gpu": 61.5,
+    "end_temp_c_nsp": 64.3,
+    "start_temp_c_cpu": 51.9,
+    "start_temp_c_gpu": 49.9,
+    "start_temp_c_nsp": 49.0,
+    "psnr_full": 22.9617,
+    "psnr_full_std": 5.672,
+    "psnr_hole": 16.7934,
+    "psnr_hole_std": 4.275,
+    "ssim": 0.7301,
+    "ssim_std": 0.2138,
+    "lpips_vgg": 0.238,
+    "lpips_vgg_std": 0.1299,
+    "n_quality": 102,
+    "by_mask_tier": {
+      "light(<15%)": {
+        "n": 68,
+        "psnr_hole": 17.36,
+        "ssim": 0.7427,
+        "lpips_vgg": 0.2036
+      },
+      "medium(15-30%)": {
+        "n": 25,
+        "psnr_hole": 15.82,
+        "ssim": 0.7098,
+        "lpips_vgg": 0.2889
+      },
+      "heavy(>30%)": {
+        "n": 9,
+        "psnr_hole": 15.19,
+        "ssim": 0.6917,
+        "lpips_vgg": 0.3558
+      }
+    }
+  },
+  "migan_gpu": {
+    "cold_ms_mean": 1173.3,
+    "cold_ms_all": [
+      1170,
+      1170,
+      1180
+    ],
+    "batch102_ms": [
+      25360,
+      25380,
+      25350
+    ],
+    "steady_ms_per_img": [
+      239.5,
+      239.7,
+      239.4
+    ],
+    "steady_ms_per_img_mean": 239.5,
+    "steady_fps": 4.18,
+    "init_ms_est": 934.0,
+    "throttle_slowdown_pct": -0.0,
+    "end_temp_c_cpu": 68.8,
+    "end_temp_c_gpu": 70.3,
+    "end_temp_c_nsp": 63.9,
+    "start_temp_c_cpu": 46.9,
+    "start_temp_c_gpu": 44.2,
+    "start_temp_c_nsp": 43.6,
+    "psnr_full": 23.4162,
+    "psnr_full_std": 6.3841,
+    "psnr_hole": 18.1239,
+    "psnr_hole_std": 5.9283,
+    "ssim": 0.727,
+    "ssim_std": 0.2171,
+    "lpips_vgg": 0.227,
+    "lpips_vgg_std": 0.1328,
+    "n_quality": 102,
+    "by_mask_tier": {
+      "light(<15%)": {
+        "n": 68,
+        "psnr_hole": 19.13,
+        "ssim": 0.7422,
+        "lpips_vgg": 0.1954
+      },
+      "medium(15-30%)": {
+        "n": 25,
+        "psnr_hole": 15.78,
+        "ssim": 0.701,
+        "lpips_vgg": 0.2761
+      },
+      "heavy(>30%)": {
+        "n": 9,
+        "psnr_hole": 17.06,
+        "ssim": 0.6839,
+        "lpips_vgg": 0.3297
+      }
+    }
+  },
+  "lama_gpu": {
+    "cold_ms_mean": 1246.7,
+    "cold_ms_all": [
+      1240,
+      1250,
+      1250
+    ],
+    "batch102_ms": [
+      54510,
+      57360,
+      58940
+    ],
+    "steady_ms_per_img": [
+      527.4,
+      555.6,
+      571.2
+    ],
+    "steady_ms_per_img_mean": 551.4,
+    "steady_fps": 1.81,
+    "init_ms_est": 695.0,
+    "throttle_slowdown_pct": 8.1,
+    "end_temp_c_cpu": 87.2,
+    "end_temp_c_gpu": 89.9,
+    "end_temp_c_nsp": 79.6,
+    "start_temp_c_cpu": 47.3,
+    "start_temp_c_gpu": 45.7,
+    "start_temp_c_nsp": 44.4,
+    "psnr_full": 23.5343,
+    "psnr_full_std": 6.2016,
+    "psnr_hole": 18.1684,
+    "psnr_hole_std": 5.3399,
+    "ssim": 0.738,
+    "ssim_std": 0.2153,
+    "lpips_vgg": 0.2355,
+    "lpips_vgg_std": 0.1297,
+    "n_quality": 102,
+    "by_mask_tier": {
+      "light(<15%)": {
+        "n": 68,
+        "psnr_hole": 18.98,
+        "ssim": 0.7455,
+        "lpips_vgg": 0.2006
+      },
+      "medium(15-30%)": {
+        "n": 25,
+        "psnr_hole": 16.28,
+        "ssim": 0.7219,
+        "lpips_vgg": 0.2878
+      },
+      "heavy(>30%)": {
+        "n": 9,
+        "psnr_hole": 17.26,
+        "ssim": 0.7262,
+        "lpips_vgg": 0.3537
+      }
+    }
+  },
+  "aotgan_gpu": {
+    "cold_ms_mean": 1250.0,
+    "cold_ms_all": [
+      1260,
+      1250,
+      1240
+    ],
+    "batch102_ms": [
+      61380,
+      66030,
+      67640
+    ],
+    "steady_ms_per_img": [
+      595.3,
+      641.4,
+      657.3
+    ],
+    "steady_ms_per_img_mean": 631.4,
+    "steady_fps": 1.58,
+    "init_ms_est": 619.0,
+    "throttle_slowdown_pct": 10.2,
+    "end_temp_c_cpu": 86.5,
+    "end_temp_c_gpu": 91.5,
+    "end_temp_c_nsp": 79.6,
+    "start_temp_c_cpu": 49.2,
+    "start_temp_c_gpu": 47.6,
+    "start_temp_c_nsp": 45.9,
+    "psnr_full": 22.9452,
+    "psnr_full_std": 5.669,
+    "psnr_hole": 16.7317,
+    "psnr_hole_std": 4.2686,
+    "ssim": 0.73,
+    "ssim_std": 0.2139,
+    "lpips_vgg": 0.238,
+    "lpips_vgg_std": 0.1298,
+    "n_quality": 102,
+    "by_mask_tier": {
+      "light(<15%)": {
+        "n": 68,
+        "psnr_hole": 17.27,
+        "ssim": 0.7425,
+        "lpips_vgg": 0.2037
+      },
+      "medium(15-30%)": {
+        "n": 25,
+        "psnr_hole": 15.81,
+        "ssim": 0.7098,
+        "lpips_vgg": 0.289
+      },
+      "heavy(>30%)": {
+        "n": 9,
+        "psnr_hole": 15.2,
+        "ssim": 0.6917,
+        "lpips_vgg": 0.3559
+      }
+    }
+  },
+  "sd_samples": {
+    "066": {
+      "rc": 0,
+      "wall_ms": 25120,
+      "t_start": [
+        45.3,
+        44.2,
+        43.6
+      ],
+      "t_end": [
+        51.5,
+        48.8,
+        48.2
+      ],
+      "prof": {
+        "VAE Encoder": 1675,
+        "Text Encoder": 1558,
+        "Total Denoising Loop": 8882,
+        "VAE Decoder & Composite": 1015
+      },
+      "e2e_ms": 13252
+    },
+    "040": {
+      "rc": 0,
+      "wall_ms": 25180,
+      "t_start": [
+        45.7,
+        44.2,
+        44.0
+      ],
+      "t_end": [
+        51.1,
+        48.4,
+        47.8
+      ],
+      "prof": {
+        "VAE Encoder": 1657,
+        "Text Encoder": 1562,
+        "Total Denoising Loop": 8926,
+        "VAE Decoder & Composite": 1034
+      },
+      "e2e_ms": 13316
+    },
+    "002": {
+      "rc": 0,
+      "wall_ms": 25210,
+      "t_start": [
+        46.1,
+        44.6,
+        44.0
+      ],
+      "t_end": [
+        50.7,
+        48.4,
+        47.4
+      ],
+      "prof": {
+        "VAE Encoder": 1675,
+        "Text Encoder": 1566,
+        "Total Denoising Loop": 8946,
+        "VAE Decoder & Composite": 1015
+      },
+      "e2e_ms": 13335
+    },
+    "024": {
+      "rc": 0,
+      "wall_ms": 25210,
+      "t_start": [
+        46.5,
+        44.2,
+        44.0
+      ],
+      "t_end": [
+        51.1,
+        48.0,
+        47.1
+      ],
+      "prof": {
+        "VAE Encoder": 1675,
+        "Text Encoder": 1553,
+        "Total Denoising Loop": 8967,
+        "VAE Decoder & Composite": 1013
+      },
+      "e2e_ms": 13339
+    },
+    "096": {
+      "rc": 0,
+      "wall_ms": 25130,
+      "t_start": [
+        44.9,
+        44.2,
+        43.6
+      ],
+      "t_end": [
+        50.3,
+        48.0,
+        47.1
+      ],
+      "prof": {
+        "VAE Encoder": 1670,
+        "Text Encoder": 1557,
+        "Total Denoising Loop": 8889,
+        "VAE Decoder & Composite": 1012
+      },
+      "e2e_ms": 13259
+    },
+    "034": {
+      "rc": 0,
+      "wall_ms": 25170,
+      "t_start": [
+        45.3,
+        44.2,
+        43.6
+      ],
+      "t_end": [
+        49.9,
+        47.6,
+        47.1
+      ],
+      "prof": {
+        "VAE Encoder": 1669,
+        "Text Encoder": 1555,
+        "Total Denoising Loop": 8930,
+        "VAE Decoder & Composite": 1028
+      },
+      "e2e_ms": 13301
+    },
+    "074": {
+      "rc": 0,
+      "wall_ms": 25160,
+      "t_start": [
+        45.3,
+        44.6,
+        43.6
+      ],
+      "t_end": [
+        50.3,
+        48.0,
+        47.1
+      ],
+      "prof": {
+        "VAE Encoder": 1675,
+        "Text Encoder": 1563,
+        "Total Denoising Loop": 8972,
+        "VAE Decoder & Composite": 1013
+      },
+      "e2e_ms": 13309
+    },
+    "044": {
+      "rc": 0,
+      "wall_ms": 25130,
+      "t_start": [
+        45.3,
+        44.2,
+        43.6
+      ],
+      "t_end": [
+        50.3,
+        48.0,
+        47.1
+      ],
+      "prof": {
+        "VAE Encoder": 1664,
+        "Text Encoder": 1556,
+        "Total Denoising Loop": 8950,
+        "VAE Decoder & Composite": 992
+      },
+      "e2e_ms": 13287
+    },
+    "046": {
+      "rc": 0,
+      "wall_ms": 25180,
+      "t_start": [
+        45.7,
+        44.6,
+        44.0
+      ],
+      "t_end": [
+        50.3,
+        47.6,
+        47.4
+      ],
+      "prof": {
+        "VAE Encoder": 1673,
+        "Text Encoder": 1564,
+        "Total Denoising Loop": 8990,
+        "VAE Decoder & Composite": 990
+      },
+      "e2e_ms": 13320
+    },
+    "080": {
+      "rc": 0,
+      "wall_ms": 25230,
+      "t_start": [
+        46.1,
+        44.6,
+        44.0
+      ],
+      "t_end": [
+        49.9,
+        47.6,
+        47.4
+      ],
+      "prof": {
+        "VAE Encoder": 1666,
+        "Text Encoder": 1559,
+        "Total Denoising Loop": 8997,
+        "VAE Decoder & Composite": 1017
+      },
+      "e2e_ms": 13368
+    }
+  }
+}

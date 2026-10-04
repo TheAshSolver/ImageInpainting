@@ -14,7 +14,7 @@ Image inpainting aims to synthesize visually plausible and semantically coherent
 1. **Computational Complexity vs. Mobile Thermal Envelopes**:
    Modern generative architectures (such as Latent Diffusion Models) demand tens of billions of FLOPs across iterative denoising passes, resulting in extreme battery depletion and rapid thermal saturation on mobile SoCs.
 2. **Feed-Forward GANs vs. Iterative Diffusion Models**:
-   While feed-forward convolutional GANs (e.g., MIGAN, AOT-GAN, LaMa) execute in a single deterministic pass ($<400\,\text{ms}$), generative diffusion models (Stable Diffusion 1.5) perform multi-step stochastic sampling ($\sim 12.2\,\text{s}$ with 12-step DPM-Solver++, accelerated from an initial $50.9\,\text{s}$ 20-step Euler baseline). Quantifying the precise trade-off between **sub-second edge interactivity** and **generative hallucination capacity** is essential for production edge engineering.
+   While feed-forward convolutional GANs (e.g., MIGAN, AOT-GAN, LaMa) execute in a single deterministic pass ($<400\,\text{ms}$), generative diffusion models (Stable Diffusion 1.5) perform multi-step stochastic sampling ($\sim 13.3\,\text{s}$ pipeline / $25.2\,\text{s}$ per launch with 12-step DPM-Solver++, accelerated from an initial $50.9\,\text{s}$ 20-step Euler baseline). Quantifying the precise trade-off between **sub-second edge interactivity** and **generative hallucination capacity** is essential for production edge engineering.
 3. **NPU Hardware Acceleration Constraints**:
    Qualcomm Hexagon Tensor Processors (HTPs) require static tensor compilation, fixed buffer dimensions ($1 \times 3 \times 512 \times 512$ float32 / uint8), int8/fp16 weight quantization, and strict FastRPC user-space-to-DSP daemon library paths. Raw unquantized dynamic shapes are rejected by the HTP runtime.
 4. **Intelligent Model Routing**:
@@ -241,6 +241,15 @@ python3 main.py benchmark --samples 102
 ```
 *Workflow: Models load into VTCM once via `--input_list`, crunch all samples sequentially in a single process with 1 Hz PMIC/thermal logging, followed by offline host evaluation of PSNR, SSIM, LPIPS, Q_boundary, and Global FID.*
 
+### Step 7b: Fresh Measured Benchmark (recommended for latency numbers)
+Measures cold-launch and steady-state latency (3 repeats), thermals, PSNR / hole-PSNR / SSIM / LPIPS, and optionally Stable Diffusion, with no hard-coded constants (see `scripts/fresh_benchmark/README.md`):
+
+```bash
+python3 main.py fresh-benchmark --lpips --sd
+# or directly: python3 scripts/fresh_benchmark/run_fresh_benchmark.py --lpips --sd
+# presentation figures: python3 scripts/fresh_benchmark/make_figures.py --results <results dir> --ds Benchmark/input_102 --out <figures dir>
+```
+
 ### Step 8: Perceptual Metric Evaluation
 To run perceptual evaluation independently on reconstructed output directories:
 
@@ -276,7 +285,7 @@ export LD_LIBRARY_PATH=/apex/com.android.i18n/lib64:/apex/com.android.runtime/li
    For feed-forward architectures (MIGAN, AOT-GAN, LaMa), runtime latency and active power draw are **$O(1)$ constant** regardless of mask shape, size, or complexity. The full spatial grid is computed in a single tensor pass.
 3. **VTCM vs. DRAM Streaming Bottlenecks**:
    - MIGAN, AOT-GAN, and LaMa fit comfortably within the Hexagon NPU's Vector Tightly-Coupled Memory (VTCM), achieving sustained throughput with minimal DRAM paging.
-   - Stable Diffusion 1.5's $860\text{M}$-parameter UNet exceeds VTCM capacity, requiring continuous weight streaming over the LPDDR5X bus. With the optimized 12-step DPM-Solver++ (2M) schedule on quantized UFIX16 weights, latency is brought down to **$12.20\text{s}$** ($35.01\text{J}$), compared to $50.93\text{s}$ under the 20-step Euler baseline.
+   - Stable Diffusion 1.5's $860\text{M}$-parameter UNet exceeds VTCM capacity, requiring continuous weight streaming over the LPDDR5X bus. With the optimized 12-step DPM-Solver++ (2M) schedule on quantized UFIX16 weights, the pipeline takes **$13.3\text{s}$** (plus ~12 s of model loading per launch, $25.2\text{s}$ wall-clock), compared to $50.9\text{s}$ under the 20-step Euler baseline.
 4. **Android 15 Linker Restrictions**:
    Do **NOT** include `/system/lib64` or `/vendor/lib64` in the device's `LD_LIBRARY_PATH`. Doing so causes a symbol collision in `libbinder_ndk.so` under Android 15 Bionic libc. Use only the isolated QNN runtime directory `/data/local/tmp/lama/lib:/data/local/tmp/sd_runtime`.
 
@@ -284,24 +293,35 @@ export LD_LIBRARY_PATH=/apex/com.android.i18n/lib64:/apex/com.android.runtime/li
 
 ## 6. Results and Outcomes
 
-### A. Master Performance, Energy & Quality Comparison (102 Benchmark Sweep)
+### A. Master Performance & Quality Comparison (102-sample sweep, measured 2026-10-04)
 
-| Model | Acceleration Hardware | Inference Latency | Active Power | Active Energy | Active EDP ($\text{J}\cdot\text{s}$) | Peak SoC Temp | Global PSNR ↑ | Hole PSNR ↑ | SSIM ↑ | LPIPS (VGG) ↓ | Global FID ↓ |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **MIGAN** | **Hexagon HTP v79** | **$115.0\,\text{ms}$** | $2.86\,\text{W}$ | **$0.33\,\text{J}$** | **$0.038$** | $48.4^\circ\text{C}$ | $27.17\,\text{dB}$ | $19.65\,\text{dB}$ | $0.9028$ | $0.1245$ | $84.49$ |
-| **MIGAN** | **Adreno 830 GPU** | $280.0\,\text{ms}$ | $2.57\,\text{W}$ | $0.72\,\text{J}$ | $0.201$ | $58.1^\circ\text{C}$ | $27.17\,\text{dB}$ | $19.65\,\text{dB}$ | $0.9028$ | $0.1245$ | **$77.11$** |
-| **LaMa Dilated** | **Hexagon HTP v79** | **$321.0\,\text{ms}$** | $3.10\,\text{W}$ | **$0.99\,\text{J}$** | **$0.318$** | $70.3^\circ\text{C}$ | **$29.84\,\text{dB}$** | **$20.73\,\text{dB}$** | **$0.9312$** | **$0.0891$** | $84.74$ |
-| **LaMa Dilated** | **Adreno 830 GPU** | $444.0\,\text{ms}$ | $3.65\,\text{W}$ | $1.62\,\text{J}$ | $0.719$ | $73.2^\circ\text{C}$ | $29.84\,\text{dB}$ | $20.73\,\text{dB}$ | $0.9312$ | $0.0891$ | $85.19$ |
-| **AOT-GAN** | **Hexagon HTP v79** | **$335.0\,\text{ms}$** | $2.70\,\text{W}$ | **$0.91\,\text{J}$** | **$0.303$** | $62.0^\circ\text{C}$ | $28.45\,\text{dB}$ | $20.86\,\text{dB}$ | $0.9184$ | $0.1012$ | $108.75$ |
-| **AOT-GAN** | **Adreno 830 GPU** | $390.0\,\text{ms}$ | $3.34\,\text{W}$ | $1.30\,\text{J}$ | $0.507$ | $68.0^\circ\text{C}$ | $28.45\,\text{dB}$ | $20.86\,\text{dB}$ | $0.9184$ | $0.1012$ | $110.38$ |
-| **SD 1.5 Inpaint** | **Hexagon HTP v79** | **$12,200.0\,\text{ms}$** | $2.87\,\text{W}$ | **$35.01\,\text{J}$** | **$427.1$** | **$+12.0^\circ\text{C}$** | $26.50\,\text{dB}$ | $9.66\,\text{dB}$ | $0.9420$ | $0.0612$ | $71.20$ |
-| *SD 1.5 (Euler 20-step)* | *HTP / GPU Hybrid* | $50,930.0\,\text{ms}$ | $2.65\,\text{W}$ | $134.97\,\text{J}$ | $6,874.8$ | $74.9^\circ\text{C}$ | $26.50\,\text{dB}$ | $9.66\,\text{dB}$ | $0.9420$ | $0.0612$ | $71.20$ |
-| **Decision Router** | **Heterogeneous** | **$216.0\,\text{ms}$** | $2.86\,\text{W}$ | **$0.62\,\text{J}$** | **$0.134$** | **$<52.0^\circ\text{C}$** | **$29.41\,\text{dB}$** | **$20.45\,\text{dB}$** | **$0.9304$** | **$0.0882$** | **$81.20$** |
+Measured with `scripts/fresh_benchmark/run_fresh_benchmark.py` (3 cold + 3 warm-batch repeats per configuration, monotonic device clock, cooldown barrier, strict output validation). *Steady per image* = (102-image batch − cold launch) / 101. Energy / power are **not** reported (no usable system-power sensor on the board - see Known issues). Raw logs, per-sample CSVs and the generated report: [`Benchmark/output/fresh_benchmark_2026-10-04/`](Benchmark/output/fresh_benchmark_2026-10-04/).
+
+| Model | Hardware | Steady per image | Throughput | Cold launch | Global PSNR ↑ | Hole PSNR ↑ | SSIM ↑ | LPIPS (VGG) ↓ | Temps CPU/GPU/NSP after 3 batches |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **MIGAN** | **Hexagon HTP v79** | **49.8 ms** | 20.1 img/s | 0.32 s | 23.01 | 17.30 | 0.7112 | 0.2412 | 46 / 44 / 45 °C |
+| **MIGAN** | Adreno 830 GPU | 239.5 ms | 4.2 img/s | 1.17 s | 23.42 | 18.12 | 0.7270 | 0.2270 | 69 / 70 / 64 °C |
+| **LaMa Dilated** | **Hexagon HTP v79** | 104.2 ms | 9.6 img/s | 7.93 s (0.47 s cached) | 23.54 | 18.18 | 0.7381 | 0.2355 | 62 / 59 / 61 °C |
+| **LaMa Dilated** | Adreno 830 GPU | 551.4 ms | 1.8 img/s | 1.25 s | 23.53 | 18.17 | 0.7380 | 0.2355 | 87 / 90 / 80 °C |
+| **AOT-GAN** | **Hexagon HTP v79** | 158.8 ms | 6.3 img/s | 8.15 s (0.57 s cached) | 22.96 | 16.79 | 0.7301 | 0.2380 | 73 / 62 / 64 °C |
+| **AOT-GAN** | Adreno 830 GPU | 631.4 ms | 1.6 img/s | 1.25 s | 22.95 | 16.73 | 0.7300 | 0.2380 | 87 / 92 / 80 °C |
+| **SD 1.5 Inpaint** (12-step, n = 10) | **Hexagon HTP v79** | 13.3 s pipeline | - | 25.2 s per launch | 18.87 | 13.46 | 0.6048 | 0.2815 | ≤ 51.5 °C (cooled between samples) |
+
+SD stage breakdown (mean ms): VAE encoder 1670, text encoder 1559, 12 denoise steps 8945 (~745 ms/step), VAE decode + composite 1013; ~12 s of model loading precedes the pipeline's own clock. On the same 10 samples MIGAN / LaMa / AOT-GAN score 20.17 / 20.37 / 19.99 dB PSNR and 0.260 / 0.253 / 0.254 LPIPS. Global FID values from the earlier sweep are in `Benchmark/output/PREVIOUS_DATASET_BENCHMARK_REPORT.md`.
 
 ### B. Hardware Acceleration Takeaways (Hexagon NPU vs. Adreno GPU)
-* **MIGAN Speedup & Efficiency**: Hexagon NPU achieves a **$2.43\times$ speedup** and **$2.18\times$ energy reduction**, translating to a **$5.29\times$ superior Energy-Delay Product (EDP)** over the GPU.
-* **LaMa Speedup & Efficiency**: Hexagon NPU delivers a **$1.38\times$ speedup** and **$1.63\times$ energy reduction** ($2.24\times$ superior EDP).
-* **AOT-GAN Speedup & Efficiency**: Hexagon NPU delivers a **$1.16\times$ speedup** and **$1.43\times$ energy reduction** ($1.66\times$ superior EDP).
+* **MIGAN**: NPU is **4.8×** faster per image (49.8 vs 239.5 ms) at identical quality.
+* **LaMa**: NPU is **5.3×** faster (104.2 vs 551.4 ms); GPU batch time grows 8 % over three repeats (thermal throttling, GPU zone ≈ 90 °C).
+* **AOT-GAN**: NPU is **4.0×** faster (158.8 vs 631.4 ms); GPU batch time grows 10 % over three repeats.
+* **Cold start**: LaMa / AOT-GAN spend ~8 s per fresh NPU launch re-preparing the graph. An SNPE init cache (`scripts/fresh_benchmark/make_init_cache.sh`, one-off) cuts this to 0.47 / 0.57 s with bit-identical outputs on all 102 images.
+* **Mask size**: LaMa is the most robust for masks > 30 % (hole PSNR 17.27 vs 15.41 MIGAN / 15.19 AOT-GAN).
+
+### B2. Known issues / measurement caveats
+1. **No energy figures.** Battery `current_now` stays within ±5 mA under full CPU load and updates every ~1.5 s; `scripts/thermal_logger.sh` substitutes 350 mA × 8.97 V ≈ 3.1 W when the reading is < 50 mA. Earlier "J per image" and EDP numbers were therefore a constant times latency. Needs an external meter or Qualcomm Profiler rails.
+2. `scripts/run_two_phase_batch_benchmark.py` substitutes hard-coded latencies (`pure_kernel_baseline_ms`) when outputs already exist on the device and falls back to the input image when an output is missing; use `scripts/fresh_benchmark/run_fresh_benchmark.py` instead.
+3. The dataset is an object-removal benchmark (input contains the object, ground truth is the scene without it), so absolute PSNR/SSIM are bounded.
+4. The Decision Router row of the earlier tables was not re-measured.
+* **Presentation figures** (box plots, Pareto, radar, telemetry, CDFs, per-sample sheets): `Benchmark/output/fresh_benchmark_2026-10-04/figures/` (regenerate with `python scripts/fresh_benchmark/make_figures.py`)
 
 ### C. Master Artifacts & Visual Deliverables
 * **8 Publication Figures (300 DPI)**: [`Benchmark/output/presentation_figures/`](Benchmark/output/presentation_figures/)

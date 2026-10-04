@@ -1,0 +1,62 @@
+=== migan_npu
+COOLDOWN migan_npu waited_s=3 hottest_mC=39900 cpu=40300 gpu=39200 nsp=38300
+RESULT migan_npu cold rep=1 rc=0 ms=350 results=1 start_mC cpu=41100 gpu=39200 nsp=39000 end_mC cpu=41100 gpu=39900 nsp=39000
+RESULT migan_npu cold rep=2 rc=0 ms=310 results=1 start_mC cpu=40300 gpu=39200 nsp=38600 end_mC cpu=41900 gpu=39600 nsp=39000
+RESULT migan_npu cold rep=3 rc=0 ms=300 results=1 start_mC cpu=40700 gpu=39200 nsp=38600 end_mC cpu=46500 gpu=39600 nsp=39000
+RESULT migan_npu batch102 rep=1 rc=0 ms=5330 results=102 start_mC cpu=40700 gpu=39200 nsp=38600 end_mC cpu=43800 gpu=41900 nsp=42500
+RESULT migan_npu batch102 rep=2 rc=0 ms=5350 results=102 start_mC cpu=42600 gpu=41900 nsp=42100 end_mC cpu=44600 gpu=43000 nsp=43600
+RESULT migan_npu batch102 rep=3 rc=0 ms=5380 results=102 start_mC cpu=44600 gpu=43000 nsp=43600 end_mC cpu=46100 gpu=44200 nsp=44800
+DONE migan_npu
+QUALITY migan_npu n=102 PSNR=23.01 holePSNR=17.30 SSIM=0.7112
+=== lama_npu
+COOLDOWN lama_npu waited_s=3 hottest_mC=39900 cpu=40300 gpu=39600 nsp=39000
+RESULT lama_npu cold rep=1 rc=0 ms=7850 results=1 start_mC cpu=47600 gpu=45700 nsp=45100 end_mC cpu=53000 gpu=48800 nsp=48200
+RESULT lama_npu cold rep=2 rc=0 ms=8100 results=1 start_mC cpu=48400 gpu=46500 nsp=45500 end_mC cpu=54200 gpu=49900 nsp=49400
+RESULT lama_npu cold rep=3 rc=0 ms=7830 results=1 start_mC cpu=49600 gpu=47300 nsp=46700 end_mC cpu=55300 gpu=51500 nsp=50500
+RESULT lama_npu batch102 rep=1 rc=0 ms=18420 results=102 start_mC cpu=49200 gpu=48400 nsp=47400 end_mC cpu=58400 gpu=54600 nsp=57400
+RESULT lama_npu batch102 rep=2 rc=0 ms=18480 results=102 start_mC cpu=56900 gpu=54600 nsp=57000 end_mC cpu=60700 gpu=56900 nsp=59700
+RESULT lama_npu batch102 rep=3 rc=0 ms=18440 results=102 start_mC cpu=59600 gpu=56900 nsp=58900 end_mC cpu=62300 gpu=58800 nsp=61200
+DONE lama_npu
+QUALITY lama_npu n=102 PSNR=23.54 holePSNR=18.18 SSIM=0.7381
+=== aotgan_npu
+COOLDOWN aotgan_npu waited_s=9 hottest_mC=42600 cpu=43400 gpu=41500 nsp=40900
+RESULT aotgan_npu cold rep=1 rc=0 ms=7970 results=1 start_mC cpu=51900 gpu=47600 nsp=46700 end_mC cpu=54900 gpu=50700 nsp=49700
+RESULT aotgan_npu cold rep=2 rc=0 ms=7960 results=1 start_mC cpu=49900 gpu=48000 nsp=47100 end_mC cpu=56100 gpu=51900 nsp=50900
+RESULT aotgan_npu cold rep=3 rc=0 ms=8520 results=1 start_mC cpu=49900 gpu=49200 nsp=48200 end_mC cpu=57600 gpu=52600 nsp=52000
+RESULT aotgan_npu batch102 rep=1 rc=0 ms=24170 results=102 start_mC cpu=51900 gpu=49900 nsp=49000 end_mC cpu=65300 gpu=56900 nsp=59700
+RESULT aotgan_npu batch102 rep=2 rc=0 ms=24300 results=102 start_mC cpu=59200 gpu=56500 nsp=58900 end_mC cpu=63400 gpu=59200 nsp=62000
+RESULT aotgan_npu batch102 rep=3 rc=0 ms=24110 results=102 start_mC cpu=60700 gpu=59200 nsp=61600 end_mC cpu=73400 gpu=61500 nsp=64300
+DONE aotgan_npu
+QUALITY aotgan_npu n=102 PSNR=22.96 holePSNR=16.79 SSIM=0.7301
+=== migan_gpu
+COOLDOWN migan_gpu waited_s=36 hottest_mC=42600 cpu=43800 gpu=41900 nsp=41300
+RESULT migan_gpu cold rep=1 rc=0 ms=1170 results=1 start_mC cpu=46900 gpu=45300 nsp=43200 end_mC cpu=49600 gpu=47600 nsp=44800
+RESULT migan_gpu cold rep=2 rc=0 ms=1170 results=1 start_mC cpu=45700 gpu=43800 nsp=42800 end_mC cpu=49600 gpu=47600 nsp=45100
+RESULT migan_gpu cold rep=3 rc=0 ms=1180 results=1 start_mC cpu=44900 gpu=44200 nsp=43200 end_mC cpu=49200 gpu=48000 nsp=45100
+RESULT migan_gpu batch102 rep=1 rc=0 ms=25360 results=102 start_mC cpu=46900 gpu=44200 nsp=43600 end_mC cpu=62600 gpu=62600 nsp=57000
+RESULT migan_gpu batch102 rep=2 rc=0 ms=25380 results=102 start_mC cpu=63800 gpu=62300 nsp=57000 end_mC cpu=65700 gpu=67200 nsp=61200
+RESULT migan_gpu batch102 rep=3 rc=0 ms=25350 results=102 start_mC cpu=65300 gpu=66100 nsp=61200 end_mC cpu=68800 gpu=70300 nsp=63900
+DONE migan_gpu
+QUALITY migan_gpu n=102 PSNR=23.42 holePSNR=18.12 SSIM=0.7270
+=== lama_gpu
+COOLDOWN lama_gpu waited_s=69 hottest_mC=42600 cpu=42600 gpu=41900 nsp=41300
+RESULT lama_gpu cold rep=1 rc=0 ms=1240 results=1 start_mC cpu=47600 gpu=47600 nsp=43600 end_mC cpu=50300 gpu=50700 nsp=45500
+RESULT lama_gpu cold rep=2 rc=0 ms=1250 results=1 start_mC cpu=45300 gpu=44600 nsp=43200 end_mC cpu=49900 gpu=51100 nsp=45900
+RESULT lama_gpu cold rep=3 rc=0 ms=1250 results=1 start_mC cpu=45700 gpu=45300 nsp=44000 end_mC cpu=50300 gpu=51100 nsp=46700
+RESULT lama_gpu batch102 rep=1 rc=0 ms=54510 results=102 start_mC cpu=47300 gpu=45700 nsp=44400 end_mC cpu=80700 gpu=84900 nsp=73900
+RESULT lama_gpu batch102 rep=2 rc=0 ms=57360 results=102 start_mC cpu=81500 gpu=83000 nsp=73900 end_mC cpu=84900 gpu=88800 nsp=78100
+RESULT lama_gpu batch102 rep=3 rc=0 ms=58940 results=102 start_mC cpu=85300 gpu=87200 nsp=77300 end_mC cpu=87200 gpu=89900 nsp=79600
+DONE lama_gpu
+QUALITY lama_gpu n=102 PSNR=23.53 holePSNR=18.17 SSIM=0.7380
+=== aotgan_gpu
+COOLDOWN aotgan_gpu waited_s=151 hottest_mC=43400 cpu=43800 gpu=42600 nsp=42100
+RESULT aotgan_gpu cold rep=1 rc=0 ms=1260 results=1 start_mC cpu=49900 gpu=51100 nsp=45100 end_mC cpu=56100 gpu=54900 nsp=47100
+RESULT aotgan_gpu cold rep=2 rc=0 ms=1250 results=1 start_mC cpu=48000 gpu=46100 nsp=44800 end_mC cpu=56100 gpu=56100 nsp=47800
+RESULT aotgan_gpu cold rep=3 rc=0 ms=1240 results=1 start_mC cpu=48000 gpu=46500 nsp=45500 end_mC cpu=58000 gpu=56900 nsp=48600
+RESULT aotgan_gpu batch102 rep=1 rc=0 ms=61380 results=102 start_mC cpu=49200 gpu=47600 nsp=45900 end_mC cpu=83800 gpu=89600 nsp=76900
+RESULT aotgan_gpu batch102 rep=2 rc=0 ms=66030 results=102 start_mC cpu=82600 gpu=86900 nsp=76600 end_mC cpu=85700 gpu=90700 nsp=78800
+RESULT aotgan_gpu batch102 rep=3 rc=0 ms=67640 results=102 start_mC cpu=84900 gpu=88800 nsp=78800 end_mC cpu=86500 gpu=91500 nsp=79600
+DONE aotgan_gpu
+QUALITY aotgan_gpu n=102 PSNR=22.95 holePSNR=16.73 SSIM=0.7300
+
+[exited with code 0]
