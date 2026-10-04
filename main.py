@@ -60,10 +60,17 @@ def cmd_benchmark(args):
     """Run the decoupled two-phase batch benchmark."""
     print("⚡ Executing Two-Phase Decoupled Batch Benchmark Sweep...")
     script_path = os.path.join(REPO_ROOT, "scripts", "run_two_phase_batch_benchmark.py")
-    cmd = [sys.executable, script_path]
-    if args.samples:
-        cmd.extend(["--samples", str(args.samples)])
-    subprocess.run(cmd, check=True)
+    # run_two_phase_batch_benchmark.py always evaluates the fixed 102-sample set and has no --samples option
+    # (forwarding it used to crash with an argparse error).
+    if args.samples not in (None, 102):
+        print(f"  note: --samples {args.samples} ignored; the two-phase benchmark always uses the 102-sample set.")
+    subprocess.run([sys.executable, script_path], check=True)
+
+def cmd_fresh_benchmark(args, extra):
+    """Measured on-device benchmark (latency, thermals, quality, SD); extra args go to the script."""
+    print("📏 Executing fresh measured benchmark (scripts/fresh_benchmark/run_fresh_benchmark.py)...")
+    script_path = os.path.join(REPO_ROOT, "scripts", "fresh_benchmark", "run_fresh_benchmark.py")
+    subprocess.run([sys.executable, script_path, *extra], check=True)
 
 def cmd_route(args):
     """Run the decision router on an image and optional mask."""
@@ -114,13 +121,18 @@ Examples:
     p_bm = subparsers.add_parser("benchmark", help="Execute on-device batch benchmarking sweep")
     p_bm.add_argument("--samples", type=int, default=102, help="Number of benchmark samples to evaluate")
 
+    # Fresh measured benchmark (extra flags are forwarded, e.g. --lpips --sd --configs migan_npu)
+    subparsers.add_parser("fresh-benchmark", help="Measured latency/thermal/quality benchmark (flags forwarded to the script)")
+
     # Router Command
     p_rt = subparsers.add_parser("route", help="Execute multi-modal decision router on an image/mask")
     p_rt.add_argument("-i", "--image", required=True, help="Path to input image")
     p_rt.add_argument("-m", "--mask", default=None, help="Optional path to binary mask")
     p_rt.add_argument("--json", default=None, help="Optional path to save JSON output")
 
-    args = parser.parse_args()
+    args, extra = parser.parse_known_args()
+    if extra and args.command != "fresh-benchmark":
+        parser.error(f"unrecognized arguments: {' '.join(extra)}")
 
     if not args.command:
         print_banner()
@@ -129,6 +141,7 @@ Examples:
         print("  • python main.py gui        -> Launch real-time Gradio Web Canvas")
         print("  • python main.py visuals    -> Generate 8 publication-grade presentation figures (300 DPI)")
         print("  • python main.py benchmark  -> Execute batch benchmarking sweep across NPU/GPU")
+        print("  • python main.py fresh-benchmark [--lpips --sd ...] -> Measured latency/thermal/quality benchmark")
         print("  • python main.py route      -> Analyze image & mask with heuristic decision router")
         print("\nRun 'python main.py <command> --help' for command-specific flags.")
         sys.exit(0)
@@ -139,6 +152,8 @@ Examples:
         cmd_visuals(args)
     elif args.command == "benchmark":
         cmd_benchmark(args)
+    elif args.command == "fresh-benchmark":
+        cmd_fresh_benchmark(args, extra)
     elif args.command == "route":
         cmd_route(args)
 
