@@ -118,7 +118,8 @@ ImageInpainting/
 | **MIGAN** | `migan_htp_v79.dlc` | $1 \times 3 \times 512 \times 512$ | **Inverted** ($0 = \text{hole}, 1 = \text{keep}$) | Multi-scale depthwise separable convolutions; facial optimization |
 | **AOT-GAN** | `aotgan.dlc` | $1 \times 3 \times 512 \times 512$ | **Standard** ($1 = \text{hole}, 0 = \text{keep}$) | Aggregated Contextual Transformations; stacked dilated bottlenecks |
 | **LaMa** | `lama_dilated.dlc` | $1 \times 3 \times 512 \times 512$ | **Standard** ($1 = \text{hole}, 0 = \text{keep}$) | Fast Fourier Transform (FFT) convolutions; global receptive field |
-| **Stable Diffusion** | `sd_qidk_runner_encoder` | $1 \times 4 \times 64 \times 64$ (Latent) | **Standard** ($1 = \text{hole}, 0 = \text{keep}$) | 20-step Euler latent diffusion; text conditioning + VAE encoding |
+| **Stable Diffusion** | `sd_qidk_runner_inpaint` | $1 \times 4 \times 64 \times 64$ (Latent) | **Standard** ($1 = \text{hole}, 0 = \text{keep}$) | 12-step DPM-Solver++ (2M) with Karras sigmas on HTP v79 (~13.2s) |
+| **Stable Diffusion (Inefficient)** | `sd_qidk_runner_inefficient` | $1 \times 4 \times 64 \times 64$ (Latent) | **Standard** ($1 = \text{hole}, 0 = \text{keep}$) | 20-step Euler stochastic RePaint schedule (~50.9s legacy) |
 
 ### C. Decision Router Decision Tree
 

@@ -48,3 +48,12 @@ qidk-inpaint-app/local.properties
 __pycache__/
 *.pyc
 */__pycache__/
+
+# Local benchmark comparison runs and temporary outputs
+Benchmark/output/sd_comparison/
+Benchmark/output/migan_hardware_diagnostics/
+comparison_results/
+generated_charts/
+qidk_outputs/
+qidk-inpaint-app/decompiled/
+

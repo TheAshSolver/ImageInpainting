@@ -1,7 +1,7 @@
 package com.qualcomm.qidk.inpaint
 
 import android.app.Activity
-import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -13,6 +13,9 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.qualcomm.qidk.inpaint.engine.DeepMaskRefiner
+import com.qualcomm.qidk.inpaint.engine.MediaPipeSegmenter
+import com.qualcomm.qidk.inpaint.engine.ModelPreloadManager
 import com.qualcomm.qidk.inpaint.engine.OnDeviceProcessDriver
 import com.qualcomm.qidk.inpaint.router.RouterClassifier
 import com.qualcomm.qidk.inpaint.ui.InpaintCanvasView
@@ -58,6 +61,14 @@ class MainActivity : AppCompatActivity() {
 
         setupModelSpinner()
         setupButtons()
+        MediaPipeSegmenter.initialize(applicationContext)
+        ModelPreloadManager.preloadAndWarmup(applicationContext) { success, statusText ->
+            runOnUiThread {
+                if (success) {
+                    Toast.makeText(this, "⚡ Models preloaded in RAM & NPU hot", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
         loadDefaultSample()
     }
 
@@ -67,7 +78,8 @@ class MainActivity : AppCompatActivity() {
             "MIGAN (Portraits & Speed)",
             "LaMa Dilated (Large Voids)",
             "AOT-GAN (Dense Texture)",
-            "Stable Diffusion 1.5 (RePaint)"
+            "Stable Diffusion 1.5 (Inpainting)",
+            "Stable Diffusion 1.5 (Inefficient RePaint)"
         )
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, models)
         modelSpinner.adapter = adapter
@@ -82,44 +94,52 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         }
 
+        canvasView.onMaskChanged = {
+            updateRouterLogic(autoSelectModel = true)
+        }
+
         findViewById<Button>(R.id.btnCamera).setOnClickListener {
             takePhotoLauncher.launch(null)
         }
 
-        findViewById<Button>(R.id.btnModeBrush).setOnClickListener {
-            canvasView.setMode(InpaintCanvasView.Mode.BRUSH)
-            Toast.makeText(this, "Brush Mode: Finger draw mask", Toast.LENGTH_SHORT).show()
-        }
+        val btnModeBrush = findViewById<Button>(R.id.btnModeBrush)
+        val btnModeBox = findViewById<Button>(R.id.btnModeBox)
 
-        findViewById<Button>(R.id.btnModeBox).setOnClickListener {
-            canvasView.setMode(InpaintCanvasView.Mode.BOUNDING_BOX)
-            Toast.makeText(this, "Box Mode: Tap 1st corner, then opposite corner", Toast.LENGTH_SHORT).show()
-        }
-
-        findViewById<Button>(R.id.btnGrabCut).setOnClickListener {
-            val box = canvasView.getSelectionBox()
-            val src = canvasView.getSourceBitmap()
-            if (box != null && src != null) {
-                val (mask, latency) = GrabCutEngine.generateBoundingBoxMask(src, box)
-                canvasView.applyGrabCutMask(mask)
-                canvasView.resetBoxSelection()
-                updateRouterLogic()
-                Toast.makeText(this, "GrabCut generated silhouette in ${latency}ms", Toast.LENGTH_SHORT).show()
+        fun updateModeButtons() {
+            if (canvasView.getMode() == InpaintCanvasView.Mode.BRUSH) {
+                btnModeBrush.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#2563EB"))
+                btnModeBox.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4B5563"))
             } else {
-                Toast.makeText(this, "Please tap 2 corners to select a box first", Toast.LENGTH_SHORT).show()
+                btnModeBrush.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4B5563"))
+                btnModeBox.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#2563EB"))
             }
         }
+        updateModeButtons()
 
-        findViewById<Button>(R.id.btnRefine).setOnClickListener {
+        btnModeBrush.setOnClickListener {
+            canvasView.setMode(InpaintCanvasView.Mode.BRUSH)
+            updateModeButtons()
+            Toast.makeText(this, "🖌️ Brush Mode: Finger paint mask", Toast.LENGTH_SHORT).show()
+        }
+
+        btnModeBox.setOnClickListener {
+            canvasView.setMode(InpaintCanvasView.Mode.BOUNDING_BOX)
+            updateModeButtons()
+            Toast.makeText(this, "🔲 Box Mode: Tap 2 corners or drag to create square mask", Toast.LENGTH_SHORT).show()
+        }
+
+        findViewById<Button>(R.id.btnSmartObjectGrab).setOnClickListener {
             val src = canvasView.getSourceBitmap()
             val roughMask = canvasView.getMaskBitmap()
-            if (src != null && roughMask != null) {
-                val (refined, latency) = GrabCutEngine.refineMaskSnapToEdges(src, roughMask)
-                canvasView.applyGrabCutMask(refined)
-                updateRouterLogic()
-                Toast.makeText(this, "✨ Mask snapped to edges in ${latency}ms", Toast.LENGTH_SHORT).show()
+            if (src != null && canvasView.hasMask()) {
+                val isBox = canvasView.getMode() == InpaintCanvasView.Mode.BOUNDING_BOX
+                // Deep Mask Refiner (Image + Mask Input Multi-Modal Refinement)
+                val (refinedMask, latency) = DeepMaskRefiner.refineMask(src, roughMask, isBox)
+                canvasView.applyGrabCutMask(refinedMask)
+                updateRouterLogic(autoSelectModel = true)
+                Toast.makeText(this, "✨ Deep Mask Refiner (${latency}ms)", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Please paint a rough mask first", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please paint with Brush or create a Box mask first", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -131,6 +151,18 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnUndo).setOnClickListener {
             canvasView.undo()
             updateRouterLogic()
+        }
+
+        findViewById<Button>(R.id.btnZoomIn).setOnClickListener {
+            canvasView.zoomIn()
+        }
+
+        findViewById<Button>(R.id.btnZoomOut).setOnClickListener {
+            canvasView.zoomOut()
+        }
+
+        findViewById<Button>(R.id.btnZoomReset).setOnClickListener {
+            canvasView.resetZoom()
         }
 
         findViewById<Button>(R.id.btnLoadSample)?.setOnClickListener {
@@ -269,7 +301,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateRouterLogic() {
+    private fun updateRouterLogic(autoSelectModel: Boolean = false) {
         val src = canvasView.getSourceBitmap() ?: return
         val mask = canvasView.getMaskBitmap()
 
@@ -282,8 +314,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         routerBadgeText.setTextColor(color)
-        routerBadgeText.text = "🎯 RECOMMENDED: ${decision.recommendedModel} (${decision.ruleTriggered})"
+        routerBadgeText.text = "🎯 AUTO-SELECTED: ${decision.recommendedModel} (${decision.ruleTriggered})"
         routerJustificationText.text = decision.justification
+
+        if (autoSelectModel) {
+            val targetIdx = when (decision.recommendedModel) {
+                "MIGAN" -> 1
+                "LAMA" -> 2
+                "AOTGAN" -> 3
+                else -> 1
+            }
+            modelSpinner.setSelection(targetIdx)
+        }
     }
 
     private fun runInpainting() {
@@ -295,8 +337,11 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        val btnInpaint = findViewById<Button>(R.id.btnRunInpaint)
+        btnInpaint.isEnabled = false
         progressBar.visibility = View.VISIBLE
-        val selectedOption = modelSpinner.selectedItem.toString()
+
+        val selectedOption = modelSpinner.selectedItem?.toString() ?: "Auto"
 
         val targetModel = when {
             selectedOption.contains("Auto") -> {
@@ -306,24 +351,39 @@ class MainActivity : AppCompatActivity() {
             selectedOption.contains("MIGAN") -> "MIGAN"
             selectedOption.contains("LaMa") -> "LAMA"
             selectedOption.contains("AOT") -> "AOTGAN"
-            selectedOption.contains("Diffusion") -> "SD"
+            selectedOption.contains("Inefficient") -> "SD_INEFFICIENT"
+            selectedOption.contains("Inpainting") || selectedOption.contains("Diffusion") || selectedOption.contains("SD") -> "SD"
             else -> "MIGAN"
         }
 
         Thread {
-            val telemetry = OnDeviceProcessDriver.executeInference(src, mask, targetModel)
-            runOnUiThread {
-                progressBar.visibility = View.GONE
-                resultImageView.setImageBitmap(telemetry.resultBitmap)
-                telemetryCard.visibility = View.VISIBLE
-                telemetryText.text = """
-                    Status: ${telemetry.executionMode}
-                    Model Executed: ${telemetry.modelName}
-                    Latency: ${telemetry.latencyMs} ms
-                    Active Energy: ${telemetry.energyJoules} Joules
-                    Active Power: ${telemetry.powerWatts} Watts
-                    Thermal Delta: +${telemetry.thermalDeltaC} °C
-                """.trimIndent()
+            try {
+                val telemetry = OnDeviceProcessDriver.executeInference(src, mask, targetModel)
+                runOnUiThread {
+                    btnInpaint.isEnabled = true
+                    progressBar.visibility = View.GONE
+                    resultImageView.setImageBitmap(telemetry.resultBitmap)
+                    telemetryCard.visibility = View.VISIBLE
+                    telemetryText.text = """
+                        Status: ${telemetry.executionMode}
+                        Model Executed: ${telemetry.modelName}
+                        Latency: ${telemetry.latencyMs} ms
+                        Active Energy: ${telemetry.energyJoules} Joules
+                        Active Power: ${telemetry.powerWatts} Watts
+                        Thermal Delta: +${telemetry.thermalDeltaC} °C
+                    """.trimIndent()
+                    Toast.makeText(this, "✨ Inpainting complete with ${telemetry.modelName}", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    btnInpaint.isEnabled = true
+                    progressBar.visibility = View.GONE
+                    AlertDialog.Builder(this)
+                        .setTitle("❌ Inference Error")
+                        .setMessage(e.message ?: "An error occurred during inference.")
+                        .setPositiveButton("OK", null)
+                        .show()
+                }
             }
         }.start()
     }

@@ -42,6 +42,7 @@ from src.auto_masking import (
     tap_to_mask,
     mask_to_raw_tensors,
     refine_mask_grabcut,
+    refine_mask_overhaul,
 )
 from src.router import (
     classify_and_route,
@@ -286,13 +287,13 @@ def refine_mask_interaction(
     if np.sum(rough_mask > 0) == 0:
         return None, None, "", "⚠️ Please draw brush strokes over the unwanted object first.", rough_mask
 
-    refined_mask, latency_ms = refine_mask_grabcut(img_512, rough_mask, iterations=2)
+    refined_mask, latency_ms = refine_mask_overhaul(img_512, rough_mask)
     mask_pil = Image.fromarray(refined_mask, mode="L")
     overlay_pil = create_mask_overlay(img_512, refined_mask, color=(255, 40, 40), alpha=0.45)
 
     route_res = classify_and_route(img_512, refined_mask)
     router_md = format_router_markdown(route_res)
-    msg = f"✨ Mask snapped to object edges via GrabCut in {latency_ms:.1f} ms! Recommended: **{route_res['recommended_model'].upper()}**."
+    msg = f"✨ Mask refined via Overhaul MP (Medial Axis + Guided Filter) in {latency_ms:.1f} ms! Recommended: **{route_res['recommended_model'].upper()}**."
 
     return mask_pil, overlay_pil, router_md, msg, refined_mask
 
@@ -368,6 +369,8 @@ def run_inpaint(
     mc = model_choice.lower()
     if "auto" in mc:
         selected_key = "auto"
+    elif "inefficient" in mc:
+        selected_key = "sd_inefficient"
     elif "diffusion" in mc or "repaint" in mc or "sd" in mc:
         selected_key = "sd"
     elif "migan" in mc:
@@ -496,7 +499,7 @@ def build_app():
             f"""# ⚡ Qualcomm Snapdragon 8 Elite Image Inpainting & Router Prototype
 **Target Acceleration:** Qualcomm Hexagon NPU (HTP v79) via FastRPC & SNPE/QNN DLCs  
 **Hardware Status:** `{device_badge}`  
-**Supported Models:** **MIGAN** (Portraits & Speed) | **LaMa Dilated** (Large Voids) | **AOT-GAN** (Dense Texture) | **Stable Diffusion 1.5 (RePaint)** (Generative Synthesis)
+**Supported Models:** **MIGAN** (Portraits & Speed) | **LaMa Dilated** (Large Voids) | **AOT-GAN** (Dense Texture) | **Stable Diffusion 1.5** (Inpainting & Inefficient RePaint)
 """
         )
 
@@ -547,7 +550,8 @@ def build_app():
                         "MIGAN",
                         "LaMa Dilated",
                         "AOT-GAN",
-                        "Stable Diffusion 1.5 (RePaint)",
+                        "Stable Diffusion 1.5 (Inpainting)",
+                        "Stable Diffusion 1.5 (Inefficient RePaint)",
                     ],
                     value="Auto (Router Recommended)",
                     label="Model Execution Choice"
@@ -677,11 +681,11 @@ def run_headless_test():
 
     print("6. Testing Inpainting Pipeline execution with Stable Diffusion 1.5...")
     res_sd, tele_sd, status_sd = run_inpaint(
-        editor_val, mask_pil, active_mask_state=mask_state, sample_id=sample_id, model_choice="Stable Diffusion 1.5 (RePaint)"
+        editor_val, mask_pil, active_mask_state=mask_state, sample_id=sample_id, model_choice="Stable Diffusion 1.5 (Inpainting)"
     )
     assert res_sd is not None
     assert "finished successfully" in status_sd
-    print("7. Stable Diffusion 1.5 RePaint executed successfully.")
+    print("7. Stable Diffusion 1.5 Inpainting executed successfully.")
 
     print("8. Testing Red Brush Stroke (#ff3333) Extraction from Transparent Canvas Layer...")
     test_layer = np.zeros((512, 512, 4), dtype=np.uint8)
