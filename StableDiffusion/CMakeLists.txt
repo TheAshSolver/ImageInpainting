@@ -17,6 +17,7 @@ link_directories(
 
 add_executable(sd_qidk_runner sd_runner.cpp)
 add_executable(sd_qidk_runner_encoder sd_runner_encoder.cpp)
+add_executable(sd_qidk_runner_inpaint sd_runner_inpaint.cpp)
 # Link against Qualcomm HTP and QNN System libraries
 target_link_libraries(sd_qidk_runner
     QnnHtp
@@ -27,6 +28,14 @@ target_link_libraries(sd_qidk_runner
 )
 
 target_link_libraries(sd_qidk_runner_encoder
+    QnnHtp
+    QnnSystem
+    dl
+    log
+    android
+)
+
+target_link_libraries(sd_qidk_runner_inpaint
     QnnHtp
     QnnSystem
     dl

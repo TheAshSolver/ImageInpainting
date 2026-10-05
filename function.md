@@ -236,6 +236,22 @@ cd /data/local/tmp/lama
     --use_gpu
 ```
 
+### Building & Staging Native Stable Diffusion Inpainting Runner
+```bash
+# 1. Compile native QIDK runner with Android NDK & Qualcomm AI Direct SDK (QAIRT)
+cd StableDiffusion
+cmake -B build -S . \
+    -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake \
+    -DANDROID_ABI=arm64-v8a \
+    -DANDROID_PLATFORM=android-34
+cmake --build build --target sd_qidk_runner_inpaint
+
+# 2. Push compiled runner and optimized unet.bin model container to device
+adb push sd_runtime/sd_qidk_runner_inpaint /data/local/tmp/sd_runtime/
+adb push sd_runtime/models/unet.bin /data/local/tmp/sd_runtime/models/unet.bin
+adb shell "chmod +x /data/local/tmp/sd_runtime/sd_qidk_runner_inpaint"
+```
+
 ### Running Stable Diffusion 1.5 on Hexagon NPU
 ```bash
 cd /data/local/tmp/sd_runtime

@@ -158,6 +158,8 @@ MODEL_REGISTRY: Dict[str, Any] = {
         "runner_binary": "sd_qidk_runner_inpaint",
         "target_hardware": "Qualcomm Hexagon HTP v79 NPU",
         "staging_dir": "/data/local/tmp/sd_runtime",
+        "model_container": "models/unet.bin (graph_wlqbe2kd)",
+        "source_file": "StableDiffusion/sd_runner_inpaint.cpp",
         "input_latent_shape": [1, 4, 64, 64],
         "algorithm": "12-step DPM-Solver++ (2M) with Karras sigmas on UFIX16 quantized UNet",
         "prompt_contract": "MANDATORY: Pass empty string '' for restoration. Text prompts cause hallucinations.",
@@ -259,6 +261,11 @@ FILE_REGISTRY: Dict[str, str] = {
     "models/LamaDilated/lama_dilated.dlc": "LaMa Dilated Fast Fourier Convolution DLC container",
     "models/AOT-GAN/aotgan.dlc": "AOT-GAN stacked dilated bottleneck DLC container",
     "models/dlc-info.txt": "Quantization profiles, tensor layer dimensions, and execution parameters",
+
+    # Stable Diffusion Native Pipeline & Models (StableDiffusion/)
+    "StableDiffusion/CMakeLists.txt": "Android NDK / QNN CMake build configuration for native SD inpainting runners",
+    "StableDiffusion/sd_runner_inpaint.cpp": "C++ native QIDK inpainting runner executing 12-step DPM-Solver++ on Hexagon HTP (unet.bin / graph_wlqbe2kd)",
+    "StableDiffusion/sd_runtime/": "Staged runtime bundle pushed to /data/local/tmp/sd_runtime/ containing runner binaries, QNN libraries, and serialized models",
 
     # Benchmarking & Diagnostic Scripts (scripts/)
     "scripts/fresh_benchmark/run_fresh_benchmark.py": "Measured on-device benchmark harness (monotonic clock, cooldown barrier, thermals)",
