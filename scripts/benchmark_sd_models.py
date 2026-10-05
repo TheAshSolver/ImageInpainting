@@ -62,7 +62,7 @@ from torchvision.models import vgg16, VGG16_Weights, inception_v3, Inception_V3_
 DEFAULT_DATASET_DIR = "Benchmark/dataset_previous"
 DEFAULT_OUTPUT_DIR = "Benchmark/output/sd_comparison"
 DEFAULT_DEVICE_SD_DIR = "/data/local/tmp/sd_runtime"
-DEFAULT_PROMPT = "A high resolution, seamless, photographic restoration of the background texture"
+DEFAULT_PROMPT = ""  # Empty string prevents textual and facial hallucinations
 
 CANONICAL_SIZE = (512, 512)
 IMAGE_RAW_BYTES = 512 * 512 * 3 * 4   # 3,145,728 bytes (float32 NHWC)
@@ -1048,7 +1048,7 @@ def main():
         help="Which model(s) to benchmark (default: 'both')"
     )
     parser.add_argument(
-        "--max-samples", type=int, default=None,
+        "--max-samples", "--limit", dest="max_samples", type=int, default=None,
         help="Optional limit on number of samples to process (e.g. 10 for quick test, default: all 102)"
     )
     parser.add_argument(

@@ -90,9 +90,43 @@ def check_adb_device() -> dict:
         return {"connected": False, "serial": None, "model": "Error", "message": f"ADB check failed: {e}"}
 
 
+def wait_for_device_reconnection() -> bool:
+    """Pause execution and block until Snapdragon 8 Elite USB cable is plugged back in."""
+    if check_adb_device()["connected"]:
+        return True
+
+    print(f"\n{YELLOW}{BOLD}⚠️  USB DISCONNECTED! Waiting for Snapdragon 8 Elite reconnection...{RESET}")
+    dots = 0
+    while not check_adb_device()["connected"]:
+        time.sleep(1.5)
+        dots = (dots + 1) % 4
+        sys.stdout.write(f"\r{YELLOW}[Waiting for ADB device{'.' * dots}   ]{RESET} ")
+        sys.stdout.flush()
+
+    sys.stdout.write("\r\033[K")
+    print(f"{GREEN}✓ Device reconnected! Resuming benchmark pipeline.{RESET}\n")
+    time.sleep(1.0)
+    return True
+
+
+def get_device_peak_temp():
+    """Read highest thermal zone temp in degrees Celsius."""
+    try:
+        res = subprocess.run(
+            ["adb", "shell", "cat /sys/class/thermal/thermal_zone*/temp 2>/dev/null | sort -nr | head -n 1"],
+            capture_output=True, text=True, timeout=5
+        )
+        if res.returncode == 0 and res.stdout.strip().isdigit():
+            return int(res.stdout.strip()) / 1000.0
+    except Exception:
+        pass
+    return None
+
+
 def run_fresh_benchmark(extra_args=None):
     """Executes the measured fresh benchmark sweep."""
     print_header("Executing Measured On-Device Benchmark Sweep (Fresh Harness)")
+    wait_for_device_reconnection()
     script = os.path.join(FRESH_BENCH_DIR, "run_fresh_benchmark.py")
     if not os.path.isfile(script):
         print(f"{RED}Error: Script not found: {script}{RESET}")
@@ -107,7 +141,23 @@ def run_fresh_benchmark(extra_args=None):
 def run_sd_benchmark(extra_args=None):
     """Executes the dual Stable Diffusion comparative profiler."""
     print_header("Executing Stable Diffusion Head-to-Head NPU Benchmark & Profiler")
+    wait_for_device_reconnection()
     script = os.path.join(SCRIPTS_DIR, "benchmark_sd_models.py")
+    if not os.path.isfile(script):
+        print(f"{RED}Error: Script not found: {script}{RESET}")
+        return 1
+
+    cmd = [sys.executable, script]
+    if extra_args:
+        cmd.extend(extra_args)
+    return subprocess.run(cmd).returncode
+
+
+def run_sd_live_benchmark(extra_args=None):
+    """Executes the interactive live Stable Diffusion runner with tqdm and auto-reconnect."""
+    print_header("Executing Live Interactive Stable Diffusion NPU Benchmark")
+    wait_for_device_reconnection()
+    script = os.path.join(SCRIPTS_DIR, "run_sd_benchmark_live.py")
     if not os.path.isfile(script):
         print(f"{RED}Error: Script not found: {script}{RESET}")
         return 1
@@ -243,7 +293,8 @@ def run_smoke_test():
         ("/data/local/tmp/lama/aotgan.dlc", "AOT-GAN Container"),
         ("/data/local/tmp/lama/snpe-net-run", "SNPE Net Run Binary"),
         ("/data/local/tmp/sd_runtime/sd_qidk_runner_inpaint", "SD Inpaint Runner (12-step DPM)"),
-        ("/data/local/tmp/sd_runtime/sd_qidk_runner_inefficient", "SD Inefficient Runner (20-step Euler)")
+        ("/data/local/tmp/sd_runtime/sd_qidk_runner_inefficient", "SD Inefficient Runner (20-step Euler)"),
+        ("/data/local/tmp/sd_runtime/models/unet.bin", "SD Inpaint UNet Container (graph_wlqbe2kd)")
     ]
     for path, name in checks:
         res = subprocess.run(["adb", "shell", f"[ -f {path} ] && echo EXISTS"], capture_output=True, text=True)
@@ -253,13 +304,18 @@ def run_smoke_test():
             print(f"   {YELLOW}⚠ MISSING:{RESET} {name} not found at {path}")
 
     print(f"\n4. Checking Python Environment & Dependencies:")
-    deps = ["torch", "torchmetrics", "PIL", "cv2", "numpy", "pandas", "matplotlib"]
+    deps = ["torch", "torchmetrics", "PIL", "cv2", "numpy", "pandas", "matplotlib", "tqdm"]
     for pkg in deps:
         try:
             __import__(pkg)
             print(f"   {GREEN}✓ PASS:{RESET} Python module '{pkg}' is installed.")
         except ImportError:
             print(f"   {YELLOW}⚠ MISSING:{RESET} Python module '{pkg}' is missing (install with uv pip install).")
+
+    temp_c = get_device_peak_temp()
+    if temp_c is not None:
+        print(f"\n5. Real-Time Hardware Telemetry:")
+        print(f"   {GREEN}✓ PASS:{RESET} Snapdragon 8 Elite Peak Core Temp: {temp_c:.1f}°C")
 
     print(f"\n{GREEN}{BOLD}Smoke test complete.{RESET}\n")
     return 0
@@ -280,8 +336,8 @@ def interactive_menu():
         print(f"{CYAN}--------------------------------------------------------------------------------{RESET}")
         print(f" {BOLD}[1]{RESET} Measured On-Device Benchmark Sweep (Fresh Harness)")
         print(f"     {DIM}Monotonic latency, thermals & quality (PSNR/SSIM/LPIPS) across NPU & GPU{RESET}")
-        print(f" {BOLD}[2]{RESET} Stable Diffusion Head-to-Head Comparison & Profiler")
-        print(f"     {DIM}12-step DPM-Solver++ (Context Inpaint) vs 20-step Euler (RePaint){RESET}")
+        print(f" {BOLD}[2]{RESET} Stable Diffusion Benchmark & Telemetry")
+        print(f"     {DIM}Live tqdm runner with auto-reconnect or full 102-sample comparative profiler{RESET}")
         print(f" {BOLD}[3]{RESET} MI-GAN Hexagon HTP Hardware Diagnostics & Cycle Audit")
         print(f"     {DIM}Cold vs warm lifecycle, burst scaling, QuRT hints, DSP cycle audit{RESET}")
         print(f" {BOLD}[4]{RESET} Decoupled Two-Phase Batch Benchmark Sweep (102 Samples)")
@@ -316,11 +372,21 @@ def interactive_menu():
                 args.append("--lpips")
             run_fresh_benchmark(args)
         elif choice == "2":
-            lim = input("Limit sample count (Enter for full previous dataset): ").strip()
+            print(f"\n{BOLD}Stable Diffusion Benchmark Modes:{RESET}")
+            print("  1) Live Interactive Runner (tqdm bar, auto-reconnect, real-time thermals, smart resume)")
+            print("  2) Full Offline Profiler & Analysis (102 samples, FID/LPIPS, markdown report)")
+            sd_mode = input("Select [1-2] (default: 1): ").strip()
+            lim = input("Limit sample count (e.g. 5, 10, or Enter for all): ").strip()
             args = []
             if lim.isdigit():
                 args.extend(["--limit", lim])
-            run_sd_benchmark(args)
+            if sd_mode == "2":
+                run_sd_benchmark(args)
+            else:
+                force = input("Force re-run and ignore cached outputs? (y/N): ").strip().lower() == "y"
+                if force:
+                    args.append("--force-rerun")
+                run_sd_live_benchmark(args)
         elif choice == "3":
             run_migan_diagnostics()
         elif choice == "4":
@@ -353,6 +419,7 @@ def main():
         epilog="""
 Examples:
   python benchmark.py                          # Launch interactive terminal menu
+  python benchmark.py --sd-live --limit 5      # Run live resilient SD benchmark (tqdm, auto-reconnect)
   python benchmark.py --fresh --lpips --sd     # Run full measured fresh benchmark with SD & LPIPS
   python benchmark.py --sd                     # Run dual SD comparative profiler
   python benchmark.py --migan-diag             # Run MI-GAN NPU hardware diagnostics
@@ -367,6 +434,9 @@ Examples:
     parser.add_argument("-f", "--fresh", action="store_true", help="Execute measured on-device fresh benchmark sweep")
     parser.add_argument("--lpips", action="store_true", help="Compute LPIPS perceptual distance in fresh benchmark")
     parser.add_argument("--sd", action="store_true", help="Include or run Stable Diffusion benchmark")
+    parser.add_argument("--sd-live", "--live-sd", dest="sd_live", action="store_true", help="Launch live resilient SD benchmark runner (tqdm, auto-reconnect)")
+    parser.add_argument("--limit", "--max-samples", dest="limit", type=int, default=None, help="Sample limit for SD runners")
+    parser.add_argument("--force-rerun", action="store_true", help="Force re-running SD inference even if cached")
     parser.add_argument("-d", "--migan-diag", action="store_true", help="Run MI-GAN hardware diagnostics on Hexagon NPU")
     parser.add_argument("-t", "--two-phase", action="store_true", help="Run decoupled two-phase 102-sample batch sweep")
     parser.add_argument("-c", "--init-cache", action="store_true", help="Build SNPE HTP init cache on device")
@@ -397,8 +467,24 @@ Examples:
             fresh_args.extend(["--configs", *args.configs])
         fresh_args.extend(unknown)
         run_fresh_benchmark(fresh_args)
+    elif args.sd_live:
+        sd_live_args = []
+        if args.limit:
+            sd_live_args.extend(["--limit", str(args.limit)])
+        if args.force_rerun:
+            sd_live_args.append("--force-rerun")
+        if unknown:
+            sd_live_args.extend(unknown)
+        run_sd_live_benchmark(sd_live_args)
     elif args.sd:
-        run_sd_benchmark(unknown)
+        sd_args = []
+        if args.limit:
+            sd_args.extend(["--limit", str(args.limit)])
+        if args.force_rerun:
+            sd_args.append("--force-rerun")
+        if unknown:
+            sd_args.extend(unknown)
+        run_sd_benchmark(sd_args)
     if args.migan_diag:
         run_migan_diagnostics(unknown)
     if args.two_phase:

@@ -234,6 +234,9 @@ python3 benchmark.py --fresh --lpips --sd
 # Stable Diffusion head-to-head profiler (12-step vs 20-step)
 python3 benchmark.py --sd
 
+# Live resilient Stable Diffusion runner (tqdm, auto-reconnect on wire pull, smart resume)
+python3 benchmark.py --sd-live --limit 10
+
 # MI-GAN hardware diagnostics on Hexagon NPU
 python3 benchmark.py --migan-diag
 

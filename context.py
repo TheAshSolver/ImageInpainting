@@ -272,6 +272,7 @@ FILE_REGISTRY: Dict[str, str] = {
     "scripts/fresh_benchmark/make_figures.py": "Generates Pareto, radar, telemetry, and distribution figures from fresh runs",
     "scripts/fresh_benchmark/make_init_cache.sh": "Compiles SNPE HTP init cache on device for instant cold-starts",
     "scripts/benchmark_sd_models.py": "Dedicated Stable Diffusion 1.5 comparative profiler (12-step DPM vs 20-step Euler)",
+    "scripts/run_sd_benchmark_live.py": "Live interactive SD benchmark runner with tqdm progress, wire-disconnect auto-reconnect, and smart resume",
     "scripts/diagnose_migan_hardware.py": "MIGAN hardware diagnostics and layer-by-layer HTP v79 cycle audit",
     "scripts/generate_sd_comparison_figures.py": "Generates 6 publication-grade figures comparing dual SD runners",
     "scripts/generate_presentation_visuals.py": "Generates the 8 master publication figures (300 DPI)",

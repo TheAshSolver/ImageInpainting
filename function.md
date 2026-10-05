@@ -61,6 +61,12 @@ python3 benchmark.py --fresh --configs migan_npu lama_npu aotgan_npu
 python3 benchmark.py --sd                         # Evaluates 12-step DPM vs 20-step Euler
 python3 benchmark.py --sd --limit 10              # Run on a 10-sample subset
 
+# Live Resilient Stable Diffusion Runner (tqdm progress bar, auto-reconnect on wire pull, smart resume)
+python3 benchmark.py --sd-live                    # Full live sweep across 102 samples
+python3 benchmark.py --sd-live --limit 5          # Quick 5-sample verification
+python3 benchmark.py --sd-live --force-rerun      # Ignore cache and re-run all
+python3 scripts/run_sd_benchmark_live.py --limit 10  # Standalone direct invocation
+
 # MI-GAN Hardware Diagnostics & DSP Cycle Audit
 python3 benchmark.py --migan-diag
 
