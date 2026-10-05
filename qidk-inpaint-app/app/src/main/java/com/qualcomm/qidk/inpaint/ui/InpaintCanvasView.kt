@@ -255,6 +255,19 @@ class InpaintCanvasView @JvmOverloads constructor(
 
     fun getSelectionBox(): RectF? = currentBBox
 
+    fun getRawMaskBitmap(): Bitmap {
+        return maskBitmap.copy(Bitmap.Config.ARGB_8888, false)
+    }
+
+    fun setRawMaskBitmap(bitmap: Bitmap) {
+        val scaled = Bitmap.createScaledBitmap(bitmap, canonicalSize, canonicalSize, false)
+        maskBitmap = scaled.copy(Bitmap.Config.ARGB_8888, true)
+        maskCanvas = Canvas(maskBitmap)
+        resetBoxSelection()
+        invalidate()
+        onMaskChanged?.invoke()
+    }
+
     fun applyGrabCutMask(binaryMask: Bitmap) {
         saveUndoState()
         val scaled = Bitmap.createScaledBitmap(binaryMask, canonicalSize, canonicalSize, false)

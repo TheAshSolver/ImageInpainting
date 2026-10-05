@@ -1,0 +1,63 @@
+# sd run started 2026-10-04T17:47:22
+SAMPLES 066:0.68 040:2.49 002:4.59 024:7.78 096:9.34 034:11.44 074:14.82 044:20.58 046:28.23 080:49.45
+SDRESULT 066 rc=0 wall_ms=25120 cooled_s=39 start_mC cpu=45300 gpu=44200 nsp=43600 end_mC cpu=51500 gpu=48800 nsp=48200
+SDPROF 066 [Profile] VAE Encoder: 1675 ms
+SDPROF 066 [Profile] Text Encoder: 1558 ms
+SDPROF 066 [Profile] Total Denoising Loop: 8882 ms
+SDPROF 066 [Profile] VAE Decoder & Composite: 1015 ms
+SDPROF 066 End-to-End Pipeline Latency: 13252 ms
+SDRESULT 040 rc=0 wall_ms=25180 cooled_s=18 start_mC cpu=45700 gpu=44200 nsp=44000 end_mC cpu=51100 gpu=48400 nsp=47800
+SDPROF 040 [Profile] VAE Encoder: 1657 ms
+SDPROF 040 [Profile] Text Encoder: 1562 ms
+SDPROF 040 [Profile] Total Denoising Loop: 8926 ms
+SDPROF 040 [Profile] VAE Decoder & Composite: 1034 ms
+SDPROF 040 End-to-End Pipeline Latency: 13316 ms
+SDRESULT 002 rc=0 wall_ms=25210 cooled_s=12 start_mC cpu=46100 gpu=44600 nsp=44000 end_mC cpu=50700 gpu=48400 nsp=47400
+SDPROF 002 [Profile] VAE Encoder: 1675 ms
+SDPROF 002 [Profile] Text Encoder: 1566 ms
+SDPROF 002 [Profile] Total Denoising Loop: 8946 ms
+SDPROF 002 [Profile] VAE Decoder & Composite: 1015 ms
+SDPROF 002 End-to-End Pipeline Latency: 13335 ms
+SDRESULT 024 rc=0 wall_ms=25210 cooled_s=12 start_mC cpu=46500 gpu=44200 nsp=44000 end_mC cpu=51100 gpu=48000 nsp=47100
+SDPROF 024 [Profile] VAE Encoder: 1675 ms
+SDPROF 024 [Profile] Text Encoder: 1553 ms
+SDPROF 024 [Profile] Total Denoising Loop: 8967 ms
+SDPROF 024 [Profile] VAE Decoder & Composite: 1013 ms
+SDPROF 024 End-to-End Pipeline Latency: 13339 ms
+SDRESULT 096 rc=0 wall_ms=25130 cooled_s=12 start_mC cpu=44900 gpu=44200 nsp=43600 end_mC cpu=50300 gpu=48000 nsp=47100
+SDPROF 096 [Profile] VAE Encoder: 1670 ms
+SDPROF 096 [Profile] Text Encoder: 1557 ms
+SDPROF 096 [Profile] Total Denoising Loop: 8889 ms
+SDPROF 096 [Profile] VAE Decoder & Composite: 1012 ms
+SDPROF 096 End-to-End Pipeline Latency: 13259 ms
+SDRESULT 034 rc=0 wall_ms=25170 cooled_s=12 start_mC cpu=45300 gpu=44200 nsp=43600 end_mC cpu=49900 gpu=47600 nsp=47100
+SDPROF 034 [Profile] VAE Encoder: 1669 ms
+SDPROF 034 [Profile] Text Encoder: 1555 ms
+SDPROF 034 [Profile] Total Denoising Loop: 8930 ms
+SDPROF 034 [Profile] VAE Decoder & Composite: 1028 ms
+SDPROF 034 End-to-End Pipeline Latency: 13301 ms
+SDRESULT 074 rc=0 wall_ms=25160 cooled_s=9 start_mC cpu=45300 gpu=44600 nsp=43600 end_mC cpu=50300 gpu=48000 nsp=47100
+SDPROF 074 [Profile] VAE Encoder: 1675 ms
+SDPROF 074 [Profile] Text Encoder: 1563 ms
+SDPROF 074 [Profile] Total Denoising Loop: 8972 ms
+SDPROF 074 [Profile] VAE Decoder & Composite: 1013 ms
+SDPROF 074 End-to-End Pipeline Latency: 13309 ms
+SDRESULT 044 rc=0 wall_ms=25130 cooled_s=12 start_mC cpu=45300 gpu=44200 nsp=43600 end_mC cpu=50300 gpu=48000 nsp=47100
+SDPROF 044 [Profile] VAE Encoder: 1664 ms
+SDPROF 044 [Profile] Text Encoder: 1556 ms
+SDPROF 044 [Profile] Total Denoising Loop: 8950 ms
+SDPROF 044 [Profile] VAE Decoder & Composite: 992 ms
+SDPROF 044 End-to-End Pipeline Latency: 13287 ms
+SDRESULT 046 rc=0 wall_ms=25180 cooled_s=9 start_mC cpu=45700 gpu=44600 nsp=44000 end_mC cpu=50300 gpu=47600 nsp=47400
+SDPROF 046 [Profile] VAE Encoder: 1673 ms
+SDPROF 046 [Profile] Text Encoder: 1564 ms
+SDPROF 046 [Profile] Total Denoising Loop: 8990 ms
+SDPROF 046 [Profile] VAE Decoder & Composite: 990 ms
+SDPROF 046 End-to-End Pipeline Latency: 13320 ms
+SDRESULT 080 rc=0 wall_ms=25230 cooled_s=9 start_mC cpu=46100 gpu=44600 nsp=44000 end_mC cpu=49900 gpu=47600 nsp=47400
+SDPROF 080 [Profile] VAE Encoder: 1666 ms
+SDPROF 080 [Profile] Text Encoder: 1559 ms
+SDPROF 080 [Profile] Total Denoising Loop: 8997 ms
+SDPROF 080 [Profile] VAE Decoder & Composite: 1017 ms
+SDPROF 080 End-to-End Pipeline Latency: 13368 ms
+# sd run finished 2026-10-04T17:54:14

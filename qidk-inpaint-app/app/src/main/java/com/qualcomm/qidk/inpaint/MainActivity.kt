@@ -69,7 +69,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        loadDefaultSample()
+
+        if (savedInstanceState == null) {
+            loadDefaultSample()
+        }
     }
 
     private fun setupModelSpinner() {
@@ -78,8 +81,8 @@ class MainActivity : AppCompatActivity() {
             "MIGAN (Portraits & Speed)",
             "LaMa Dilated (Large Voids)",
             "AOT-GAN (Dense Texture)",
-            "Stable Diffusion 1.5 (Inpainting)",
-            "Stable Diffusion 1.5 (Inefficient RePaint)"
+            "Stable Diffusion 1.5 (Inpainting - DPM 12-step)",
+            "Stable Diffusion 1.5 (Inefficient RePaint - Euler 20-step)"
         )
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, models)
         modelSpinner.adapter = adapter
@@ -95,7 +98,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         canvasView.onMaskChanged = {
-            updateRouterLogic(autoSelectModel = true)
+            updateRouterLogic()
         }
 
         findViewById<Button>(R.id.btnCamera).setOnClickListener {
@@ -176,16 +179,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun showSamplePickerDialog() {
         // Direct sample loading on Android 15 (Scoped Storage compliant)
+        val internalDir = File(filesDir, "samples")
         val samplesDir = File(getExternalFilesDir(null), "samples")
         val altDir = File("/sdcard/Android/data/com.qualcomm.qidk.inpaint/files/samples")
+        val picDir = File("/sdcard/Pictures/Inpainting102")
         val targetDir = when {
+            internalDir.exists() && internalDir.isDirectory && (internalDir.listFiles()?.isNotEmpty() == true) -> internalDir
+            samplesDir.exists() && samplesDir.isDirectory && (samplesDir.listFiles()?.isNotEmpty() == true) -> samplesDir
+            altDir.exists() && altDir.isDirectory && (altDir.listFiles()?.isNotEmpty() == true) -> altDir
+            picDir.exists() && picDir.isDirectory && (picDir.listFiles()?.isNotEmpty() == true) -> picDir
+            internalDir.exists() && internalDir.isDirectory -> internalDir
             samplesDir.exists() && samplesDir.isDirectory -> samplesDir
             altDir.exists() && altDir.isDirectory -> altDir
+            picDir.exists() && picDir.isDirectory -> picDir
             else -> null
         }
 
         if (targetDir == null) {
-            Toast.makeText(this, "Samples directory not found. Please push samples via ADB.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Samples directory not found on device.", Toast.LENGTH_LONG).show()
             return
         }
 
@@ -251,11 +262,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadDefaultSample() {
+        val internalDir = File(filesDir, "samples")
         val samplesDir = File(getExternalFilesDir(null), "samples")
         val altDir = File("/sdcard/Android/data/com.qualcomm.qidk.inpaint/files/samples")
+        val picDir = File("/sdcard/Pictures/Inpainting102")
         val targetDir = when {
+            internalDir.exists() && internalDir.isDirectory && File(internalDir, "001.png").exists() -> internalDir
+            samplesDir.exists() && samplesDir.isDirectory && File(samplesDir, "001.png").exists() -> samplesDir
+            altDir.exists() && altDir.isDirectory && File(altDir, "001.png").exists() -> altDir
+            picDir.exists() && picDir.isDirectory && File(picDir, "001.png").exists() -> picDir
+            internalDir.exists() && internalDir.isDirectory -> internalDir
             samplesDir.exists() && samplesDir.isDirectory -> samplesDir
             altDir.exists() && altDir.isDirectory -> altDir
+            picDir.exists() && picDir.isDirectory -> picDir
             else -> null
         }
 
@@ -337,8 +356,9 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        val btnInpaint = findViewById<Button>(R.id.btnRunInpaint)
-        btnInpaint.isEnabled = false
+        val btnRunInpaint = findViewById<Button>(R.id.btnRunInpaint)
+        btnRunInpaint.isEnabled = false
+        modelSpinner.isEnabled = false
         progressBar.visibility = View.VISIBLE
 
         val selectedOption = modelSpinner.selectedItem?.toString() ?: "Auto"
@@ -360,8 +380,9 @@ class MainActivity : AppCompatActivity() {
             try {
                 val telemetry = OnDeviceProcessDriver.executeInference(src, mask, targetModel)
                 runOnUiThread {
-                    btnInpaint.isEnabled = true
                     progressBar.visibility = View.GONE
+                    btnRunInpaint.isEnabled = true
+                    modelSpinner.isEnabled = true
                     resultImageView.setImageBitmap(telemetry.resultBitmap)
                     telemetryCard.visibility = View.VISIBLE
                     telemetryText.text = """
@@ -376,15 +397,21 @@ class MainActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 runOnUiThread {
-                    btnInpaint.isEnabled = true
                     progressBar.visibility = View.GONE
+                    btnRunInpaint.isEnabled = true
+                    modelSpinner.isEnabled = true
                     AlertDialog.Builder(this)
                         .setTitle("❌ Inference Error")
-                        .setMessage(e.message ?: "An error occurred during inference.")
+                        .setMessage(e.message ?: "An unexpected error occurred during inference")
                         .setPositiveButton("OK", null)
                         .show()
                 }
             }
         }.start()
+    }
+
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        canvasView.invalidate()
     }
 }
