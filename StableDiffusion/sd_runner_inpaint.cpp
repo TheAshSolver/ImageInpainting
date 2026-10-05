@@ -323,7 +323,7 @@ int main(int argc, char** argv) {
     unet.addInputTensor(22, "sample", QNN_DATATYPE_FLOAT_32, {1, 16, 64, 64});
     unet.addInputTensor(305, "encoder_hidden_states", QNN_DATATYPE_FLOAT_32, {1, 77, 768});
     unet.addOutputTensor(8669, "out_sample", QNN_DATATYPE_FLOAT_32, {1, 4, 64, 64});
-    if (!unet.init("models/unet.bin", "graph_wlqbe2kd")) {
+    if (!unet.init("models/unet_inpaint_16ch_ctx.bin", "graph_5_ihizww")) {
         std::cerr << "Failed to init UNet." << std::endl;
         return -1;
     }

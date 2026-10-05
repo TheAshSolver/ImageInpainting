@@ -158,7 +158,7 @@ MODEL_REGISTRY: Dict[str, Any] = {
         "runner_binary": "sd_qidk_runner_inpaint",
         "target_hardware": "Qualcomm Hexagon HTP v79 NPU",
         "staging_dir": "/data/local/tmp/sd_runtime",
-        "model_container": "models/unet.bin (graph_wlqbe2kd)",
+        "model_container": "models/unet_inpaint_16ch_ctx.bin (graph_5_ihizww)",
         "source_file": "StableDiffusion/sd_runner_inpaint.cpp",
         "input_latent_shape": [1, 4, 64, 64],
         "algorithm": "12-step DPM-Solver++ (2M) with Karras sigmas on UFIX16 quantized UNet",
@@ -264,7 +264,7 @@ FILE_REGISTRY: Dict[str, str] = {
 
     # Stable Diffusion Native Pipeline & Models (StableDiffusion/)
     "StableDiffusion/CMakeLists.txt": "Android NDK / QNN CMake build configuration for native SD inpainting runners",
-    "StableDiffusion/sd_runner_inpaint.cpp": "C++ native QIDK inpainting runner executing 12-step DPM-Solver++ on Hexagon HTP (unet.bin / graph_wlqbe2kd)",
+    "StableDiffusion/sd_runner_inpaint.cpp": "C++ native QIDK inpainting runner executing 12-step DPM-Solver++ on Hexagon HTP (unet_inpaint_16ch_ctx.bin / graph_5_ihizww)",
     "StableDiffusion/sd_runtime/": "Staged runtime bundle pushed to /data/local/tmp/sd_runtime/ containing runner binaries, QNN libraries, and serialized models",
 
     # Benchmarking & Diagnostic Scripts (scripts/)

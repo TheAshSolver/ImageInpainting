@@ -252,9 +252,9 @@ cmake -B build -S . \
     -DANDROID_PLATFORM=android-34
 cmake --build build --target sd_qidk_runner_inpaint
 
-# 2. Push compiled runner and optimized unet.bin model container to device
+# 2. Push compiled runner and unet_inpaint_16ch_ctx.bin model container to device
 adb push sd_runtime/sd_qidk_runner_inpaint /data/local/tmp/sd_runtime/
-adb push sd_runtime/models/unet.bin /data/local/tmp/sd_runtime/models/unet.bin
+adb push sd_runtime/models/unet_inpaint_16ch_ctx.bin /data/local/tmp/sd_runtime/models/unet_inpaint_16ch_ctx.bin
 adb shell "chmod +x /data/local/tmp/sd_runtime/sd_qidk_runner_inpaint"
 ```
 

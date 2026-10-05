@@ -135,7 +135,7 @@ Connect your Snapdragon 8 Elite development board via USB-C to the host machine.
    adb push <SNPE_ROOT>/lib/dsp/* /data/local/tmp/lama/dsp/
 
    # Push Stable Diffusion NPU pipeline runners and model containers
-   # unet.bin (~843MB optimized container for graph_wlqbe2kd) and QNN runtime
+   # unet_inpaint_16ch_ctx.bin (~842MB 16-channel context UNet for graph_5_ihizww) and QNN runtime
    adb push StableDiffusion/sd_runtime/* /data/local/tmp/sd_runtime/
 
    # Set executable permissions on all on-device runners
@@ -177,7 +177,7 @@ python3 benchmark.py --smoke-test
 | **MIGAN** | `migan_htp_v79.dlc` | $1 \times 3 \times 512 \times 512$ | **Inverted** ($0 = \text{hole}, 1 = \text{keep}$) | Multi-scale depthwise separable convolutions; facial optimization |
 | **AOT-GAN** | `aotgan.dlc` | $1 \times 3 \times 512 \times 512$ | **Standard** ($1 = \text{hole}, 0 = \text{keep}$) | Aggregated Contextual Transformations; stacked dilated bottlenecks |
 | **LaMa** | `lama_dilated.dlc` | $1 \times 3 \times 512 \times 512$ | **Standard** ($1 = \text{hole}, 0 = \text{keep}$) | Fast Fourier Transform (FFT) convolutions; global receptive field |
-| **Stable Diffusion** | `sd_qidk_runner_inpaint` + `models/unet.bin` | $1 \times 4 \times 64 \times 64$ (Latent) | **Standard** ($1 = \text{hole}, 0 = \text{keep}$) | 12-step DPM-Solver++ (2M) latent diffusion; text conditioning + VAE encoding on Hexagon HTP v79 (~13.2s) |
+| **Stable Diffusion** | `sd_qidk_runner_inpaint` + `models/unet_inpaint_16ch_ctx.bin` | $1 \times 4 \times 64 \times 64$ (Latent) | **Standard** ($1 = \text{hole}, 0 = \text{keep}$) | 12-step DPM-Solver++ (2M) latent diffusion; text conditioning + VAE encoding on Hexagon HTP v79 (~13.2s) |
 | **Stable Diffusion (Inefficient)** | `sd_qidk_runner_inefficient` | $1 \times 4 \times 64 \times 64$ (Latent) | **Standard** ($1 = \text{hole}, 0 = \text{keep}$) | 20-step Euler stochastic RePaint schedule (~50.9s legacy baseline) |
 
 ### Decision Router Logic & Rules

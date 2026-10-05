@@ -294,7 +294,7 @@ def run_smoke_test():
         ("/data/local/tmp/lama/snpe-net-run", "SNPE Net Run Binary"),
         ("/data/local/tmp/sd_runtime/sd_qidk_runner_inpaint", "SD Inpaint Runner (12-step DPM)"),
         ("/data/local/tmp/sd_runtime/sd_qidk_runner_inefficient", "SD Inefficient Runner (20-step Euler)"),
-        ("/data/local/tmp/sd_runtime/models/unet.bin", "SD Inpaint UNet Container (graph_wlqbe2kd)")
+        ("/data/local/tmp/sd_runtime/models/unet_inpaint_16ch_ctx.bin", "SD Inpaint UNet Container (graph_5_ihizww)")
     ]
     for path, name in checks:
         res = subprocess.run(["adb", "shell", f"[ -f {path} ] && echo EXISTS"], capture_output=True, text=True)
