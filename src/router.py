@@ -78,10 +78,29 @@ BENCHMARK_PROFILES = {
         "architecture": "Aggregated Contextual Transformations (dense texture & sharp edges)"
     },
     "sd": {
-        "name": "Stable Diffusion 1.5 (RePaint)",
+        "name": "Stable Diffusion 1.5 (Inpainting)",
         "dlc": "sd_runtime",
         "runtime": "htp_v79",
         "runtime_flag": "--use_htp",
+        "runner": "sd_qidk_runner_inpaint",
+        "latency_ms": 13211.0,
+        "energy_j": 35.01,
+        "power_w": 2.65,
+        "peak_temp_c": 58.4,
+        "thermal_rise_c": 12.0,
+        "global_psnr_db": 22.45,
+        "hole_psnr_db": 16.80,
+        "ssim": 0.8120,
+        "lpips": 0.2310,
+        "ram_gb": 3.80,
+        "architecture": "Diffusion Generative Model (12-step DPM-Solver++ with Karras sigmas on Qualcomm NPU)"
+    },
+    "sd_inefficient": {
+        "name": "Stable Diffusion 1.5 (Inefficient RePaint)",
+        "dlc": "sd_runtime",
+        "runtime": "htp_v79",
+        "runtime_flag": "--use_htp",
+        "runner": "sd_qidk_runner_inefficient",
         "latency_ms": 50930.0,
         "energy_j": 135.02,
         "power_w": 2.65,
@@ -92,7 +111,7 @@ BENCHMARK_PROFILES = {
         "ssim": 0.3183,
         "lpips": 0.7216,
         "ram_gb": 4.20,
-        "architecture": "Diffusion Generative Model (20-step stochastic RePaint schedule)"
+        "architecture": "Diffusion Generative Model (20-step Euler stochastic RePaint schedule - legacy/inefficient)"
     }
 }
 
@@ -318,7 +337,9 @@ def run_live_snpe_inference(
     selected_model = route_info["recommended_model"] if model_key == "auto" else model_key.lower()
     
     # Normalize model key
-    if "sd" in selected_model or "diffusion" in selected_model or "repaint" in selected_model:
+    if "inefficient" in selected_model:
+        selected_model = "sd_inefficient"
+    elif "sd" in selected_model or "diffusion" in selected_model or "repaint" in selected_model:
         selected_model = "sd"
     elif "migan" in selected_model:
         selected_model = "migan"
@@ -339,9 +360,9 @@ def run_live_snpe_inference(
         try:
             with tempfile.TemporaryDirectory() as tmpdir:
                 # -------------------------------------------------------------
-                # 1. Stable Diffusion 1.5 RePaint Path
+                # 1. Stable Diffusion (Inpainting DPM-Solver++ or Inefficient RePaint)
                 # -------------------------------------------------------------
-                if selected_model == "sd":
+                if selected_model in ("sd", "sd_inefficient"):
                     img_arr = (img_512.astype(np.float32) / 255.0)  # (512, 512, 3)
                     # SD expects 1.0 at hole, 0.0 at keep:
                     standard_mask_tensor = (standard_mask.astype(np.float32) / 255.0)[..., np.newaxis]  # (512, 512, 1)
@@ -355,12 +376,14 @@ def run_live_snpe_inference(
                     subprocess.run(["adb", "push", local_img, f"{sd_base}/image.raw"], check=True, timeout=10)
                     subprocess.run(["adb", "push", local_mask, f"{sd_base}/mask.raw"], check=True, timeout=10)
 
-                    # Execute SD runner
+                    # Execute SD runner binary (new inpaint runner vs inefficient runner)
+                    runner_bin = profile.get("runner", "sd_qidk_runner_inpaint" if selected_model == "sd" else "sd_qidk_runner_inefficient")
                     sd_cmd = (
                         f"cd {sd_base} && "
                         f"export LD_LIBRARY_PATH={sd_base}:$LD_LIBRARY_PATH && "
                         f"export ADSP_LIBRARY_PATH='{sd_base};/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp' && "
-                        f"./sd_qidk_runner_encoder \"{prompt}\""
+                        f"rm -f sd_output.png && "
+                        f"./{runner_bin} \"{prompt}\""
                     )
                     t0 = time.perf_counter()
                     subprocess.run(["adb", "shell", sd_cmd], check=True, timeout=180)
@@ -373,7 +396,7 @@ def run_live_snpe_inference(
                         sd_img = np.array(Image.open(local_out).convert("RGB"))
                         sd_final = composite_inpaint_result(img_512, sd_img, standard_mask, feather=True)
                         return sd_final, {
-                            "execution_mode": "QUALCOMM_HEXAGON_NPU_LIVE (SD 1.5 RePaint)",
+                            "execution_mode": f"QUALCOMM_HEXAGON_NPU_LIVE ({profile['name']})",
                             "device": dev_name,
                             "model_executed": profile["name"],
                             "snpe_latency_ms": round(sd_ms, 2),

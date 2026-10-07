@@ -359,6 +359,174 @@ def refine_mask_grabcut(
     return refined, latency_ms
 
 
+_MP_SEGMENTER_INSTANCE = None
+
+def get_mediapipe_segmenter(model_path: Optional[str] = None):
+    """Lazily initializes MediaPipe InteractiveSegmenter for Python."""
+    global _MP_SEGMENTER_INSTANCE
+    if _MP_SEGMENTER_INSTANCE is not None:
+        return _MP_SEGMENTER_INSTANCE
+
+    if model_path is None:
+        candidates = [
+            os.path.join(os.path.dirname(__file__), "..", "qidk-inpaint-app", "app", "src", "main", "assets", "magic_touch.tflite"),
+            os.path.join(os.path.dirname(__file__), "..", "models", "magic_touch.tflite"),
+        ]
+        for c in candidates:
+            if os.path.exists(c):
+                model_path = os.path.abspath(c)
+                break
+
+    if model_path is None or not os.path.exists(model_path):
+        return None
+
+    try:
+        import mediapipe as mp
+        from mediapipe.tasks.python import vision
+        base_options = mp.tasks.BaseOptions(model_asset_path=model_path)
+        options = vision.InteractiveSegmenterOptions(
+            base_options=base_options,
+            output_category_mask=True,
+            output_confidence_masks=True
+        )
+        _MP_SEGMENTER_INSTANCE = vision.InteractiveSegmenter.create_from_options(options)
+        return _MP_SEGMENTER_INSTANCE
+    except Exception as e:
+        return None
+
+
+def sample_medial_axis_seeds(
+    binary_mask: np.ndarray,
+    max_seeds: int = 3,
+    min_dist_threshold: float = 3.0
+) -> List[Tuple[int, int]]:
+    """
+    Extracts 1 to 3 medial axis prompt seeds from a binary mask via Distance Transform + NMS.
+    Eliminates centroid collapse on concave / annular strokes.
+    """
+    if np.sum(binary_mask > 0) == 0:
+        return []
+
+    mask_u8 = (binary_mask > 0).astype(np.uint8) * 255
+    dist = cv2.distanceTransform(mask_u8, cv2.DIST_L2, 3)
+
+    seeds = []
+    dist_map = dist.copy()
+
+    for _ in range(max_seeds):
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(dist_map)
+        if max_val < min_dist_threshold:
+            break
+        if seeds and max_val < seeds[0][1] * 0.30:
+            break
+
+        seeds.append((max_loc, max_val))
+        suppression_radius = int(max(20, max_val * 1.5))
+        cv2.circle(dist_map, max_loc, suppression_radius, 0, -1)
+
+    if not seeds:
+        y_pts, x_pts = np.where(mask_u8 > 0)
+        if len(x_pts) > 0:
+            return [(int(x_pts[len(x_pts) // 2]), int(y_pts[len(y_pts) // 2]))]
+        return []
+
+    return [pt for pt, _ in seeds]
+
+
+def fast_guided_filter(
+    image: np.ndarray,
+    mask_prob: np.ndarray,
+    radius: int = 4,
+    eps: float = 0.01
+) -> np.ndarray:
+    """
+    Fast Guided Filter snapping soft mask probabilities to photo color edges.
+    Uses cv2.ximgproc.guidedFilter if available, otherwise high-quality bilateral fallback.
+    """
+    img_guide = ensure_512_image(image)
+    if hasattr(cv2, "ximgproc") and hasattr(cv2.ximgproc, "guidedFilter"):
+        guide_gray = cv2.cvtColor(img_guide, cv2.COLOR_RGB2GRAY).astype(np.float32) / 255.0
+        prob = mask_prob.astype(np.float32)
+        if prob.max() > 1.0:
+            prob = prob / 255.0
+        q = cv2.ximgproc.guidedFilter(guide_gray, prob, radius, eps)
+        return np.clip(q, 0.0, 1.0)
+    else:
+        return cv2.bilateralFilter(mask_prob.astype(np.float32), radius * 2 + 1, 75, 75)
+
+
+def refine_mask_overhaul(
+    image: Union[np.ndarray, Image.Image],
+    rough_mask: Union[np.ndarray, Image.Image],
+    model_path: Optional[str] = None
+) -> Tuple[np.ndarray, float]:
+    """
+    Overhauled MediaPipe Pipeline (Candidate 3):
+    1. Multi-point medial axis sampling (avoids centroid collapse)
+    2. Multi-seed confidence map fusion
+    3. Fast Guided Filter edge-snapping (r=4, eps=1e-2)
+    4. 2px circular safety dilation
+    5. Instant sub-1ms fallback (zero GrabCut stalling)
+    """
+    t0 = time.perf_counter()
+    img_512 = ensure_512_image(image)
+    h, w = img_512.shape[:2]
+
+    if isinstance(rough_mask, Image.Image):
+        rmask = np.array(rough_mask.convert("L").resize((w, h), Image.Resampling.NEAREST))
+    else:
+        rmask = cv2.resize(rough_mask, (w, h), interpolation=cv2.INTER_NEAREST) if rough_mask.shape[:2] != (w, h) else rough_mask
+
+    mask_bin = (rmask >= 128)
+    if not np.any(mask_bin):
+        return np.zeros((h, w), dtype=np.uint8), 0.0
+
+    seeds = sample_medial_axis_seeds(mask_bin, max_seeds=3)
+    segmenter = get_mediapipe_segmenter(model_path)
+
+    fused_conf = np.zeros((h, w), dtype=np.float32)
+
+    if segmenter is not None and seeds:
+        try:
+            import mediapipe as mp
+            from mediapipe.tasks.python import vision
+            from mediapipe.tasks.python.components.containers import keypoint
+
+            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=img_512)
+            for (sx, sy) in seeds:
+                roi = vision.InteractiveSegmenterRegionOfInterest(
+                    format=vision.InteractiveSegmenterRegionOfInterest.Format.KEYPOINT,
+                    keypoint=keypoint.NormalizedKeypoint(
+                        x=float(np.clip(sx / float(w), 0.01, 0.99)),
+                        y=float(np.clip(sy / float(h), 0.01, 0.99))
+                    )
+                )
+                res = segmenter.segment(mp_image, roi)
+                if res.confidence_masks:
+                    c_mask = res.confidence_masks[0].numpy_view()
+                    if c_mask.shape != (h, w):
+                        c_mask = cv2.resize(c_mask, (w, h), interpolation=cv2.INTER_LINEAR)
+                    fused_conf = np.maximum(fused_conf, c_mask)
+        except Exception:
+            pass
+
+    # If neural confidence was insufficient or segmenter unavailable, use rough mask as initial probability
+    if np.sum(fused_conf >= 0.35) < 20:
+        fused_conf = mask_bin.astype(np.float32)
+
+    # Fast Guided Filter snapping to RGB physical edges
+    q = fast_guided_filter(img_512, fused_conf, radius=4, eps=0.01)
+
+    # Threshold & 2px safety dilation
+    binary_refined = (q >= 0.45).astype(np.uint8) * 255
+    k_2px = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    final_mask = cv2.dilate(binary_refined, k_2px)
+
+    latency_ms = (time.perf_counter() - t0) * 1000.0
+    return final_mask, latency_ms
+
+
+
 
 def mask_to_raw_tensors(
     image: Union[np.ndarray, Image.Image],

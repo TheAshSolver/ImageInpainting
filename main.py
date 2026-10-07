@@ -56,15 +56,11 @@ def cmd_visuals(args):
     script_path = os.path.join(REPO_ROOT, "scripts", "generate_presentation_visuals.py")
     subprocess.run([sys.executable, script_path], check=True)
 
-def cmd_benchmark(args):
-    """Run the decoupled two-phase batch benchmark."""
-    print("⚡ Executing Two-Phase Decoupled Batch Benchmark Sweep...")
-    script_path = os.path.join(REPO_ROOT, "scripts", "run_two_phase_batch_benchmark.py")
-    # run_two_phase_batch_benchmark.py always evaluates the fixed 102-sample set and has no --samples option
-    # (forwarding it used to crash with an argparse error).
-    if args.samples not in (None, 102):
-        print(f"  note: --samples {args.samples} ignored; the two-phase benchmark always uses the 102-sample set.")
-    subprocess.run([sys.executable, script_path], check=True)
+def cmd_benchmark(args, extra):
+    """Run the unified master benchmark suite or launch interactive menu."""
+    script_path = os.path.join(REPO_ROOT, "benchmark.py")
+    cmd = [sys.executable, script_path, *extra]
+    subprocess.run(cmd)
 
 def cmd_fresh_benchmark(args, extra):
     """Measured on-device benchmark (latency, thermals, quality, SD); extra args go to the script."""
@@ -118,10 +114,9 @@ Examples:
     p_vis = subparsers.add_parser("visuals", help="Generate publication presentation figures (300 DPI)")
 
     # Benchmark Command
-    p_bm = subparsers.add_parser("benchmark", help="Execute on-device batch benchmarking sweep")
-    p_bm.add_argument("--samples", type=int, default=102, help="Number of benchmark samples to evaluate")
+    subparsers.add_parser("benchmark", help="Execute unified benchmark suite & diagnostics (run without flags for menu)")
 
-    # Fresh measured benchmark (extra flags are forwarded, e.g. --lpips --sd --configs migan_npu)
+    # Fresh measured benchmark (backward compatibility forwarding)
     subparsers.add_parser("fresh-benchmark", help="Measured latency/thermal/quality benchmark (flags forwarded to the script)")
 
     # Router Command
@@ -131,7 +126,7 @@ Examples:
     p_rt.add_argument("--json", default=None, help="Optional path to save JSON output")
 
     args, extra = parser.parse_known_args()
-    if extra and args.command != "fresh-benchmark":
+    if extra and args.command not in ("benchmark", "fresh-benchmark"):
         parser.error(f"unrecognized arguments: {' '.join(extra)}")
 
     if not args.command:
@@ -139,8 +134,8 @@ Examples:
         check_adb_status()
         print("Available Commands:")
         print("  • python main.py gui        -> Launch real-time Gradio Web Canvas")
+        print("  • python main.py benchmark  -> Unified benchmark suite & interactive menu")
         print("  • python main.py visuals    -> Generate 8 publication-grade presentation figures (300 DPI)")
-        print("  • python main.py benchmark  -> Execute batch benchmarking sweep across NPU/GPU")
         print("  • python main.py fresh-benchmark [--lpips --sd ...] -> Measured latency/thermal/quality benchmark")
         print("  • python main.py route      -> Analyze image & mask with heuristic decision router")
         print("\nRun 'python main.py <command> --help' for command-specific flags.")
@@ -151,7 +146,7 @@ Examples:
     elif args.command == "visuals":
         cmd_visuals(args)
     elif args.command == "benchmark":
-        cmd_benchmark(args)
+        cmd_benchmark(args, extra)
     elif args.command == "fresh-benchmark":
         cmd_fresh_benchmark(args, extra)
     elif args.command == "route":

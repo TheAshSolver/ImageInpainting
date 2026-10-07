@@ -12,9 +12,9 @@ Everything reported is measured by this script - nothing comes from constants:
 Energy is NOT reported: the board exposes no usable system-power sensor (battery current stays ~0 under load).
 
 Usage (repo root, device connected, adb on PATH or --adb):
-    python scripts/fresh_benchmark/run_fresh_benchmark.py                      # 6 GAN configs, no LPIPS
+ython scripts/fresh_benchmark/run_fresh_benchmark.py                      # 6 GAN configs, no LPIPS
     python scripts/fresh_benchmark/run_fresh_benchmark.py --lpips --sd         # + LPIPS + Stable Diffusion
-    python scripts/fresh_benchmark/run_fresh_benchmark.py --configs migan_npu lama_npu --cached-dlc
+    python scripts/fresh_benchmark/run_fresh_benchmark.py --configs migan_npu lama_npu --cached-dlc    p
 Outputs go to Benchmark/output/fresh_benchmark/<timestamp>/ (summary.json, BENCHMARK_RESULTS.md, quality CSVs, raw logs).
 Presentation figures: python scripts/fresh_benchmark/make_figures.py --results <that folder> --ds Benchmark/input_102 --out <figures folder>
 """

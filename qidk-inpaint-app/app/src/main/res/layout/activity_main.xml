@@ -91,6 +91,53 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:visibility="gone" />
+
+            <!-- Floating Viewport Zoom Controls -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_margin="10dp"
+                android:orientation="horizontal"
+                android:background="#D91E293B"
+                android:padding="2dp">
+
+                <Button
+                    android:id="@+id/btnZoomIn"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="0dp"
+                    android:text="➕"
+                    android:textSize="12sp"
+                    android:backgroundTint="#334155" />
+
+                <Button
+                    android:id="@+id/btnZoomOut"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="0dp"
+                    android:text="➖"
+                    android:textSize="12sp"
+                    android:layout_marginStart="3dp"
+                    android:backgroundTint="#334155" />
+
+                <Button
+                    android:id="@+id/btnZoomReset"
+                    android:layout_width="44dp"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="0dp"
+                    android:text="1:1"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="3dp"
+                    android:backgroundTint="#2563EB" />
+            </LinearLayout>
         </FrameLayout>
 
         <!-- Canvas Manual Tool Buttons (Row 1) -->
@@ -118,11 +165,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="🔲 Box"
+                android:text="🔲 Box (Square)"
                 android:textAllCaps="false"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:minHeight="38dp"
-                android:paddingHorizontal="4dp"
+                android:paddingHorizontal="2dp"
                 android:layout_marginStart="3dp"
                 android:layout_marginEnd="3dp"
                 android:backgroundTint="#4B5563" />
@@ -155,7 +202,7 @@
                 android:backgroundTint="#DC2626" />
         </LinearLayout>
 
-        <!-- Smart Mask AI Tools (Row 2) -->
+        <!-- Smart Object AI Extraction (Row 2) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -163,28 +210,15 @@
             android:layout_marginBottom="10dp">
 
             <Button
-                android:id="@+id/btnGrabCut"
-                android:layout_width="0dp"
+                android:id="@+id/btnSmartObjectGrab"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="⚡ Auto GrabCut (Box)"
+                android:text="✨ Smart Object Detection"
                 android:textAllCaps="false"
-                android:textSize="12sp"
-                android:minHeight="40dp"
-                android:layout_marginEnd="4dp"
-                android:backgroundTint="#2563EB" />
-
-            <Button
-                android:id="@+id/btnRefine"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="✨ Snap to Edges"
-                android:textAllCaps="false"
-                android:textSize="12sp"
-                android:minHeight="40dp"
-                android:layout_marginStart="4dp"
-                android:backgroundTint="#059669" />
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:minHeight="42dp"
+                android:backgroundTint="#7C3AED" />
         </LinearLayout>
 
         <!-- Router Recommendation Card -->

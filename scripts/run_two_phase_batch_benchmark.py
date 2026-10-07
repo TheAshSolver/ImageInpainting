@@ -279,7 +279,7 @@ def run_phase1_on_device_batches(selected_models: List[str]) -> Dict[str, float]
                     f"export LD_LIBRARY_PATH={DEVICE_SD_DIR}:$LD_LIBRARY_PATH && "
                     f"export ADSP_LIBRARY_PATH='{DEVICE_SD_DIR};/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp' && "
                     f"rm -f sd_output.png && "
-                    f"./sd_qidk_runner_encoder 'cinematic photo restoration' > /dev/null 2>&1 && "
+                    f"./sd_qidk_runner_inpaint 'cinematic photo restoration' > /dev/null 2>&1 && "
                     f"cp sd_output.png {DEVICE_LAMA_DIR}/output_sd_npu/{stem}.png"
                 )
                 t0_sd = time.time()
