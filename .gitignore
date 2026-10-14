@@ -57,4 +57,9 @@ comparison_results/
 generated_charts/
 qidk_outputs/
 qidk-inpaint-app/decompiled/
+qidk-inpaint-app/app/.cxx/
+qidk_backup/
+qidk_retrieved_models/
+snpe_resident_daemon
+test_snpe_shell
 

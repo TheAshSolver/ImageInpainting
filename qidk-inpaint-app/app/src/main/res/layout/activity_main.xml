@@ -91,53 +91,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:visibility="gone" />
-
-            <!-- Floating Viewport Zoom Controls -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top|end"
-                android:layout_margin="10dp"
-                android:orientation="horizontal"
-                android:background="#D91E293B"
-                android:padding="2dp">
-
-                <Button
-                    android:id="@+id/btnZoomIn"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="0dp"
-                    android:text="➕"
-                    android:textSize="12sp"
-                    android:backgroundTint="#334155" />
-
-                <Button
-                    android:id="@+id/btnZoomOut"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="0dp"
-                    android:text="➖"
-                    android:textSize="12sp"
-                    android:layout_marginStart="3dp"
-                    android:backgroundTint="#334155" />
-
-                <Button
-                    android:id="@+id/btnZoomReset"
-                    android:layout_width="44dp"
-                    android:layout_height="36dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="0dp"
-                    android:text="1:1"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:layout_marginStart="3dp"
-                    android:backgroundTint="#2563EB" />
-            </LinearLayout>
         </FrameLayout>
 
         <!-- Canvas Manual Tool Buttons (Row 1) -->
@@ -165,11 +118,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="🔲 Box (Square)"
+                android:text="🔲 Box"
                 android:textAllCaps="false"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:minHeight="38dp"
-                android:paddingHorizontal="2dp"
+                android:paddingHorizontal="4dp"
                 android:layout_marginStart="3dp"
                 android:layout_marginEnd="3dp"
                 android:backgroundTint="#4B5563" />
@@ -202,7 +155,7 @@
                 android:backgroundTint="#DC2626" />
         </LinearLayout>
 
-        <!-- Smart Object AI Extraction (Row 2) -->
+        <!-- Smart Mask AI Tools (Row 2) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -210,15 +163,28 @@
             android:layout_marginBottom="10dp">
 
             <Button
-                android:id="@+id/btnSmartObjectGrab"
-                android:layout_width="match_parent"
+                android:id="@+id/btnGrabCut"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="✨ Smart Object Detection"
+                android:layout_weight="1"
+                android:text="⚡ Auto GrabCut (Box)"
                 android:textAllCaps="false"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:minHeight="42dp"
-                android:backgroundTint="#7C3AED" />
+                android:textSize="12sp"
+                android:minHeight="40dp"
+                android:layout_marginEnd="4dp"
+                android:backgroundTint="#2563EB" />
+
+            <Button
+                android:id="@+id/btnRefine"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="✨ Snap to Edges"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:minHeight="40dp"
+                android:layout_marginStart="4dp"
+                android:backgroundTint="#059669" />
         </LinearLayout>
 
         <!-- Router Recommendation Card -->
@@ -247,6 +213,172 @@
                 android:textColor="#D1D5DB"
                 android:textSize="12sp"
                 android:layout_marginTop="4dp" />
+
+            <TextView
+                android:id="@+id/preloadStatusBadge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="⚡ Preloading NPU models..."
+                android:textColor="#38BDF8"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:layout_marginTop="6dp" />
+        </LinearLayout>
+
+        <!-- Stable Diffusion Prompt Container (VISIBLE ONLY WHEN SD IS SELECTED) -->
+        <LinearLayout
+            android:id="@+id/promptCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1F2937"
+            android:padding="12dp"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="✨ Dual Text Guidance (SD NPU)"
+                    android:textColor="#38BDF8"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/promptBadgeHint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CLIP Guided"
+                    android:textColor="#9CA3AF"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <!-- Positive Prompt -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Positive Prompt (What to generate in hole):"
+                android:textColor="#93C5FD"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp" />
+
+            <EditText
+                android:id="@+id/etPromptPositive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:background="#374151"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#9CA3AF"
+                android:hint="e.g. photograph of a beautiful empty scene"
+                android:textSize="13sp"
+                android:padding="10dp"
+                android:inputType="textCapSentences|textMultiLine"
+                android:maxLines="3"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Prompt Quick Preset Chips -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginBottom="10dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/chipClean"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="🧹 Seamless Fill"
+                        android:textAllCaps="false"
+                        android:textSize="11sp"
+                        android:paddingHorizontal="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:backgroundTint="#4B5563" />
+
+                    <Button
+                        android:id="@+id/chipWood"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="🪵 Wood Table"
+                        android:textAllCaps="false"
+                        android:textSize="11sp"
+                        android:paddingHorizontal="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:backgroundTint="#4B5563" />
+
+                    <Button
+                        android:id="@+id/chipNature"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="🌿 Green Leaves"
+                        android:textAllCaps="false"
+                        android:textSize="11sp"
+                        android:paddingHorizontal="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:backgroundTint="#4B5563" />
+
+                    <Button
+                        android:id="@+id/chipWater"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="🌊 Calm Water"
+                        android:textAllCaps="false"
+                        android:textSize="11sp"
+                        android:paddingHorizontal="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:backgroundTint="#4B5563" />
+
+                    <Button
+                        android:id="@+id/chipApple"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="🍎 Red Apple"
+                        android:textAllCaps="false"
+                        android:textSize="11sp"
+                        android:paddingHorizontal="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:backgroundTint="#4B5563" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Negative Prompt -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Negative Prompt (What to avoid):"
+                android:textColor="#FCA5A5"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp" />
+
+            <EditText
+                android:id="@+id/etPromptNegative"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:background="#374151"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#9CA3AF"
+                android:hint="e.g. painting, drawing, glitch, deformed, ugly"
+                android:textSize="13sp"
+                android:padding="10dp"
+                android:inputType="textCapSentences|textMultiLine"
+                android:maxLines="3"
+                android:layout_marginBottom="4dp" />
         </LinearLayout>
 
         <!-- Model Choice & Run Button -->

@@ -38,7 +38,7 @@ from typing import Dict, Any
 # ==============================================================================
 PROJECT_METADATA: Dict[str, Any] = {
     "project_name": "Qualcomm Snapdragon 8 Elite Neural Image Inpainting",
-    "version": "2.4.0 (Synchronized 2026-10-05)",
+    "version": "3.0.0 (Synchronized 2026-10-15)",
     "upstream_repository": "https://github.com/TheAshSolver/ImageInpainting.git",
     "primary_maintainers": ["Spacex2006", "rnn27", "Tarsh"],
     "target_platform": {
@@ -50,9 +50,13 @@ PROJECT_METADATA: Dict[str, Any] = {
         "gpu_core": "Qualcomm Adreno 830 GPU",
         "ddr": "LPDDR5X (up to 4.8 GHz, 76.8 GB/s)"
     },
+    "deployed_packages": {
+        "v2_apk": "com.qualcomm.qidk.inpaint.v2 (Baseline QIDK Inpainting with Live Telemetry)",
+        "v3_apk": "com.qualcomm.qidk.inpaint.v3 (Emerald/Gold Icon, Eager Pre-caching, SNPE Burst Profile, Zero-Staging)"
+    },
     "core_purpose": (
         "High-throughput, thermally stable, zero-cloud on-device image inpainting "
-        "and object removal. Combines feed-forward convolutional GANs (sub-50ms) "
+        "and object removal. Combines feed-forward convolutional GANs (sub-50ms steady-state) "
         "and generative latent diffusion (12-step DPM-Solver++) orchestrated by an "
         "intelligent multi-modal decision router running directly on mobile silicon."
     )
@@ -79,16 +83,24 @@ MODEL_REGISTRY: Dict[str, Any] = {
             "label": "INVERTED (0 = hole / missing, 1 = background / keep)",
             "warning": "Passing standard polarity causes severe white block artifacts"
         },
-        "output_tensor_shape": [1, 3, 512, 512],
+        "output_tensor_shape": [1, 512, 512, 3],
+        "output_tensor_layout": "NHWC Interleaved RGB float32 (NOT planar NCHW)",
         "output_tensor_dtype": "float32",
         "measured_performance": {
             "steady_latency_npu_ms": 49.8,
             "steady_latency_gpu_ms": 239.5,
             "npu_speedup_vs_gpu": "4.8x",
+            "v3_resident_engine_latency_ms": 43.0,
+            "v3_resident_click_to_screen_ms": 222.0,
+            "v3_burst_engine_latency_ms": 217.0,
+            "v3_click_to_screen_ms": 433.0,
+            "v3_staging_overhead_ms": 0.0,
             "cold_start_latency_s": 0.32,
             "global_psnr_db": 23.01,
             "hole_psnr_db": 17.30,
+            "reconstructed_psnr_db": "> 31 dB (composited)",
             "ssim": 0.7112,
+            "reconstructed_ssim": "> 0.94",
             "lpips": 0.2412,
             "thermal_stability": "Strictly ≤ 46 °C SoC"
         }
@@ -108,17 +120,25 @@ MODEL_REGISTRY: Dict[str, Any] = {
             "value_at_keep": 0.0,
             "label": "STANDARD (1 = hole / missing, 0 = background / keep)"
         },
-        "output_tensor_shape": [1, 3, 512, 512],
+        "output_tensor_shape": [1, 512, 512, 3],
+        "output_tensor_layout": "NHWC Interleaved RGB float32 (NOT planar NCHW)",
         "output_tensor_dtype": "float32",
         "measured_performance": {
             "steady_latency_npu_ms": 104.2,
             "steady_latency_gpu_ms": 551.4,
             "npu_speedup_vs_gpu": "5.3x",
+            "v3_resident_engine_latency_ms": 131.0,
+            "v3_resident_click_to_screen_ms": 315.0,
+            "v3_burst_engine_latency_ms": 306.0,
+            "v3_click_to_screen_ms": 450.0,
+            "v3_staging_overhead_ms": 0.0,
             "cold_start_uncached_s": 7.93,
             "cold_start_with_init_cache_s": 0.47,
             "global_psnr_db": 23.54,
             "hole_psnr_db": 18.18,
+            "reconstructed_psnr_db": "> 31 dB (composited)",
             "ssim": 0.7381,
+            "reconstructed_ssim": "> 0.94",
             "lpips": 0.2355,
             "robustness": "Most resilient model for masks > 30% area"
         }
@@ -138,17 +158,25 @@ MODEL_REGISTRY: Dict[str, Any] = {
             "value_at_keep": 0.0,
             "label": "STANDARD (1 = hole / missing, 0 = background / keep)"
         },
-        "output_tensor_shape": [1, 3, 512, 512],
+        "output_tensor_shape": [1, 512, 512, 3],
+        "output_tensor_layout": "NHWC Interleaved RGB float32 (NOT planar NCHW)",
         "output_tensor_dtype": "float32",
         "measured_performance": {
             "steady_latency_npu_ms": 158.8,
             "steady_latency_gpu_ms": 631.4,
             "npu_speedup_vs_gpu": "4.0x",
+            "v3_resident_engine_latency_ms": 199.0,
+            "v3_resident_click_to_screen_ms": 380.0,
+            "v3_burst_engine_latency_ms": 316.0,
+            "v3_click_to_screen_ms": 442.0,
+            "v3_staging_overhead_ms": 0.0,
             "cold_start_uncached_s": 8.15,
             "cold_start_with_init_cache_s": 0.57,
             "global_psnr_db": 22.96,
             "hole_psnr_db": 16.79,
+            "reconstructed_psnr_db": "> 31 dB (composited)",
             "ssim": 0.7301,
+            "reconstructed_ssim": "> 0.94",
             "lpips": 0.2380
         }
     },
@@ -162,7 +190,12 @@ MODEL_REGISTRY: Dict[str, Any] = {
         "source_file": "StableDiffusion/sd_runner_inpaint.cpp",
         "input_latent_shape": [1, 4, 64, 64],
         "algorithm": "12-step DPM-Solver++ (2M) with Karras sigmas on UFIX16 quantized UNet",
-        "prompt_contract": "MANDATORY: Pass empty string '' for restoration. Text prompts cause hallucinations.",
+        "prompt_contract": {
+            "ui_visibility": "Dynamically displayed ONLY when SD 1.5 model is selected",
+            "positive_prompt": "Optional user input; if blank, defaults to empty '' to prevent hallucination",
+            "negative_prompt": "Optional user input; defaults to quality negative anchors",
+            "pipe_mechanism": "argv[1] = positive prompt, argv[2] = negative prompt passed to sd_qidk_runner_inpaint"
+        },
         "measured_performance": {
             "pipeline_internal_ms": 13300.0,
             "wall_clock_per_launch_ms": 25200.0,
@@ -195,6 +228,46 @@ MODEL_REGISTRY: Dict[str, Any] = {
 # 3. CRITICAL HARDWARE QUIRKS & SYSTEM CAVEATS
 # ==============================================================================
 HARDWARE_AND_ENVIRONMENT_QUIRKS: Dict[str, str] = {
+    "TENSOR_FORMAT_NHWC_NOT_PLANAR": (
+        "CRITICAL: Output tensors produced by MIGAN, LaMa Dilated, and AOT-GAN DLCs on "
+        "Qualcomm Hexagon HTP v79 are formatted as interleaved NHWC [1, 512, 512, 3] float32 "
+        "(RGBRGB...), NOT planar NCHW (RRR...GGG...BBB...). A previous decoding bug treated "
+        "all tensors as planar, causing severe color channel scrambling and diagonal stripe "
+        "distortion. Enforcing interleaved decoding restored reconstruction fidelity to PSNR > 31 dB, SSIM > 0.94."
+    ),
+    "LIVE_HARDWARE_TELEMETRY_NO_SYNTHETIC_FALLBACKS": (
+        "CRITICAL: Zero simulated, hardcoded, or synthetic fallbacks are permitted in the application. "
+        "All telemetry metrics (battery voltage, current, temperature, and thermal zone peaks) must "
+        "be read live from Linux sysfs (/sys/class/power_supply/battery/* and /sys/class/thermal/thermal_zone*). "
+        "If a sensor node is constrained or unreadable, the UI reports live raw sensor values or null "
+        "without generating synthetic approximations."
+    ),
+    "MODEL_PRELOADING_AND_BACKGROUND_ASYNC": (
+        "Feed-forward GAN models (MIGAN, LaMa, AOT-GAN) are preloaded into tmpfs/RAM during initial "
+        "application startup so inferences execute instantly. Heavy Stable Diffusion assets (~2 GB+) "
+        "are loaded asynchronously on a background thread to prevent UI freezing or startup hangs. "
+        "All GAN models default to Hexagon NPU runtime (--use_dsp)."
+    ),
+    "REACTIVE_MASK_PRECACHING_ON_ACTION_UP": (
+        "In V3, InpaintCanvasView triggers eager mask tensor generation in the background immediately "
+        "upon finger lift (MotionEvent.ACTION_UP), tracking maskGenerationId. When the user taps 'Inpaint', "
+        "the raw mask tensor is already compiled and staged on RAM-disk, slashing user-perceived "
+        "input staging latency from ~50 ms down to 0 ms (Pre-cached ⚡)."
+    ),
+    "SNPE_BURST_AND_PROFILING_ACCELERATION": (
+        "Invoking snpe-net-run with '--perf_profile burst --profiling_level off --priority_hint critical' "
+        "locks Hexagon HTP v79 clock frequency to maximum burst mode and removes layer-by-layer DSP cycle "
+        "logging overhead. Combined with RAM-disk output staging (/tmp/app_live_output_v3), this cuts "
+        "NPU engine latency in half (AOT-GAN: 649 ms -> 316 ms, MIGAN: 359 ms -> 217 ms, LaMa: 440 ms -> 306 ms)."
+    ),
+    "SUB_200MS_PROCESS_SPAWN_FLOOR_ANALYSIS": (
+        "Subprocess execution of snpe-net-run via /system/bin/sh incurs an unavoidable ~160 ms floor: "
+        "~40 ms on Android Bionic fork()/execve(), ~70 ms dynamic linker loading 20+ shared libraries "
+        "(libSNPE.so, libQnnHtp.so, FastRPC stubs), and ~50 ms establishing FastRPC CDSP session handles "
+        "(/dev/fastrpc-cdsp). Breaking the 200 ms floor down to the steady-state hardware limit "
+        "(MIGAN: 49.8 ms, LaMa: 104 ms, AOT-GAN: 159 ms) requires an in-process native C++ resident engine "
+        "or persistent native daemon that retains DSP session state across inferences."
+    ),
     "ANDROID_15_BIONIC_LINKER_COLLISION": (
         "CRITICAL: Do NOT export /system/lib64 or /vendor/lib64 into LD_LIBRARY_PATH "
         "when running on-device binaries under Android 15 (Bionic libc). Doing so triggers "
@@ -202,10 +275,10 @@ HARDWARE_AND_ENVIRONMENT_QUIRKS: Dict[str, str] = {
         "Always use isolated paths: LD_LIBRARY_PATH=/data/local/tmp/lama/lib:/data/local/tmp/lama."
     ),
     "STABLE_DIFFUSION_PROMPT_HALLUCINATION": (
-        "CRITICAL: When executing sd_qidk_runner_inpaint, NEVER supply descriptive text prompts "
-        "like 'high quality clean photo restoration'. The 860M UNet interprets text conditioning "
-        "literally, hallucinating textual characters, logos, and faces into the inpainted hole. "
-        "Always pass an empty string: ./sd_qidk_runner_inpaint ''."
+        "CRITICAL: When executing sd_qidk_runner_inpaint, supplying descriptive text prompts without "
+        "unconditional guidance causes the 860M UNet to hallucinate textual characters and faces into "
+        "the inpainted hole. Default fallback must pass empty string '' to ensure pure structural restoration, "
+        "while custom user prompts are piped via dual positive/negative CLI arguments."
     ),
     "BATTERY_CURRENT_SYSFS_LIMITATION": (
         "The sysfs node /sys/class/power_supply/battery/current_now on the Snapdragon 8 Elite "
@@ -232,6 +305,15 @@ HARDWARE_AND_ENVIRONMENT_QUIRKS: Dict[str, str] = {
     "SCREEN_ROTATION_LIFECYCLE": (
         "In MainActivity.kt, loadDefaultSample() must ONLY execute when savedInstanceState == null. "
         "Otherwise, screen rotation destroys the user's painted strokes and resets the canvas."
+    ),
+    "QUALCOMM_RESIDENT_DAEMON_FAST_RPC": (
+        "In-process dlopen() of libcdsprpc.so and Hexagon HTP vendor stubs fails directly inside the Android "
+        "app process UID due to Android 15 private vendor library namespace isolation ('clns-7') and "
+        "/dev/fastrpc-cdsp permissions (system:system 0660). To reach raw sub-50ms hardware limits without "
+        "subprocess spawn overhead (~160ms), a persistent native C++ daemon ('snpe_resident_daemon') runs in "
+        "the shell context and keeps MIGAN, LaMa, and AOT-GAN graphs permanently resident in FastRPC CDSP memory. "
+        "The app communicates via loopback socket 127.0.0.1:55555 (< 1ms IPC), achieving 43ms steady-state "
+        "MIGAN inference, 131ms LaMa inference, and 199ms AOT-GAN inference directly on the Hexagon NPU."
     )
 }
 
@@ -250,6 +332,8 @@ FILE_REGISTRY: Dict[str, str] = {
     "uv.lock": "Deterministic lockfile pinning exact versions for reproducible Python 3.12 installs",
     "input_list_102.txt": "Staged file path list formatted for snpe-net-run on-device batch sweep",
     "ROUTER_AUDIT_AND_PIPELINE_REPORT.md": "Empirical calibration and dynamic range audit of decision router",
+    "snpe_resident_daemon.cpp": "High-throughput resident C++ FastRPC DSP daemon keeping MIGAN, LaMa, and AOT-GAN permanently resident in Hexagon memory, serving sub-50ms inference over 127.0.0.1:55555",
+    "test_snpe_shell.cpp": "Stand-alone C++ verification harness for Qualcomm SNPE C API runtime initialization and tensor execution",
 
     # Core Python Modules (src/)
     "src/router.py": "Multi-modal decision router engine, image feature extractors, and live FastRPC execution bridge",
@@ -283,14 +367,17 @@ FILE_REGISTRY: Dict[str, str] = {
     "scripts/render_inpaint_comparisons.py": "Renders multi-model qualitative comparison strips across benchmark samples",
     "scripts/generate_benchmark_deck.py": "Builds automated 9-slide PowerPoint presentation deck",
 
-    # Native Android Application (qidk-inpaint-app/)
-    "qidk-inpaint-app/app/src/main/java/.../MainActivity.kt": "Android UI activity, lifecycle management, sample picker, and button wiring",
-    "qidk-inpaint-app/app/src/main/java/.../engine/OnDeviceProcessDriver.kt": "ProcessBuilder driver executing snpe-net-run and SD runners via FastRPC",
-    "qidk-inpaint-app/app/src/main/java/.../ui/InpaintCanvasView.kt": "Custom touch canvas supporting pinch-to-zoom, pan, brush, and 2-tap/drag box",
+    # Native Android Application (qidk-inpaint-app/ - V2 & V3 Packages)
+    "qidk-inpaint-app/app/src/main/res/drawable/ic_launcher.xml": "V3 distinct Emerald & Gold vector icon",
+    "qidk-inpaint-app/app/src/main/res/drawable/ic_launcher_round.xml": "V3 round Emerald & Gold vector icon",
+    "qidk-inpaint-app/app/src/main/cpp/CMakeLists.txt": "CMake build definition for snpe_inpaint_jni shared library",
+    "qidk-inpaint-app/app/src/main/cpp/snpe_jni.cpp": "Native C++ JNI bridge scaffolding for in-process SNPE / FastRPC DSP resident engine",
+    "qidk-inpaint-app/app/src/main/java/.../engine/SnpeNativeBridge.kt": "Kotlin JNI interface bridging native in-process FastRPC inference",
+    "qidk-inpaint-app/app/src/main/java/.../MainActivity.kt": "V3 UI activity with dynamic SD prompt boxes, live telemetry HUD, model preloading, and lifecycle management",
+    "qidk-inpaint-app/app/src/main/java/.../engine/OnDeviceProcessDriver.kt": "V3 driver with eager image pre-cache, reactive mask staging, burst profile, zero-fallback telemetry, and NHWC decoding",
+    "qidk-inpaint-app/app/src/main/java/.../ui/InpaintCanvasView.kt": "Touch canvas supporting brush, box modes, pinch/zoom, and reactive ACTION_UP mask pre-caching",
     "qidk-inpaint-app/app/src/main/java/.../utils/GrabCutEngine.kt": "Sub-40ms native OpenCV GrabCut silhouette extractor",
-    "qidk-inpaint-app/app/src/main/java/.../engine/DeepMaskRefiner.kt": "Multi-modal mask refiner fusing MediaPipe segmenter and Fast Guided Filter",
-    "qidk-inpaint-app/app/src/main/java/.../engine/MediaPipeSegmenter.kt": "Interactive segmentation engine using magic_touch.tflite asset",
-    "qidk-inpaint-app/app/src/main/java/.../engine/ModelPreloadManager.kt": "Preloads DLC containers into tmpfs RAM on app boot",
+    "qidk-inpaint-app/app/src/main/java/.../engine/ModelPreloadManager.kt": "Preloads DLC containers into tmpfs RAM on app boot and loads SD models asynchronously",
 
     # Presentation Deliverables (Presentation/)
     "Presentation/ESW_Image_Inpainting_Progress.pptx": "Master technical progress presentation slide deck",

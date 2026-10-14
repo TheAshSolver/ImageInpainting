@@ -6,13 +6,14 @@ plugins {
 android {
     namespace = "com.qualcomm.qidk.inpaint"
     compileSdk = 34
+    ndkVersion = "26.2.11394342"
 
     defaultConfig {
-        applicationId = "com.qualcomm.qidk.inpaint"
+        applicationId = "com.qualcomm.qidk.inpaint.v3"
         minSdk = 29
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "3.0"
         ndk {
             abiFilters.addAll(setOf("arm64-v8a"))
         }
@@ -40,6 +41,13 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
 }
 
 dependencies {
@@ -47,6 +55,4 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("com.google.mediapipe:tasks-vision:0.10.14")
-    testImplementation("junit:junit:4.13.2")
 }

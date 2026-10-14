@@ -1,7 +1,7 @@
 package com.qualcomm.qidk.inpaint
 
 import android.app.Activity
-import android.content.res.ColorStateList
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -13,8 +13,6 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.qualcomm.qidk.inpaint.engine.DeepMaskRefiner
-import com.qualcomm.qidk.inpaint.engine.MediaPipeSegmenter
 import com.qualcomm.qidk.inpaint.engine.ModelPreloadManager
 import com.qualcomm.qidk.inpaint.engine.OnDeviceProcessDriver
 import com.qualcomm.qidk.inpaint.router.RouterClassifier
@@ -30,6 +28,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var modelSpinner: Spinner
     private lateinit var routerBadgeText: TextView
     private lateinit var routerJustificationText: TextView
+    private lateinit var preloadStatusBadge: TextView
+    private lateinit var promptCard: View
+    private lateinit var etPromptPositive: EditText
+    private lateinit var etPromptNegative: EditText
     private lateinit var telemetryCard: View
     private lateinit var telemetryText: TextView
     private lateinit var progressBar: ProgressBar
@@ -55,20 +57,17 @@ class MainActivity : AppCompatActivity() {
         modelSpinner = findViewById(R.id.modelSpinner)
         routerBadgeText = findViewById(R.id.routerBadgeText)
         routerJustificationText = findViewById(R.id.routerJustificationText)
+        preloadStatusBadge = findViewById(R.id.preloadStatusBadge)
+        promptCard = findViewById(R.id.promptCard)
+        etPromptPositive = findViewById(R.id.etPromptPositive)
+        etPromptNegative = findViewById(R.id.etPromptNegative)
         telemetryCard = findViewById(R.id.telemetryCard)
         telemetryText = findViewById(R.id.telemetryText)
         progressBar = findViewById(R.id.progressBar)
 
         setupModelSpinner()
         setupButtons()
-        MediaPipeSegmenter.initialize(applicationContext)
-        ModelPreloadManager.preloadAndWarmup(applicationContext) { success, statusText ->
-            runOnUiThread {
-                if (success) {
-                    Toast.makeText(this, "⚡ Models preloaded in RAM & NPU hot", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+        triggerModelPreload()
 
         if (savedInstanceState == null) {
             loadDefaultSample()
@@ -86,6 +85,36 @@ class MainActivity : AppCompatActivity() {
         )
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, models)
         modelSpinner.adapter = adapter
+
+        modelSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selected = parent?.getItemAtPosition(position)?.toString() ?: ""
+                val isSd = selected.contains("Stable Diffusion") || selected.contains("SD")
+                promptCard.visibility = if (isSd) View.VISIBLE else View.GONE
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                promptCard.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun triggerModelPreload() {
+        preloadStatusBadge.visibility = View.VISIBLE
+        preloadStatusBadge.text = "⚡ Preloading GAN models on Hexagon NPU..."
+
+        // 1. Synchronous GAN preload during startup
+        val ganTime = ModelPreloadManager.preloadGanModelsSync(this)
+        preloadStatusBadge.text = "⚡ GANs ready on NPU (${ganTime}ms) | Streaming SD models in background..."
+        preloadStatusBadge.setTextColor(Color.parseColor("#38BDF8"))
+
+        // 2. Asynchronous SD background streaming
+        ModelPreloadManager.preloadSdModelsAsync { sdTime ->
+            runOnUiThread {
+                preloadStatusBadge.text = "✅ Hexagon NPU Ready (GANs: ${ganTime}ms, SD: ${sdTime}ms)"
+                preloadStatusBadge.setTextColor(Color.parseColor("#10B981"))
+            }
+        }
     }
 
     private fun setupButtons() {
@@ -99,50 +128,58 @@ class MainActivity : AppCompatActivity() {
 
         canvasView.onMaskChanged = {
             updateRouterLogic()
+            val src = canvasView.getSourceBitmap()
+            val mask = canvasView.getMaskBitmap()
+            if (src != null) {
+                val selectedOption = modelSpinner.selectedItem?.toString() ?: "Auto"
+                val isMigan = if (selectedOption.contains("Auto")) {
+                    val dec = RouterClassifier.classifyAndRoute(src, mask)
+                    dec.recommendedModel == "MIGAN"
+                } else {
+                    selectedOption.contains("MIGAN")
+                }
+                OnDeviceProcessDriver.eagerPrecacheMask(mask, inverted = isMigan)
+            }
         }
 
         findViewById<Button>(R.id.btnCamera).setOnClickListener {
             takePhotoLauncher.launch(null)
         }
 
-        val btnModeBrush = findViewById<Button>(R.id.btnModeBrush)
-        val btnModeBox = findViewById<Button>(R.id.btnModeBox)
+        findViewById<Button>(R.id.btnModeBrush).setOnClickListener {
+            canvasView.setMode(InpaintCanvasView.Mode.BRUSH)
+            Toast.makeText(this, "Brush Mode: Finger draw mask", Toast.LENGTH_SHORT).show()
+        }
 
-        fun updateModeButtons() {
-            if (canvasView.getMode() == InpaintCanvasView.Mode.BRUSH) {
-                btnModeBrush.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#2563EB"))
-                btnModeBox.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4B5563"))
+        findViewById<Button>(R.id.btnModeBox).setOnClickListener {
+            canvasView.setMode(InpaintCanvasView.Mode.BOUNDING_BOX)
+            Toast.makeText(this, "Box Mode: Tap 1st corner, then opposite corner", Toast.LENGTH_SHORT).show()
+        }
+
+        findViewById<Button>(R.id.btnGrabCut).setOnClickListener {
+            val box = canvasView.getSelectionBox()
+            val src = canvasView.getSourceBitmap()
+            if (box != null && src != null) {
+                val (mask, latency) = GrabCutEngine.generateBoundingBoxMask(src, box)
+                canvasView.applyGrabCutMask(mask)
+                canvasView.resetBoxSelection()
+                updateRouterLogic()
+                Toast.makeText(this, "GrabCut generated silhouette in ${latency}ms", Toast.LENGTH_SHORT).show()
             } else {
-                btnModeBrush.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4B5563"))
-                btnModeBox.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#2563EB"))
+                Toast.makeText(this, "Please tap 2 corners to select a box first", Toast.LENGTH_SHORT).show()
             }
         }
-        updateModeButtons()
 
-        btnModeBrush.setOnClickListener {
-            canvasView.setMode(InpaintCanvasView.Mode.BRUSH)
-            updateModeButtons()
-            Toast.makeText(this, "🖌️ Brush Mode: Finger paint mask", Toast.LENGTH_SHORT).show()
-        }
-
-        btnModeBox.setOnClickListener {
-            canvasView.setMode(InpaintCanvasView.Mode.BOUNDING_BOX)
-            updateModeButtons()
-            Toast.makeText(this, "🔲 Box Mode: Tap 2 corners or drag to create square mask", Toast.LENGTH_SHORT).show()
-        }
-
-        findViewById<Button>(R.id.btnSmartObjectGrab).setOnClickListener {
+        findViewById<Button>(R.id.btnRefine).setOnClickListener {
             val src = canvasView.getSourceBitmap()
             val roughMask = canvasView.getMaskBitmap()
-            if (src != null && canvasView.hasMask()) {
-                val isBox = canvasView.getMode() == InpaintCanvasView.Mode.BOUNDING_BOX
-                // Deep Mask Refiner (Image + Mask Input Multi-Modal Refinement)
-                val (refinedMask, latency) = DeepMaskRefiner.refineMask(src, roughMask, isBox)
-                canvasView.applyGrabCutMask(refinedMask)
-                updateRouterLogic(autoSelectModel = true)
-                Toast.makeText(this, "✨ Deep Mask Refiner (${latency}ms)", Toast.LENGTH_SHORT).show()
+            if (src != null && roughMask != null) {
+                val (refined, latency) = GrabCutEngine.refineMaskSnapToEdges(src, roughMask)
+                canvasView.applyGrabCutMask(refined)
+                updateRouterLogic()
+                Toast.makeText(this, "✨ Mask snapped to edges in ${latency}ms", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Please paint with Brush or create a Box mask first", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please paint a rough mask first", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -156,16 +193,20 @@ class MainActivity : AppCompatActivity() {
             updateRouterLogic()
         }
 
-        findViewById<Button>(R.id.btnZoomIn).setOnClickListener {
-            canvasView.zoomIn()
+        findViewById<Button>(R.id.chipClean)?.setOnClickListener {
+            etPromptPositive.setText("seamless clean background, natural texture, highly realistic")
         }
-
-        findViewById<Button>(R.id.btnZoomOut).setOnClickListener {
-            canvasView.zoomOut()
+        findViewById<Button>(R.id.chipWood)?.setOnClickListener {
+            etPromptPositive.setText("smooth polished wood surface, warm natural indoor lighting")
         }
-
-        findViewById<Button>(R.id.btnZoomReset).setOnClickListener {
-            canvasView.resetZoom()
+        findViewById<Button>(R.id.chipNature)?.setOnClickListener {
+            etPromptPositive.setText("lush green foliage and leaves, sharp natural texture")
+        }
+        findViewById<Button>(R.id.chipWater)?.setOnClickListener {
+            etPromptPositive.setText("crystal clear water surface with gentle ripples")
+        }
+        findViewById<Button>(R.id.chipApple)?.setOnClickListener {
+            etPromptPositive.setText("fresh crisp red apple, highly detailed, studio lighting")
         }
 
         findViewById<Button>(R.id.btnLoadSample)?.setOnClickListener {
@@ -178,22 +219,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showSamplePickerDialog() {
-        // Direct sample loading on Android 15 (Scoped Storage compliant)
         val internalDir = File(filesDir, "samples")
         val samplesDir = File(getExternalFilesDir(null), "samples")
         val altDir = File("/sdcard/Android/data/com.qualcomm.qidk.inpaint/files/samples")
+        val v3Dir = File("/sdcard/Android/data/com.qualcomm.qidk.inpaint.v3/files/samples")
+        val v2Dir = File("/sdcard/Android/data/com.qualcomm.qidk.inpaint.v2/files/samples")
         val picDir = File("/sdcard/Pictures/Inpainting102")
-        val targetDir = when {
-            internalDir.exists() && internalDir.isDirectory && (internalDir.listFiles()?.isNotEmpty() == true) -> internalDir
-            samplesDir.exists() && samplesDir.isDirectory && (samplesDir.listFiles()?.isNotEmpty() == true) -> samplesDir
-            altDir.exists() && altDir.isDirectory && (altDir.listFiles()?.isNotEmpty() == true) -> altDir
-            picDir.exists() && picDir.isDirectory && (picDir.listFiles()?.isNotEmpty() == true) -> picDir
-            internalDir.exists() && internalDir.isDirectory -> internalDir
-            samplesDir.exists() && samplesDir.isDirectory -> samplesDir
-            altDir.exists() && altDir.isDirectory -> altDir
-            picDir.exists() && picDir.isDirectory -> picDir
-            else -> null
-        }
+        val picDirAlt = File("/sdcard/Pictures/Inpainting")
+        val lamaDir = File("/data/local/tmp/lama/samples")
+        val candidates = listOf(internalDir, samplesDir, altDir, v3Dir, v2Dir, picDir, picDirAlt, lamaDir)
+        val targetDir = candidates.firstOrNull { it.exists() && it.isDirectory && (it.listFiles()?.isNotEmpty() == true) }
+            ?: candidates.firstOrNull { it.exists() && it.isDirectory }
 
         if (targetDir == null) {
             Toast.makeText(this, "Samples directory not found on device.", Toast.LENGTH_LONG).show()
@@ -265,18 +301,14 @@ class MainActivity : AppCompatActivity() {
         val internalDir = File(filesDir, "samples")
         val samplesDir = File(getExternalFilesDir(null), "samples")
         val altDir = File("/sdcard/Android/data/com.qualcomm.qidk.inpaint/files/samples")
+        val v3Dir = File("/sdcard/Android/data/com.qualcomm.qidk.inpaint.v3/files/samples")
+        val v2Dir = File("/sdcard/Android/data/com.qualcomm.qidk.inpaint.v2/files/samples")
         val picDir = File("/sdcard/Pictures/Inpainting102")
-        val targetDir = when {
-            internalDir.exists() && internalDir.isDirectory && File(internalDir, "001.png").exists() -> internalDir
-            samplesDir.exists() && samplesDir.isDirectory && File(samplesDir, "001.png").exists() -> samplesDir
-            altDir.exists() && altDir.isDirectory && File(altDir, "001.png").exists() -> altDir
-            picDir.exists() && picDir.isDirectory && File(picDir, "001.png").exists() -> picDir
-            internalDir.exists() && internalDir.isDirectory -> internalDir
-            samplesDir.exists() && samplesDir.isDirectory -> samplesDir
-            altDir.exists() && altDir.isDirectory -> altDir
-            picDir.exists() && picDir.isDirectory -> picDir
-            else -> null
-        }
+        val picDirAlt = File("/sdcard/Pictures/Inpainting")
+        val lamaDir = File("/data/local/tmp/lama/samples")
+        val candidates = listOf(internalDir, samplesDir, altDir, v3Dir, v2Dir, picDir, picDirAlt, lamaDir)
+        val targetDir = candidates.firstOrNull { it.exists() && it.isDirectory && File(it, "001.png").exists() }
+            ?: candidates.firstOrNull { it.exists() && it.isDirectory && (it.listFiles()?.isNotEmpty() == true) }
 
         if (targetDir != null) {
             val s001 = File(targetDir, "001.png")
@@ -307,6 +339,8 @@ class MainActivity : AppCompatActivity() {
         currentBitmap = scaled
         canvasView.setSourceBitmap(scaled)
         updateRouterLogic()
+        // V3 Eager Pre-caching: Serialize image to live_img_v3.raw in background immediately
+        OnDeviceProcessDriver.eagerPrecacheImage(scaled)
     }
 
     private fun loadBitmapFromUri(uri: Uri) {
@@ -320,7 +354,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateRouterLogic(autoSelectModel: Boolean = false) {
+    private fun updateRouterLogic() {
         val src = canvasView.getSourceBitmap() ?: return
         val mask = canvasView.getMaskBitmap()
 
@@ -333,18 +367,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         routerBadgeText.setTextColor(color)
-        routerBadgeText.text = "🎯 AUTO-SELECTED: ${decision.recommendedModel} (${decision.ruleTriggered})"
+        routerBadgeText.text = "🎯 RECOMMENDED: ${decision.recommendedModel} (${decision.ruleTriggered})"
         routerJustificationText.text = decision.justification
-
-        if (autoSelectModel) {
-            val targetIdx = when (decision.recommendedModel) {
-                "MIGAN" -> 1
-                "LAMA" -> 2
-                "AOTGAN" -> 3
-                else -> 1
-            }
-            modelSpinner.setSelection(targetIdx)
-        }
     }
 
     private fun runInpainting() {
@@ -353,6 +377,21 @@ class MainActivity : AppCompatActivity() {
 
         if (src == null) {
             Toast.makeText(this, "Please select an image first", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Check if user has painted or selected a mask
+        var hasMask = false
+        val maskPixels = IntArray(mask.width * mask.height)
+        mask.getPixels(maskPixels, 0, mask.width, 0, 0, mask.width, mask.height)
+        for (c in maskPixels) {
+            if (Color.red(c) > 128) {
+                hasMask = true
+                break
+            }
+        }
+        if (!hasMask) {
+            Toast.makeText(this, "Please draw a mask with Brush or select a Box first", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -376,22 +415,43 @@ class MainActivity : AppCompatActivity() {
             else -> "MIGAN"
         }
 
+        val posPrompt = etPromptPositive.text.toString().trim()
+        val negPrompt = etPromptNegative.text.toString().trim()
+
+        val clickTimestamp = android.os.SystemClock.elapsedRealtime()
+
         Thread {
             try {
-                val telemetry = OnDeviceProcessDriver.executeInference(src, mask, targetModel)
+                val telemetry = OnDeviceProcessDriver.executeInference(src, mask, targetModel, posPrompt, negPrompt)
                 runOnUiThread {
+                    val clickToScreenMs = android.os.SystemClock.elapsedRealtime() - clickTimestamp
                     progressBar.visibility = View.GONE
                     btnRunInpaint.isEnabled = true
                     modelSpinner.isEnabled = true
                     resultImageView.setImageBitmap(telemetry.resultBitmap)
                     telemetryCard.visibility = View.VISIBLE
+
+                    val powerStr = if (telemetry.powerWatts != null) "%.2f W".format(telemetry.powerWatts) else "N/A"
+                    val energyStr = if (telemetry.energyJoules != null) "%.2f J".format(telemetry.energyJoules) else "N/A"
+                    val currentStr = if (telemetry.rawCurrentUa != null) "%d µA (%.1f mA)".format(telemetry.rawCurrentUa, telemetry.rawCurrentUa / 1000.0) else "N/A"
+                    val voltageStr = if (telemetry.rawVoltageUv != null) "%.3f V".format(telemetry.rawVoltageUv / 1e6) else "N/A"
+                    val deltaSign = if (telemetry.thermalDeltaC >= 0) "+" else ""
+                    val deltaStr = "%s%.2f °C".format(deltaSign, telemetry.thermalDeltaC)
+                    val tempRangeStr = "%.1f °C ➔ %.1f °C".format(telemetry.startTempC, telemetry.endTempC)
+                    val stagingStr = if (telemetry.stagingLatencyMs <= 2) "0 ms (Pre-cached ⚡)" else "${telemetry.stagingLatencyMs} ms"
+
                     telemetryText.text = """
-                        Status: ${telemetry.executionMode}
-                        Model Executed: ${telemetry.modelName}
-                        Latency: ${telemetry.latencyMs} ms
-                        Active Energy: ${telemetry.energyJoules} Joules
-                        Active Power: ${telemetry.powerWatts} Watts
-                        Thermal Delta: +${telemetry.thermalDeltaC} °C
+                        Model: ${telemetry.modelName}
+                        Backend: ${telemetry.executionMode}
+                        Click-to-Screen Latency: ${clickToScreenMs} ms
+                        NPU Engine Execution: ${telemetry.engineLatencyMs} ms
+                        Input Staging Overhead: $stagingStr
+                        Active Power: $powerStr
+                        Active Energy: $energyStr
+                        Battery Current: $currentStr
+                        Battery Voltage: $voltageStr
+                        Peak Temperature: $tempRangeStr
+                        Thermal Delta: $deltaStr
                     """.trimIndent()
                     Toast.makeText(this, "✨ Inpainting complete with ${telemetry.modelName}", Toast.LENGTH_SHORT).show()
                 }
