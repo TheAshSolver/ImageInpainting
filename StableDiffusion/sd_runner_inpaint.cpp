@@ -272,54 +272,23 @@ bool readRawFloats(const std::string& path, std::vector<float>& buf, size_t expe
 }
 
 void downsampleMaskNearest(const std::vector<float>& mask512, std::vector<float>& mask64) {
-    mask64.assign(64 * 64, 0.0f);
+    mask64.resize(64 * 64);
     for (int h = 0; h < 64; ++h) {
         for (int w = 0; w < 64; ++w) {
-            float sum = 0.0f;
-            for (int dh = 0; dh < 8; ++dh) {
-                for (int dw = 0; dw < 8; ++dw) {
-                    sum += (mask512[(h * 8 + dh) * 512 + (w * 8 + dw)] > 0.5f) ? 1.0f : 0.0f;
-                }
-            }
-            mask64[h * 64 + w] = (sum / 64.0f > 0.25f) ? 1.0f : 0.0f;
+            mask64[h * 64 + w] = (mask512[(h * 8) * 512 + (w * 8)] > 0.5f) ? 1.0f : 0.0f;
         }
     }
 }
 
 int main(int argc, char** argv) {
-    std::string userPrompt = "clean high quality photograph, natural textures, seamless realistic scene";
-    std::string negPrompt  = "painting, drawing, illustration, glitch, deformed, mutated, cross-eyed, ugly, disfigured, text, watermark, signature, blurry, artifact";
-    int numSteps = 12;
-    float guidanceScale = 7.5f;
+    int numSteps = (argc > 2) ? std::atoi(argv[2]) : 12;
+    float guidanceScale = 2.0f;
     std::string outputPath = "sd_output.png";
-
-    if (argc > 1 && strlen(argv[1]) > 0) {
-        userPrompt = argv[1];
-    }
-    if (argc > 2 && strlen(argv[2]) > 0) {
-        char* endPtr = nullptr;
-        long val = std::strtol(argv[2], &endPtr, 10);
-        if (endPtr && *endPtr == '\0' && val > 0) {
-            numSteps = static_cast<int>(val);
-        } else {
-            negPrompt = argv[2];
-        }
-    }
-    if (argc > 3) {
-        int s = std::atoi(argv[3]);
-        if (s > 0) numSteps = s;
-    }
-    if (argc > 4) {
-        float g = std::atof(argv[4]);
-        if (g > 0.0f) guidanceScale = g;
-    }
 
     std::cout << "==========================================================" << std::endl;
     std::cout << "SD 1.5 Inpainting on Qualcomm Snapdragon 8 Elite (QIDK)" << std::endl;
     std::cout << "Scheduler: DPM-Solver++ (2M) with Karras Sigmas" << std::endl;
     std::cout << "Target Steps: " << numSteps << " | Guidance Scale: " << guidanceScale << std::endl;
-    std::cout << "Positive Prompt: \"" << userPrompt << "\"" << std::endl;
-    std::cout << "Negative Prompt: \"" << negPrompt << "\"" << std::endl;
     std::cout << "==========================================================" << std::endl;
 
     const float TE_OUT_SCALE         = 0.0009303585393354297f;
@@ -426,7 +395,8 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    // Using userPrompt and negPrompt parsed from CLI arguments
+    std::string userPrompt = (argc > 1) ? argv[1] : "photograph of a beautiful empty scene, highest quality settings";
+    std::string negPrompt  = "painting, drawing, illustration, glitch, deformed, mutated, cross-eyed, ugly, disfigured";
 
     std::vector<int32_t> promptTokens = tokenizer.encode(userPrompt);
     std::vector<int32_t> uncondTokens = tokenizer.encode(negPrompt);

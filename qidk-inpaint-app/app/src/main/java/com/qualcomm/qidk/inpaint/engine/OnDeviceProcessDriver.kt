@@ -287,18 +287,9 @@ object OnDeviceProcessDriver {
             val runnerName = if (isInefficientSd) "Stable Diffusion 1.5 (Inefficient RePaint)" else "Stable Diffusion 1.5 (Inpainting - DPM 12-step)"
             val execMode = if (isInefficientSd) "Qualcomm Hexagon NPU (HTP v79 Live Euler)" else "Qualcomm Hexagon NPU (HTP v79 Live DPM++)"
 
-            // Positive prompt fallback if user left it blank: photographic restoration
-            val finalPosPrompt = positivePrompt.trim().ifEmpty {
-                "cinematic photo restoration, high quality photorealistic scene"
-            }
-
-            // Negative prompt fallback if user left it blank: standard negative conditioning
-            val finalNegPrompt = negativePrompt.trim().ifEmpty {
-                "painting, drawing, illustration, glitch, deformed, mutated, cross-eyed, ugly, disfigured, text, watermark, signature, blurry, artifact"
-            }
-
+            // Direct user prompt (default empty string '' allows pure structural restoration without hallucinating external concepts)
+            val finalPosPrompt = positivePrompt.trim()
             val sanitizedPos = finalPosPrompt.replace("\"", "\\\"").replace("'", "\\'")
-            val sanitizedNeg = finalNegPrompt.replace("\"", "\\\"").replace("'", "\\'")
 
             return try {
                 val sdDir = File(DEVICE_SD_DIR)
@@ -320,25 +311,28 @@ object OnDeviceProcessDriver {
                 maskRaw.setReadable(true, false)
                 maskRaw.setWritable(true, false)
 
-                // Pass dual prompts: argv[1] = positive, argv[2] = negative
                 val cmd = arrayOf(
                     "/system/bin/sh", "-c",
                     "cd $DEVICE_SD_DIR && " +
                     "export LD_LIBRARY_PATH=$DEVICE_SD_DIR:\$LD_LIBRARY_PATH && " +
                     "export ADSP_LIBRARY_PATH='$DEVICE_SD_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp' && " +
                     "rm -f sd_output.png 2>/dev/null; " +
-                    "$runnerBin \"$sanitizedPos\" \"$sanitizedNeg\" 12 2.0"
+                    "$runnerBin \"$sanitizedPos\"; " +
+                    "RET=\$?; chmod 666 sd_output.png image.raw mask.raw 2>/dev/null; exit \$RET"
                 )
 
                 val startTemp = readPeakTemperatureC()
                 val tracker = HardwareTelemetryTracker()
                 tracker.start()
 
+                val processStart = System.currentTimeMillis()
                 val process = ProcessBuilder(*cmd).redirectErrorStream(true).start()
                 val logText = process.inputStream.bufferedReader().readText()
                 val exitCode = process.waitFor()
-                android.util.Log.d("OnDeviceProcessDriver", "$runnerBin exit=$exitCode: $logText")
+                val engineLatency = System.currentTimeMillis() - processStart
                 val totalLatency = System.currentTimeMillis() - startTime
+                val stagingLatency = (totalLatency - engineLatency).coerceAtLeast(0L)
+                android.util.Log.d("OnDeviceProcessDriver", "$runnerBin exit=$exitCode engineLatency=${engineLatency}ms: $logText")
                 val endTemp = readPeakTemperatureC()
                 val (realPower, realEnergy, realDelta) = tracker.stop(totalLatency, startTemp, endTemp)
                 val rawCurrent = readActiveCurrentUa()
@@ -351,6 +345,8 @@ object OnDeviceProcessDriver {
                         modelName = runnerName,
                         executionMode = execMode,
                         latencyMs = totalLatency,
+                        engineLatencyMs = engineLatency,
+                        stagingLatencyMs = stagingLatency,
                         energyJoules = realEnergy,
                         powerWatts = realPower,
                         thermalDeltaC = realDelta,
@@ -411,12 +407,18 @@ object OnDeviceProcessDriver {
         val stagingStart = System.currentTimeMillis()
         val inputDir = File(DEVICE_LAMA_DIR, "input_v3")
         if (!inputDir.exists()) inputDir.mkdirs()
+        inputDir.setReadable(true, false)
+        inputDir.setWritable(true, false)
+        inputDir.setExecutable(true, false)
 
         val rawImgFile = File(inputDir, "live_img_v3.raw")
         val rawMaskFile = File(inputDir, "live_mask_v3.raw")
         val listFile = File(DEVICE_LAMA_DIR, "live_input_v3.txt")
-        val outDir = File("/tmp/app_live_output_v3")
+        val outDir = File(DEVICE_LAMA_DIR, "app_live_output_v3")
         if (!outDir.exists()) outDir.mkdirs()
+        outDir.setReadable(true, false)
+        outDir.setWritable(true, false)
+        outDir.setExecutable(true, false)
 
         // 1. Image Staging: Check if already pre-cached in background
         val imageMatches = isImagePrecached && rawImgFile.exists() && (precachedImageRef === image || (precachedImageGenId != -1 && precachedImageGenId == image.generationId))
@@ -512,10 +514,10 @@ object OnDeviceProcessDriver {
                     "export ADSP_LIBRARY_PATH='$DEVICE_LAMA_DIR/dsp/lib;$DEVICE_LAMA_DIR/dsp;/dsp'; " +
                     "export PATH=\$PATH:$DEVICE_LAMA_DIR; " +
                     "cd $DEVICE_LAMA_DIR && " +
-                    "mkdir -p /tmp/app_live_output_v3 && " +
-                    "rm -f /tmp/app_live_output_v3/Result_0/*.raw 2>/dev/null; " +
-                    "./snpe-net-run --container $dlcName --input_list live_input_v3.txt --output_dir /tmp/app_live_output_v3 $runtimeFlag $initCacheFlag --perf_profile burst --profiling_level off --priority_hint critical; " +
-                    "RET=\$?; chmod -R 777 /tmp/app_live_output_v3 2>/dev/null; exit \$RET"
+                    "mkdir -p $DEVICE_LAMA_DIR/app_live_output_v3 && " +
+                    "rm -f $DEVICE_LAMA_DIR/app_live_output_v3/Result_0/*.raw 2>/dev/null; " +
+                    "./snpe-net-run --container $dlcName --input_list live_input_v3.txt --output_dir $DEVICE_LAMA_DIR/app_live_output_v3 $runtimeFlag $initCacheFlag --perf_profile burst --profiling_level off --priority_hint critical; " +
+                    "RET=\$?; chmod -R 777 $DEVICE_LAMA_DIR/app_live_output_v3 $DEVICE_LAMA_DIR/input_v3 2>/dev/null; exit \$RET"
                 )
                 val process = ProcessBuilder(*cmd).redirectErrorStream(true).start()
                 fallbackLogText = process.inputStream.bufferedReader().readText()
