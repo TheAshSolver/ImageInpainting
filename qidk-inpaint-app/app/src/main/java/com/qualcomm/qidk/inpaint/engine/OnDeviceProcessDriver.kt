@@ -327,7 +327,7 @@ object OnDeviceProcessDriver {
                     "export LD_LIBRARY_PATH=$DEVICE_SD_DIR:\$LD_LIBRARY_PATH && " +
                     "export ADSP_LIBRARY_PATH='$DEVICE_SD_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp' && " +
                     "rm -f sd_output.png 2>/dev/null; " +
-                    "$runnerBin \"$sanitizedPos\" \"$sanitizedNeg\""
+                    "$runnerBin \"$sanitizedPos\" \"$sanitizedNeg\" 12 7.5"
                 )
 
                 val startTemp = readPeakTemperatureC()
