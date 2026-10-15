@@ -287,9 +287,9 @@ object OnDeviceProcessDriver {
             val runnerName = if (isInefficientSd) "Stable Diffusion 1.5 (Inefficient RePaint)" else "Stable Diffusion 1.5 (Inpainting - DPM 12-step)"
             val execMode = if (isInefficientSd) "Qualcomm Hexagon NPU (HTP v79 Live Euler)" else "Qualcomm Hexagon NPU (HTP v79 Live DPM++)"
 
-            // Positive prompt fallback if user left it blank: clean photographic completion
+            // Positive prompt fallback if user left it blank: photographic restoration
             val finalPosPrompt = positivePrompt.trim().ifEmpty {
-                "clean high quality photograph, natural textures, seamless realistic scene"
+                "cinematic photo restoration, high quality photorealistic scene"
             }
 
             // Negative prompt fallback if user left it blank: standard negative conditioning
@@ -327,7 +327,7 @@ object OnDeviceProcessDriver {
                     "export LD_LIBRARY_PATH=$DEVICE_SD_DIR:\$LD_LIBRARY_PATH && " +
                     "export ADSP_LIBRARY_PATH='$DEVICE_SD_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp' && " +
                     "rm -f sd_output.png 2>/dev/null; " +
-                    "$runnerBin \"$sanitizedPos\" \"$sanitizedNeg\" 12 7.5"
+                    "$runnerBin \"$sanitizedPos\" \"$sanitizedNeg\" 12 2.0"
                 )
 
                 val startTemp = readPeakTemperatureC()
