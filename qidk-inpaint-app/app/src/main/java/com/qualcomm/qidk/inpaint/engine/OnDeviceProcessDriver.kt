@@ -287,14 +287,14 @@ object OnDeviceProcessDriver {
             val runnerName = if (isInefficientSd) "Stable Diffusion 1.5 (Inefficient RePaint)" else "Stable Diffusion 1.5 (Inpainting - DPM 12-step)"
             val execMode = if (isInefficientSd) "Qualcomm Hexagon NPU (HTP v79 Live Euler)" else "Qualcomm Hexagon NPU (HTP v79 Live DPM++)"
 
-            // Positive prompt fallback if user left it blank
+            // Positive prompt fallback if user left it blank: clean photographic completion
             val finalPosPrompt = positivePrompt.trim().ifEmpty {
-                "photograph of a beautiful empty scene, highest quality settings"
+                "clean high quality photograph, natural textures, seamless realistic scene"
             }
 
-            // Negative prompt fallback if user left it blank
+            // Negative prompt fallback if user left it blank: standard negative conditioning
             val finalNegPrompt = negativePrompt.trim().ifEmpty {
-                "painting, drawing, illustration, glitch, deformed, mutated, cross-eyed, ugly, disfigured"
+                "painting, drawing, illustration, glitch, deformed, mutated, cross-eyed, ugly, disfigured, text, watermark, signature, blurry, artifact"
             }
 
             val sanitizedPos = finalPosPrompt.replace("\"", "\\\"").replace("'", "\\'")
