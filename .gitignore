@@ -1,6 +1,7 @@
 # Qualcomm binary model containers & builds
 *.dlc
 /StableDiffusion/build
+/StableDiffusion/sd_qidk_runner_inpaint
 StableDiffusion/sd_runtime/
 models/StableDiffusion
 
