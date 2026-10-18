@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity() {
             "LaMa Dilated (Large Voids)",
             "AOT-GAN (Dense Texture)",
             "Stable Diffusion 1.5 (Inpainting - DPM 12-step)",
+            "Stable Diffusion 1.5 (New Inpaint - 20-step HD)",
             "Stable Diffusion 1.5 (Inefficient RePaint - Euler 20-step)"
         )
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, models)
@@ -410,6 +411,7 @@ class MainActivity : AppCompatActivity() {
             selectedOption.contains("MIGAN") -> "MIGAN"
             selectedOption.contains("LaMa") -> "LAMA"
             selectedOption.contains("AOT") -> "AOTGAN"
+            selectedOption.contains("New Inpaint") || selectedOption.contains("HD") -> "SD_NEW_INPAINT"
             selectedOption.contains("Inefficient") -> "SD_INEFFICIENT"
             selectedOption.contains("Inpainting") || selectedOption.contains("Diffusion") || selectedOption.contains("SD") -> "SD"
             else -> "MIGAN"

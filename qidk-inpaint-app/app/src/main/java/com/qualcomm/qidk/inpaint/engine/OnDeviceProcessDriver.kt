@@ -91,16 +91,46 @@ object OnDeviceProcessDriver {
         }
     }
 
+    private var dedicatedThermalZoneFile: File? = null
+
+    private fun getDedicatedThermalFile(): File {
+        dedicatedThermalZoneFile?.let { return it }
+        try {
+            val tzDir = File("/sys/class/thermal")
+            if (tzDir.exists() && tzDir.isDirectory) {
+                val tzDirs = tzDir.listFiles { f -> f.name.startsWith("thermal_zone") } ?: emptyArray()
+                for (preferredType in listOf("nsphvx-0", "nsphmx-0", "cdsp", "npu")) {
+                    for (tz in tzDirs) {
+                        val typeFile = File(tz, "type")
+                        if (typeFile.exists() && typeFile.canRead()) {
+                            val typeName = try { typeFile.readText().trim() } catch (_: Exception) { "" }
+                            if (typeName.equals(preferredType, ignoreCase = true)) {
+                                val tempF = File(tz, "temp")
+                                if (tempF.exists() && tempF.canRead()) {
+                                    dedicatedThermalZoneFile = tempF
+                                    return tempF
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (_: Exception) {}
+        val defaultTz0 = File("/sys/class/thermal/thermal_zone0/temp")
+        dedicatedThermalZoneFile = defaultTz0
+        return defaultTz0
+    }
+
     /**
-     * Reads current temperature in Celsius from thermal_zone0 directly.
+     * Reads current temperature in Celsius from the dedicated NPU / SoC thermal sensor directly.
      * Returns null if unreadable. Zero hardcoded fallback.
      */
     fun readCurrentTemperatureC(): Float? {
         return try {
-            val f = File("/sys/class/thermal/thermal_zone0/temp")
+            val f = getDedicatedThermalFile()
             if (f.exists() && f.canRead()) {
                 val t = f.readText().trim().toFloatOrNull()
-                if (t != null) t / 1000.0f else null
+                if (t != null && t > -40000 && t < 150000) t / 1000.0f else null
             } else null
         } catch (_: Exception) {
             null
@@ -108,28 +138,11 @@ object OnDeviceProcessDriver {
     }
 
     /**
-     * Reads peak temperature across all SoC thermal zones live.
-     * Returns 0.0f if no thermal zone can be read.
+     * Reads temperature from the dedicated NPU/SoC thermal sensor live.
+     * Returns 0.0f if no thermal sensor can be read.
      */
     fun readPeakTemperatureC(): Float {
-        var peak = 0.0f
-        try {
-            val tzDir = File("/sys/class/thermal")
-            if (tzDir.exists() && tzDir.isDirectory) {
-                val tzFiles = tzDir.listFiles { f -> f.name.startsWith("thermal_zone") } ?: emptyArray()
-                for (tz in tzFiles) {
-                    val tempFile = File(tz, "temp")
-                    if (tempFile.exists() && tempFile.canRead()) {
-                        val tVal = tempFile.readText().trim().toFloatOrNull()
-                        if (tVal != null && tVal > -40000 && tVal < 150000) {
-                            val c = tVal / 1000.0f
-                            if (c > peak) peak = c
-                        }
-                    }
-                }
-            }
-        } catch (_: Exception) {}
-        return if (peak > 0f) peak else (readCurrentTemperatureC() ?: 0.0f)
+        return readCurrentTemperatureC() ?: 0.0f
     }
 
     /**
@@ -257,12 +270,12 @@ object OnDeviceProcessDriver {
             }
 
             val energyJoules = if (avgPower != null) avgPower * (latencyMs / 1000.0f) else null
-            val deltaT = peakTemp - startTempC
+            val deltaT = (peakTemp - startTempC).coerceAtLeast(0.0f)
 
             return Triple(
                 avgPower?.let { String.format(java.util.Locale.US, "%.3f", it).toFloat() },
                 energyJoules?.let { String.format(java.util.Locale.US, "%.3f", it).toFloat() },
-                String.format(java.util.Locale.US, "%.1f", deltaT).toFloat()
+                String.format(java.util.Locale.US, "%.2f", deltaT).toFloat()
             )
         }
     }
@@ -277,19 +290,31 @@ object OnDeviceProcessDriver {
         val startTime = System.currentTimeMillis()
         val targetModel = modelKey.uppercase()
         val isInefficientSd = targetModel.contains("INEFFICIENT")
-        val isSd = targetModel.contains("SD") || targetModel.contains("DIFFUSION") || isInefficientSd
+        val isNewSd = targetModel.contains("NEW") || targetModel.contains("HD")
+        val isSd = targetModel.contains("SD") || targetModel.contains("DIFFUSION") || isInefficientSd || isNewSd
 
         // =====================================================================
         // 1. Stable Diffusion Pipeline (DPM-Solver++ 12/20-step on Hexagon NPU)
         // =====================================================================
         if (isSd) {
-            val runnerBin = if (isInefficientSd) "./sd_qidk_runner_inefficient" else "./sd_qidk_runner_inpaint"
-            val runnerName = if (isInefficientSd) "Stable Diffusion 1.5 (Inefficient RePaint)" else "Stable Diffusion 1.5 (Inpainting - DPM 12-step)"
-            val execMode = if (isInefficientSd) "Qualcomm Hexagon NPU (HTP v79 Live Euler)" else "Qualcomm Hexagon NPU (HTP v79 Live DPM++)"
+            val runnerBin = when {
+                isInefficientSd -> "./sd_qidk_runner_inefficient"
+                isNewSd -> "./sd_qidk_runner_inpaint_20step_cfg20"
+                else -> "./sd_qidk_runner_inpaint"
+            }
+            val runnerName = when {
+                isInefficientSd -> "Stable Diffusion 1.5 (Inefficient RePaint - Euler 20-step)"
+                isNewSd -> "Stable Diffusion 1.5 (New Inpaint - 20-step HD)"
+                else -> "Stable Diffusion 1.5 (Inpainting - DPM 12-step)"
+            }
+            val execMode = when {
+                isInefficientSd -> "Qualcomm Hexagon NPU (HTP v79 Live Euler)"
+                isNewSd -> "Qualcomm Hexagon NPU (HTP v79 Live DPM++ 20-step HD)"
+                else -> "Qualcomm Hexagon NPU (HTP v79 Live DPM++)"
+            }
 
-            // Direct user prompt (default empty string '' allows pure structural restoration without hallucinating external concepts)
-            val finalPosPrompt = positivePrompt.trim()
-            val sanitizedPos = finalPosPrompt.replace("\"", "\\\"").replace("'", "\\'")
+            val sanitizedPos = positivePrompt.trim().replace("\"", "\\\"").replace("'", "\\'")
+            val sanitizedNeg = negativePrompt.trim().replace("\"", "\\\"").replace("'", "\\'")
 
             return try {
                 val sdDir = File(DEVICE_SD_DIR)
@@ -317,7 +342,7 @@ object OnDeviceProcessDriver {
                     "export LD_LIBRARY_PATH=$DEVICE_SD_DIR:\$LD_LIBRARY_PATH && " +
                     "export ADSP_LIBRARY_PATH='$DEVICE_SD_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp' && " +
                     "rm -f sd_output.png 2>/dev/null; " +
-                    "$runnerBin \"$sanitizedPos\"; " +
+                    "$runnerBin \"$sanitizedPos\" \"$sanitizedNeg\"; " +
                     "RET=\$?; chmod 666 sd_output.png image.raw mask.raw 2>/dev/null; exit \$RET"
                 )
 
@@ -604,35 +629,88 @@ object OnDeviceProcessDriver {
         outScaled.getPixels(outPixels, 0, w, 0, 0, w, h)
         maskScaled.getPixels(maskPixels, 0, w, 0, 0, w, h)
 
-        val maskWeights = FloatArray(w * h)
+        // 1. Binary mask: 1.0f for hole pixels, 0.0f for background
+        val maskBin = FloatArray(w * h)
         for (i in 0 until (w * h)) {
-            maskWeights[i] = if (isHolePixel(maskPixels[i])) 1.0f else 0.0f
+            maskBin[i] = if (isHolePixel(maskPixels[i])) 1.0f else 0.0f
         }
 
-        // Fast separable 3x3 box blur on mask weights for a clean, seamless transition at hole boundary
-        val blurredMask = FloatArray(w * h)
-        val tempMask = FloatArray(w * h)
-
+        // 2. Fast separable 2-px dilation (radius 2)
+        // Horizontal dilation pass
+        val dilH = FloatArray(w * h)
         for (y in 0 until h) {
             val yOffset = y * w
             for (x in 0 until w) {
-                val x0 = if (x > 0) x - 1 else 0
-                val x1 = x
-                val x2 = if (x < w - 1) x + 1 else w - 1
-                tempMask[yOffset + x] = (maskWeights[yOffset + x0] + maskWeights[yOffset + x1] + maskWeights[yOffset + x2]) / 3.0f
+                var maxVal = 0.0f
+                val minDx = if (x >= 2) -2 else -x
+                val maxDx = if (x <= w - 3) 2 else (w - 1 - x)
+                for (dx in minDx..maxDx) {
+                    val v = maskBin[yOffset + x + dx]
+                    if (v > maxVal) {
+                        maxVal = v
+                        if (maxVal == 1.0f) break
+                    }
+                }
+                dilH[yOffset + x] = maxVal
             }
         }
+        // Vertical dilation pass
+        val dilatedMask = FloatArray(w * h)
         for (x in 0 until w) {
             for (y in 0 until h) {
-                val y0 = if (y > 0) y - 1 else 0
-                val y1 = y
-                val y2 = if (y < h - 1) y + 1 else h - 1
-                blurredMask[y * w + x] = (tempMask[y0 * w + x] + tempMask[y1 * w + x] + tempMask[y2 * w + x]) / 3.0f
+                var maxVal = 0.0f
+                val minDy = if (y >= 2) -2 else -y
+                val maxDy = if (y <= h - 3) 2 else (h - 1 - y)
+                for (dy in minDy..maxDy) {
+                    val v = dilH[(y + dy) * w + x]
+                    if (v > maxVal) {
+                        maxVal = v
+                        if (maxVal == 1.0f) break
+                    }
+                }
+                dilatedMask[y * w + x] = maxVal
+            }
+        }
+
+        // 3. Fast separable 5-tap Gaussian blur ([1, 4, 6, 4, 1] / 16.0f)
+        // Horizontal blur pass
+        val blurH = FloatArray(w * h)
+        for (y in 0 until h) {
+            val yOffset = y * w
+            for (x in 0 until w) {
+                val xm2 = (x - 2).coerceIn(0, w - 1)
+                val xm1 = (x - 1).coerceIn(0, w - 1)
+                val xp1 = (x + 1).coerceIn(0, w - 1)
+                val xp2 = (x + 2).coerceIn(0, w - 1)
+                blurH[yOffset + x] = (
+                    dilatedMask[yOffset + xm2] * 1.0f +
+                    dilatedMask[yOffset + xm1] * 4.0f +
+                    dilatedMask[yOffset + x]   * 6.0f +
+                    dilatedMask[yOffset + xp1] * 4.0f +
+                    dilatedMask[yOffset + xp2] * 1.0f
+                ) / 16.0f
+            }
+        }
+        // Vertical blur pass -> featheredMask
+        val featheredMask = FloatArray(w * h)
+        for (x in 0 until w) {
+            for (y in 0 until h) {
+                val ym2 = (y - 2).coerceIn(0, h - 1)
+                val ym1 = (y - 1).coerceIn(0, h - 1)
+                val yp1 = (y + 1).coerceIn(0, h - 1)
+                val yp2 = (y + 2).coerceIn(0, h - 1)
+                featheredMask[y * w + x] = (
+                    blurH[ym2 * w + x] * 1.0f +
+                    blurH[ym1 * w + x] * 4.0f +
+                    blurH[y * w + x]   * 6.0f +
+                    blurH[yp1 * w + x] * 4.0f +
+                    blurH[yp2 * w + x] * 1.0f
+                ) / 16.0f
             }
         }
 
         for (i in 0 until (w * h)) {
-            val maskNorm = blurredMask[i]
+            val maskNorm = featheredMask[i]
             val invNorm = 1.0f - maskNorm
 
             val origC = origPixels[i]
