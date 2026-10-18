@@ -4,34 +4,71 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    
-    <!-- Dark navy background -->
+
+    <!-- 1. Deep Cyber Obsidian Background (Emerald Tinted) -->
     <path
-        android:fillColor="#0F172A"
+        android:fillColor="#04130D"
         android:pathData="M0,0h108v108h-108z" />
-        
-    <!-- Rounded inner badge -->
-    <path
-        android:fillColor="#1E293B"
-        android:pathData="M16,16h76a8,8 0 0 1 8,8v60a8,8 0 0 1 -8,8h-76a8,8 0 0 1 -8,-8v-60a8,8 0 0 1 8,-8z" />
 
-    <!-- Cyan glow circle -->
+    <!-- 2. Neon Rounded Squircle Outer Shield (Vibrant Emerald Outline) -->
     <path
-        android:fillColor="#0284C7"
-        android:pathData="M54,54m-28,0a28,28 0 1,0 56,0a28,28 0 1,0 -56,0" />
+        android:fillColor="#06281B"
+        android:strokeColor="#10B981"
+        android:strokeWidth="3.5"
+        android:pathData="M26,6 h56 a20,20 0 0 1 20,20 v56 a20,20 0 0 1 -20,20 h-56 a20,20 0 0 1 -20,-20 v-56 a20,20 0 0 1 20,-20 z" />
 
-    <!-- Qualcomm Gold Lightning Bolt -->
+    <!-- 3. Inner Deep Jade Plate (Mint Green Outline) -->
     <path
-        android:fillColor="#F59E0B"
-        android:pathData="M56,24 L36,54 L52,54 L48,84 L72,50 L56,50 Z" />
+        android:fillColor="#0A3F2C"
+        android:strokeColor="#34D399"
+        android:strokeWidth="1.5"
+        android:pathData="M27,12 h54 a15,15 0 0 1 15,15 v54 a15,15 0 0 1 -15,15 h-54 a15,15 0 0 1 -15,-15 v-54 a15,15 0 0 1 15,-15 z" />
 
-    <!-- Magic Inpainting Sparkle 1 -->
-    <path
-        android:fillColor="#38BDF8"
-        android:pathData="M78,28 L80,34 L86,36 L80,38 L78,44 L76,38 L70,36 L76,34 Z" />
-
-    <!-- Magic Inpainting Sparkle 2 -->
+    <!-- 4. Top AI Diffusion Sparkle (White) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M30,68 L31.5,72 L36,73.5 L31.5,75 L30,79.5 L28.5,75 L24,73.5 L28.5,72 Z" />
+        android:pathData="M82,16 L84,22 L90,24 L84,26 L82,32 L80,26 L74,24 L80,22 Z" />
+
+    <!-- 5. Top Left Sparkle (Golden Amber) -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M24,20 L25.5,24 L30,25.5 L25.5,27 L24,31 L22.5,27 L18,25.5 L22.5,24 Z" />
+
+    <!-- 6. Qualcomm Snapdragon Lightning / Flare (Gold) -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M54,18 L58,26 L54,24 L50,32 L56,32 L48,42 L52,30 L46,30 Z" />
+
+    <!-- 7. Bold High-Contrast "V" Glyph (White core, Emerald body) -->
+    <path
+        android:fillColor="#00F5A0"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.2"
+        android:pathData="M18,38 L34,76 H44 L60,38 H48 L39,61 L30,38 Z" />
+
+    <!-- 8. Bold High-Contrast "3" Glyph (White core, Emerald body) -->
+    <path
+        android:fillColor="#00F5A0"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.2"
+        android:pathData="M64,38 H88 V54 H74 V58 H88 V76 H64 V68 H78 V62 H72 V50 H78 V44 H64 Z" />
+
+    <!-- 9. Bottom Pill Chip [V3 NPU LIVE] -->
+    <path
+        android:fillColor="#065F46"
+        android:strokeColor="#10B981"
+        android:strokeWidth="1.2"
+        android:pathData="M28,83 h52 a6,6 0 0 1 6,6 v3 a6,6 0 0 1 -6,6 h-52 a6,6 0 0 1 -6,-6 v-3 a6,6 0 0 1 6,-6 z" />
+
+    <!-- Pill Dots / Inpainting Accents -->
+    <path
+        android:fillColor="#00F5A0"
+        android:pathData="M38,89 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,89 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M70,89 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+
 </vector>

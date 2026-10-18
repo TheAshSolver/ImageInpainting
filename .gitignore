@@ -1,6 +1,7 @@
 # Qualcomm binary model containers & builds
 *.dlc
 /StableDiffusion/build
+/StableDiffusion/sd_qidk_runner_inpaint
 StableDiffusion/sd_runtime/
 models/StableDiffusion
 
@@ -49,3 +50,18 @@ qidk-inpaint-app/decompiled/
 __pycache__/
 *.pyc
 */__pycache__/
+
+# Local benchmark comparison runs and temporary outputs
+Benchmark/output/sd_comparison/
+Benchmark/output/migan_hardware_diagnostics/
+comparison_results/
+generated_charts/
+qidk_outputs/
+qidk-inpaint-app/decompiled/
+qidk-inpaint-app/app/.cxx/
+qidk_backup/
+qidk_retrieved_models/
+snpe_resident_daemon
+test_snpe_shell
+
+phone_*.png

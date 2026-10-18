@@ -109,9 +109,11 @@ class InpaintCanvasView @JvmOverloads constructor(
     private val currentPath = Path()
     private val canonicalPath = Path()
 
-    // Two-Tap Bounding Box Selection
+    // Two-Tap and Drag Bounding Box Selection
     private var firstCorner: PointF? = null
     private var currentBBox: RectF? = null
+    private var dragPreviewBox: RectF? = null
+    private var boxTouchDown: PointF? = null
     var onBoxSelectionStatusChanged: ((String) -> Unit)? = null
     var onMaskChanged: (() -> Unit)? = null
 
@@ -122,6 +124,8 @@ class InpaintCanvasView @JvmOverloads constructor(
     fun resetBoxSelection() {
         firstCorner = null
         currentBBox = null
+        dragPreviewBox = null
+        boxTouchDown = null
         invalidate()
     }
 
@@ -137,8 +141,15 @@ class InpaintCanvasView @JvmOverloads constructor(
         maskPaint.strokeWidth = radius * 2f
     }
 
+    private var cachedProcessedMask: Bitmap? = null
+    private var isMaskDirty: Boolean = true
+
     fun setSourceBitmap(bitmap: Bitmap) {
-        sourceBitmap = Bitmap.createScaledBitmap(bitmap, canonicalSize, canonicalSize, true)
+        sourceBitmap = if (bitmap.width == canonicalSize && bitmap.height == canonicalSize) {
+            bitmap
+        } else {
+            Bitmap.createScaledBitmap(bitmap, canonicalSize, canonicalSize, true)
+        }
         clearMask(saveUndo = false)
         invalidate()
     }
@@ -146,6 +157,9 @@ class InpaintCanvasView @JvmOverloads constructor(
     fun getSourceBitmap(): Bitmap? = sourceBitmap
 
     fun getMaskBitmap(): Bitmap {
+        if (!isMaskDirty && cachedProcessedMask != null) {
+            return cachedProcessedMask!!
+        }
         // Returns 512x512 mask where 255=hole, 0=background
         val outBitmap = Bitmap.createBitmap(canonicalSize, canonicalSize, Bitmap.Config.ARGB_8888)
         val pixels = IntArray(canonicalSize * canonicalSize)
@@ -158,6 +172,8 @@ class InpaintCanvasView @JvmOverloads constructor(
             pixels[i] = if (isHole) Color.WHITE else Color.BLACK
         }
         outBitmap.setPixels(pixels, 0, canonicalSize, 0, 0, canonicalSize, canonicalSize)
+        cachedProcessedMask = outBitmap
+        isMaskDirty = false
         return outBitmap
     }
 
@@ -172,6 +188,7 @@ class InpaintCanvasView @JvmOverloads constructor(
         maskBitmap = scaled.copy(Bitmap.Config.ARGB_8888, true)
         maskCanvas = Canvas(maskBitmap)
         resetBoxSelection()
+        isMaskDirty = true
         invalidate()
         onMaskChanged?.invoke()
     }
@@ -191,6 +208,7 @@ class InpaintCanvasView @JvmOverloads constructor(
         }
         maskBitmap.setPixels(pixels, 0, canonicalSize, 0, 0, canonicalSize, canonicalSize)
         resetBoxSelection()
+        isMaskDirty = true
         invalidate()
         onMaskChanged?.invoke()
     }
@@ -199,6 +217,7 @@ class InpaintCanvasView @JvmOverloads constructor(
         if (saveUndo) saveUndoState()
         maskBitmap.eraseColor(Color.TRANSPARENT)
         resetBoxSelection()
+        isMaskDirty = true
         invalidate()
         onMaskChanged?.invoke()
     }
@@ -209,6 +228,7 @@ class InpaintCanvasView @JvmOverloads constructor(
             maskBitmap = previous.copy(Bitmap.Config.ARGB_8888, true)
             maskCanvas = Canvas(maskBitmap)
             resetBoxSelection()
+            isMaskDirty = true
             invalidate()
             onMaskChanged?.invoke()
         }
@@ -221,19 +241,32 @@ class InpaintCanvasView @JvmOverloads constructor(
         undoStack.add(maskBitmap.copy(Bitmap.Config.ARGB_8888, false))
     }
 
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                parent?.requestDisallowInterceptTouchEvent(true)
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                parent?.requestDisallowInterceptTouchEvent(false)
+            }
+        }
+        return super.dispatchTouchEvent(event)
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        parent?.requestDisallowInterceptTouchEvent(true)
         val x = event.x
         val y = event.y
 
         // Map View coordinates to 512x512 canonical coordinates
         val scaleX = canonicalSize.toFloat() / width.toFloat()
         val scaleY = canonicalSize.toFloat() / height.toFloat()
-        val cx = x * scaleX
-        val cy = y * scaleY
+        val cx = (x * scaleX).coerceIn(0f, (canonicalSize - 1).toFloat())
+        val cy = (y * scaleY).coerceIn(0f, (canonicalSize - 1).toFloat())
 
         when (currentMode) {
             Mode.BRUSH -> {
-                when (event.action) {
+                when (event.actionMasked) {
                     MotionEvent.ACTION_DOWN -> {
                         saveUndoState()
                         currentPath.reset()
@@ -263,6 +296,7 @@ class InpaintCanvasView @JvmOverloads constructor(
                         maskCanvas.drawPath(canonicalPath, maskPaint)
                         currentPath.reset()
                         canonicalPath.reset()
+                        isMaskDirty = true
                         invalidate()
                         onMaskChanged?.invoke()
                         return true
@@ -270,32 +304,84 @@ class InpaintCanvasView @JvmOverloads constructor(
                 }
             }
             Mode.BOUNDING_BOX -> {
-                when (event.action) {
+                when (event.actionMasked) {
                     MotionEvent.ACTION_DOWN -> {
+                        boxTouchDown = PointF(cx, cy)
+                        if (firstCorner != null) {
+                            val fc = firstCorner!!
+                            dragPreviewBox = RectF(
+                                min(fc.x, cx), min(fc.y, cy),
+                                max(fc.x, cx), max(fc.y, cy)
+                            )
+                            invalidate()
+                        }
+                        return true
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        if (firstCorner != null) {
+                            val fc = firstCorner!!
+                            dragPreviewBox = RectF(
+                                min(fc.x, cx), min(fc.y, cy),
+                                max(fc.x, cx), max(fc.y, cy)
+                            )
+                            invalidate()
+                        } else if (boxTouchDown != null) {
+                            val down = boxTouchDown!!
+                            val dx = abs(cx - down.x)
+                            val dy = abs(cy - down.y)
+                            if (dx >= 8f || dy >= 8f) {
+                                dragPreviewBox = RectF(
+                                    min(down.x, cx), min(down.y, cy),
+                                    max(down.x, cx), max(down.y, cy)
+                                )
+                                invalidate()
+                            }
+                        }
                         return true
                     }
                     MotionEvent.ACTION_UP -> {
+                        val preview = dragPreviewBox
+                        if (preview != null && preview.width() >= 10f && preview.height() >= 10f) {
+                            currentBBox = RectF(preview)
+                            saveUndoState()
+                            maskCanvas.drawRect(currentBBox!!, maskFillPaint)
+                            isMaskDirty = true
+                            firstCorner = null
+                            dragPreviewBox = null
+                            boxTouchDown = null
+                            val bw = currentBBox!!.width().toInt()
+                            val bh = currentBBox!!.height().toInt()
+                            onBoxSelectionStatusChanged?.invoke("Box masked (${bw}x${bh} px). Ready to inpaint")
+                            onMaskChanged?.invoke()
+                            invalidate()
+                            return true
+                        }
+
+                        dragPreviewBox = null
+                        boxTouchDown = null
+
                         if (firstCorner == null) {
                             firstCorner = PointF(cx, cy)
                             currentBBox = null
-                            onBoxSelectionStatusChanged?.invoke("Tap opposite corner to complete box")
+                            onBoxSelectionStatusChanged?.invoke("Corner 1 set. Tap opposite corner to complete box")
                             invalidate()
                         } else {
                             val p1 = firstCorner!!
-                            val x1 = p1.x
-                            val y1 = p1.y
-                            val x2 = cx
-                            val y2 = cy
+                            val left = min(p1.x, cx)
+                            val top = min(p1.y, cy)
+                            val right = max(p1.x, cx)
+                            val bottom = max(p1.y, cy)
 
-                            val left = min(x1, x2)
-                            val top = min(y1, y2)
-                            val right = max(x1, x2)
-                            val bottom = max(y1, y2)
-
-                            if (abs(right - left) >= 8f && abs(bottom - top) >= 8f) {
+                            if (abs(right - left) >= 10f && abs(bottom - top) >= 10f) {
                                 currentBBox = RectF(left, top, right, bottom)
+                                saveUndoState()
+                                maskCanvas.drawRect(currentBBox!!, maskFillPaint)
+                                isMaskDirty = true
                                 firstCorner = null
-                                onBoxSelectionStatusChanged?.invoke("Box selected (${(right - left).toInt()}x${(bottom - top).toInt()} px). Tap 'Auto GrabCut'")
+                                val bw = (right - left).toInt()
+                                val bh = (bottom - top).toInt()
+                                onBoxSelectionStatusChanged?.invoke("Box masked (${bw}x${bh} px). Ready to inpaint")
+                                onMaskChanged?.invoke()
                                 invalidate()
                             } else {
                                 firstCorner = PointF(cx, cy)
@@ -326,36 +412,24 @@ class InpaintCanvasView @JvmOverloads constructor(
         // 2. Draw translucent red overlay mask
         canvas.drawBitmap(maskBitmap, null, dstRect, overlayPaint)
 
-        // 3. Draw Two-Tap Bounding Box UI if active
+        // 3. Draw Bounding Box UI if in Bounding Box mode
         if (currentMode == Mode.BOUNDING_BOX) {
             val viewScaleX = width.toFloat() / canonicalSize.toFloat()
             val viewScaleY = height.toFloat() / canonicalSize.toFloat()
 
-            // A. Point 1 set: draw cyan crosshair & circle
-            firstCorner?.let { p ->
-                val fx = p.x * viewScaleX
-                val fy = p.y * viewScaleY
-                val crossSize = 28f
-                canvas.drawLine(fx - crossSize, fy, fx + crossSize, fy, firstCornerPaint)
-                canvas.drawLine(fx, fy - crossSize, fx, fy + crossSize, firstCornerPaint)
-                canvas.drawCircle(fx, fy, 14f, firstCornerPaint)
-                canvas.drawCircle(fx, fy, 5f, firstCornerFill)
-
-                drawBanner(canvas, "📍 Corner 1 set. Tap opposite corner to complete box")
-            }
-
-            // B. Full box formed: draw translucent fill, dashed outline, and corner handles
-            currentBBox?.let { box ->
+            val activeBox = dragPreviewBox ?: currentBBox
+            if (activeBox != null) {
+                // Draw full box: translucent fill, dashed outline, and corner handles
                 val viewRect = RectF(
-                    box.left * viewScaleX,
-                    box.top * viewScaleY,
-                    box.right * viewScaleX,
-                    box.bottom * viewScaleY
+                    activeBox.left * viewScaleX,
+                    activeBox.top * viewScaleY,
+                    activeBox.right * viewScaleX,
+                    activeBox.bottom * viewScaleY
                 )
                 canvas.drawRect(viewRect, bboxFillPaint)
                 canvas.drawRect(viewRect, bboxPaint)
 
-                // Draw corner handles
+                // Corner handles
                 val handleRadius = 10f
                 val corners = arrayOf(
                     PointF(viewRect.left, viewRect.top),
@@ -368,12 +442,26 @@ class InpaintCanvasView @JvmOverloads constructor(
                     canvas.drawCircle(pt.x, pt.y, handleRadius, cornerHandleStroke)
                 }
 
-                drawBanner(canvas, "✅ Box: ${box.width().toInt()}×${box.height().toInt()} px — Tap '⚡ Auto GrabCut'")
-            }
+                if (dragPreviewBox != null) {
+                    drawBanner(canvas, "📐 Sizing box: ${activeBox.width().toInt()}×${activeBox.height().toInt()} px")
+                } else {
+                    drawBanner(canvas, "✅ Box masked: ${activeBox.width().toInt()}×${activeBox.height().toInt()} px — Ready to inpaint")
+                }
+            } else if (firstCorner != null) {
+                // Corner 1 set: draw cyan crosshair & circle
+                val p = firstCorner!!
+                val fx = p.x * viewScaleX
+                val fy = p.y * viewScaleY
+                val crossSize = 28f
+                canvas.drawLine(fx - crossSize, fy, fx + crossSize, fy, firstCornerPaint)
+                canvas.drawLine(fx, fy - crossSize, fx, fy + crossSize, firstCornerPaint)
+                canvas.drawCircle(fx, fy, 14f, firstCornerPaint)
+                canvas.drawCircle(fx, fy, 5f, firstCornerFill)
 
-            // C. Initial prompt if no tap recorded yet
-            if (firstCorner == null && currentBBox == null) {
-                drawBanner(canvas, "🔲 Box Mode: Tap 1st corner of unwanted object")
+                drawBanner(canvas, "📍 Corner 1 set. Tap opposite corner to complete box")
+            } else {
+                // Initial prompt
+                drawBanner(canvas, "🔲 Box Mode: Drag across object or tap 2 corners")
             }
         }
     }
