@@ -11,6 +11,7 @@ import android.graphics.drawable.GradientDrawable
 import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
+import android.view.GestureDetector
 import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewGroup
@@ -193,10 +194,18 @@ class SingleImageViewport(
         }
 
     var onTransformChanged: ((scale: Float, panX: Float, panY: Float) -> Unit)? = null
+    var onDoubleTapReset: (() -> Unit)? = null
 
     private var lastX = 0f
     private var lastY = 0f
     private var isScaling = false
+
+    private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+        override fun onDoubleTap(e: MotionEvent): Boolean {
+            onDoubleTapReset?.invoke()
+            return true
+        }
+    })
 
     private val scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScale(d: ScaleGestureDetector): Boolean {
@@ -218,6 +227,7 @@ class SingleImageViewport(
     override fun onTouchEvent(e: MotionEvent): Boolean {
         parent?.requestDisallowInterceptTouchEvent(true)
         scaleDetector.onTouchEvent(e)
+        gestureDetector.onTouchEvent(e)
 
         when (e.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
@@ -267,12 +277,14 @@ class SingleImageViewport(
         c.drawRoundRect(pillRect, 8 * density, 8 * density, pillPaint)
         c.drawText(badgeTitle, pillRect.left + padH, pillRect.bottom - padV - 4f, tagPaint)
 
-        // Draw bottom-right zoom indicator
-        val zoomText = "🔍 x%.1f".format(mapper.userScale)
-        val zoomW = zoomBadgePaint.measureText(zoomText)
-        val zoomRect = RectF(width - zoomW - 24 * density, height - 38 * density, width - 10 * density, height - 10 * density)
-        c.drawRoundRect(zoomRect, 6 * density, 6 * density, pillPaint)
-        c.drawText(zoomText, zoomRect.left + 7 * density, zoomRect.bottom - 7 * density, zoomBadgePaint)
+        // Draw bottom-right zoom indicator only when zoomed
+        if (mapper.userScale > 1.02f) {
+            val zoomText = "🔍 x%.1f".format(mapper.userScale)
+            val zoomW = zoomBadgePaint.measureText(zoomText)
+            val zoomRect = RectF(width - zoomW - 24 * density, height - 38 * density, width - 10 * density, height - 10 * density)
+            c.drawRoundRect(zoomRect, 6 * density, 6 * density, pillPaint)
+            c.drawText(zoomText, zoomRect.left + 7 * density, zoomRect.bottom - 7 * density, zoomBadgePaint)
+        }
     }
 }
 
@@ -326,37 +338,51 @@ class SynchronizedCompareLayout(context: Context) : FrameLayout(context) {
 
         addView(root)
 
+        // Floating Compact Reset Zoom (1:1) pill button anchored at Top-Right
+        btnResetZoom = Button(context).apply {
+            text = "🔍 1:1 Reset"
+            setTextColor(Color.WHITE)
+            textSize = 11f
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            minHeight = 0
+            minWidth = 0
+            minimumHeight = 0
+            minimumWidth = 0
+            includeFontPadding = false
+            setPadding((11 * density).toInt(), (5 * density).toInt(), (11 * density).toInt(), (5 * density).toInt())
+            val gd = GradientDrawable().apply {
+                setColor(Color.parseColor("#E60F172A"))
+                cornerRadius = 14 * density
+                setStroke((1 * density).toInt(), Color.parseColor("#38BDF8"))
+            }
+            background = gd
+            elevation = 6 * density
+            alpha = 0.40f
+            isEnabled = false
+            setOnClickListener { resetTransform() }
+        }
+
+        val lpBtn = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
+            gravity = Gravity.TOP or Gravity.END
+            topMargin = (8 * density).toInt()
+            marginEnd = (10 * density).toInt()
+        }
+        addView(btnResetZoom, lpBtn)
+
         // Synchronize transformations in lockstep
         val onSyncTransform = { scale: Float, panX: Float, panY: Float ->
             topViewport.mapper.setUserTransform(scale, panX, panY)
             bottomViewport.mapper.setUserTransform(scale, panX, panY)
             topViewport.invalidate()
             bottomViewport.invalidate()
+            val isZoomed = scale > 1.02f || abs(panX) > 2f || abs(panY) > 2f
+            btnResetZoom.alpha = if (isZoomed) 1.0f else 0.40f
+            btnResetZoom.isEnabled = isZoomed
         }
         topViewport.onTransformChanged = onSyncTransform
         bottomViewport.onTransformChanged = onSyncTransform
-
-        // Floating Reset Zoom (1:1) button
-        btnResetZoom = Button(context).apply {
-            text = "🔍 Reset Zoom (1:1)"
-            setTextColor(Color.WHITE)
-            textSize = 12f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setPadding((14 * density).toInt(), (6 * density).toInt(), (14 * density).toInt(), (6 * density).toInt())
-            val gd = GradientDrawable().apply {
-                setColor(Color.parseColor("#E61E293B"))
-                cornerRadius = 16 * density
-                setStroke((1 * density).toInt(), Color.parseColor("#38BDF8"))
-            }
-            background = gd
-            setOnClickListener { resetTransform() }
-        }
-
-        val lpBtn = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
-            gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-            bottomMargin = (12 * density).toInt()
-        }
-        addView(btnResetZoom, lpBtn)
+        topViewport.onDoubleTapReset = { resetTransform() }
+        bottomViewport.onDoubleTapReset = { resetTransform() }
     }
 
     fun resetTransform() {
@@ -364,6 +390,8 @@ class SynchronizedCompareLayout(context: Context) : FrameLayout(context) {
         bottomViewport.mapper.setUserTransform(1f, 0f, 0f)
         topViewport.invalidate()
         bottomViewport.invalidate()
+        btnResetZoom.alpha = 0.40f
+        btnResetZoom.isEnabled = false
     }
 }
 
