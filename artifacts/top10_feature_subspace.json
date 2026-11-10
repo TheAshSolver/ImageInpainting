@@ -1,0 +1,109 @@
+{
+  "analysis_date": "2026-11-04T03:29:57.456179",
+  "total_features_evaluated": 50,
+  "total_variance_explained_by_top10_pct": 84.17,
+  "top_10_features": [
+    {
+      "rank": 1,
+      "feature": "mask_area_ratio_rho",
+      "composite_importance": 0.5938,
+      "lpips_importance": 0.9535,
+      "psnr_importance": 0.0541,
+      "variance_share_pct": 59.38,
+      "cumulative_variance_pct": 59.38
+    },
+    {
+      "rank": 2,
+      "feature": "boundary_laplacian_mean",
+      "composite_importance": 0.0429,
+      "lpips_importance": 0.0014,
+      "psnr_importance": 0.1053,
+      "variance_share_pct": 4.29,
+      "cumulative_variance_pct": 63.67
+    },
+    {
+      "rank": 3,
+      "feature": "mean_hole_depth",
+      "composite_importance": 0.0344,
+      "lpips_importance": 0.0036,
+      "psnr_importance": 0.0804,
+      "variance_share_pct": 3.44,
+      "cumulative_variance_pct": 67.1
+    },
+    {
+      "rank": 4,
+      "feature": "context_lab_delta_e_mean",
+      "composite_importance": 0.034,
+      "lpips_importance": 0.0008,
+      "psnr_importance": 0.0837,
+      "variance_share_pct": 3.4,
+      "cumulative_variance_pct": 70.5
+    },
+    {
+      "rank": 5,
+      "feature": "std_hole_depth",
+      "composite_importance": 0.0313,
+      "lpips_importance": 0.0016,
+      "psnr_importance": 0.0758,
+      "variance_share_pct": 3.13,
+      "cumulative_variance_pct": 73.63
+    },
+    {
+      "rank": 6,
+      "feature": "boundary_canny_density",
+      "composite_importance": 0.0246,
+      "lpips_importance": 0.0019,
+      "psnr_importance": 0.0586,
+      "variance_share_pct": 2.46,
+      "cumulative_variance_pct": 76.08
+    },
+    {
+      "rank": 7,
+      "feature": "mask_extent",
+      "composite_importance": 0.0245,
+      "lpips_importance": 0.0033,
+      "psnr_importance": 0.0563,
+      "variance_share_pct": 2.45,
+      "cumulative_variance_pct": 78.53
+    },
+    {
+      "rank": 8,
+      "feature": "max_inscribed_radius_rmax",
+      "composite_importance": 0.023,
+      "lpips_importance": 0.0019,
+      "psnr_importance": 0.0547,
+      "variance_share_pct": 2.3,
+      "cumulative_variance_pct": 80.83
+    },
+    {
+      "rank": 9,
+      "feature": "boundary_laplacian_var",
+      "composite_importance": 0.0176,
+      "lpips_importance": 0.0006,
+      "psnr_importance": 0.0431,
+      "variance_share_pct": 1.76,
+      "cumulative_variance_pct": 82.59
+    },
+    {
+      "rank": 10,
+      "feature": "boundary_edge_density_sobel",
+      "composite_importance": 0.0158,
+      "lpips_importance": 0.0009,
+      "psnr_importance": 0.0382,
+      "variance_share_pct": 1.58,
+      "cumulative_variance_pct": 84.17
+    }
+  ],
+  "selected_feature_names": [
+    "mask_area_ratio_rho",
+    "boundary_laplacian_mean",
+    "mean_hole_depth",
+    "context_lab_delta_e_mean",
+    "std_hole_depth",
+    "boundary_canny_density",
+    "mask_extent",
+    "max_inscribed_radius_rmax",
+    "boundary_laplacian_var",
+    "boundary_edge_density_sobel"
+  ]
+}

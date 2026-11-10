@@ -157,7 +157,7 @@ public:
     CLIPTokenizer() {
         init_byte_encoder();
         // Regex splitting pattern used by OpenAI CLIP
-        pattern = std::regex(R"(<\|startoftext\|>|<\|endoftext\|>|'s|'t|'re|'ve|'m|'ll|'d|[^\s\w]+|\w+|\s+)");
+        pattern = std::regex(R"(<\|startoftext\|>|<\|endoftext\|>|'s|'t|'re|'ve|'m|'ll|'d|[a-z]+|[0-9]|[^\sa-z0-9]+)");
     }
 
     bool load(const std::string& vocab_path, const std::string& merges_path) {
@@ -183,7 +183,7 @@ public:
             encoder[key] = id;
         }
 
-        std::cout << "[CLIPTokenizer] Loaded " << encoder.size() << " vocab entries from " << vocab_path << std::endl;
+        std::cerr << "[CLIPTokenizer] Loaded " << encoder.size() << " vocab entries from " << vocab_path << std::endl;
         if (encoder.empty()) {
             std::cerr << "Warning: No vocabulary entries found in " << vocab_path << std::endl;
             return false;
@@ -208,7 +208,7 @@ public:
             }
         }
 
-        std::cout << "[CLIPTokenizer] Loaded " << bpe_ranks.size() << " BPE merge rules from " << merges_path << std::endl;
+        std::cerr << "[CLIPTokenizer] Loaded " << bpe_ranks.size() << " BPE merge rules from " << merges_path << std::endl;
         return true;
     }
 

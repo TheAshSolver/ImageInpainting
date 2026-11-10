@@ -1,10 +1,19 @@
 package com.qualcomm.qidk.inpaint.engine
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.util.Log
 import java.io.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import qidk.fix.Backend
+import qidk.fix.BackendMatrix
+import qidk.fix.ClassicalAlgo
+import qidk.fix.ClassicalInpainter
+import qidk.fix.ModelFamily
+import qidk.fix.SdRunnerCommand
+import qidk.fix.SmartPrompt
 
 data class InferenceTelemetry(
     val modelName: String,
@@ -289,46 +298,36 @@ object OnDeviceProcessDriver {
         image: Bitmap,
         mask: Bitmap,
         modelKey: String,
+        backend: Backend = Backend.NPU,
         positivePrompt: String = "",
         negativePrompt: String = "",
-        runtimeHardware: String = "NPU"
+        smartPrompt: Boolean = false,
+        seed: Int = 42
     ): InferenceTelemetry {
         val startTime = System.currentTimeMillis()
         val targetModel = modelKey.uppercase()
 
         // =====================================================================
-        // 0. Algorithmic Inpainting Pipeline (Telea FMM & Navier-Stokes PDE)
+        // 0. Algorithmic Inpainting Suite (Telea, Navier-Stokes, Criminisi, Biharmonic)
         // =====================================================================
-        val isTelea = targetModel.contains("TELEA") || targetModel.contains("MARCHING")
-        val isNS = targetModel.contains("NAVIER") || targetModel.contains("STREAMLINES")
-        val isHybrid = targetModel.contains("HYBRID")
-        val isAlgo = isTelea || isNS || (isHybrid && getMaskAreaRatio(mask) < 0.05f)
-
-        if (isAlgo) {
+        ClassicalAlgo.fromText(modelKey)?.let { algo ->
             val t0 = System.currentTimeMillis()
-            val startTemp = readPeakTemperatureC()
-            val tracker = HardwareTelemetryTracker()
-            tracker.start()
-
-            val inpaintedBmp = executeAlgorithmicInpaint(image, mask, isNS)
-            val resultBmp = compositeInpaintResult(image, inpaintedBmp, mask)
-
-            val totalLatency = System.currentTimeMillis() - t0
-            val endTemp = readPeakTemperatureC()
-            val (realPower, realEnergy, realDelta) = tracker.stop(totalLatency, startTemp, endTemp)
-
+            val img = if (image.width == 512 && image.height == 512) image else Bitmap.createScaledBitmap(image, 512, 512, true)
+            val out = ClassicalInpainter.run(img, ClassicalInpainter.holeBytes(mask), algo)
+            val total = System.currentTimeMillis() - t0
+            Log.i("QIDK.Run", "model=${out.used} backend=CPU engineMs=${out.ms} note=${out.note ?: "-"}")
             return InferenceTelemetry(
-                modelName = if (isNS) "Navier-Stokes (Fluid Streamlines)" else "Fast Marching Method (Telea)",
-                executionMode = "Qualcomm Oryon CPU (OpenCV Multi-threaded NEON)",
-                latencyMs = totalLatency,
-                energyJoules = realEnergy ?: ((totalLatency / 1000f) * 1.5f),
-                powerWatts = realPower ?: 1.5f,
-                thermalDeltaC = realDelta,
-                startTempC = startTemp,
-                endTempC = endTemp,
+                modelName = out.used,
+                executionMode = "Oryon ARM64 CPU" + (out.note?.let { " ($it)" } ?: ""),
+                latencyMs = total,
+                energyJoules = null,
+                powerWatts = null,
+                thermalDeltaC = 0f,
+                startTempC = readPeakTemperatureC(),
+                endTempC = readPeakTemperatureC(),
                 rawCurrentUa = readActiveCurrentUa(),
                 rawVoltageUv = readActiveVoltageUv(),
-                resultBitmap = resultBmp
+                resultBitmap = out.bitmap
             )
         }
 
@@ -337,17 +336,14 @@ object OnDeviceProcessDriver {
         val isSd = targetModel.contains("SD") || targetModel.contains("DIFFUSION") || isInefficientSd || is20Step
 
         // =====================================================================
-        // 1. Stable Diffusion Pipeline (16-ch DPM 20-step Backup & 12-step on Hexagon NPU)
+        // 1. Stable Diffusion Pipeline (16-ch DPM on Hexagon NPU)
         // =====================================================================
         if (isSd) {
+            BackendMatrix.require(ModelFamily.SD15, backend)
             val runnerBin = if (is20Step) {
-                if (File(DEVICE_SD_DIR, "sd_qidk_runner_inpaint_20step").exists()) {
-                    "./sd_qidk_runner_inpaint_20step"
-                } else if (File(DEVICE_SD_DIR, "sd_qidk_runner_inpaint_cfg75").exists()) {
-                    "./sd_qidk_runner_inpaint_cfg75"
-                } else {
-                    "./sd_qidk_runner_inpaint"
-                }
+                if (File(DEVICE_SD_DIR, "sd_qidk_runner_inpaint_20step").exists()) "./sd_qidk_runner_inpaint_20step"
+                else if (File(DEVICE_SD_DIR, "sd_qidk_runner_inpaint_cfg75").exists()) "./sd_qidk_runner_inpaint_cfg75"
+                else "./sd_qidk_runner_inpaint"
             } else if (isInefficientSd) {
                 "./sd_qidk_runner_inefficient"
             } else {
@@ -360,140 +356,142 @@ object OnDeviceProcessDriver {
             } else {
                 "Stable Diffusion 1.5 (Inpainting - DPM 12-step)"
             }
-            val execMode = if (is20Step) {
-                "Qualcomm Hexagon NPU (HTP v79 DPM++ 20-step 16-ch)"
-            } else if (isInefficientSd) {
-                "Qualcomm Hexagon NPU (HTP v79 Live Euler)"
-            } else {
-                "Qualcomm Hexagon NPU (HTP v79 Live DPM++)"
+            val execMode = "Qualcomm Hexagon NPU (HTP v79 Live DPM++)"
+
+            if (!File(DEVICE_SD_DIR, "sd_cli_v2").exists()) {
+                throw IllegalStateException("The SD runner on the device is the old build (no --prompt/--steps command line). Push the rebuilt runners (Phase 4.3).")
             }
-
-            // Positive prompt fallback if user left it blank
-            val finalPosPrompt = positivePrompt.trim().ifEmpty {
-                "clean high quality photograph, natural textures, seamless realistic scene"
-            }
-
-            // Negative prompt fallback if user left it blank
-            val finalNegPrompt = negativePrompt.trim().ifEmpty {
-                "painting, drawing, illustration, glitch, deformed, mutated, cross-eyed, ugly, disfigured, text, watermark, signature, blurry, artifact"
-            }
-
-            val sanitizedPos = finalPosPrompt.replace("\"", "\\\"").replace("'", "\\'")
-            val sanitizedNeg = finalNegPrompt.replace("\"", "\\\"").replace("'", "\\'")
-
-            return try {
-                val sdDir = File(DEVICE_SD_DIR)
-                val imgRaw = File(sdDir, "image.raw")
-                val maskRaw = File(sdDir, "mask.raw")
-                val outPng = File(sdDir, "sd_output.png")
-
-                if (imgRaw.exists()) {
-                    imgRaw.delete()
-                }
-                if (maskRaw.exists()) {
-                    maskRaw.delete()
-                }
-                if (outPng.exists()) {
-                    outPng.delete()
-                }
-
-                val imgBytes = bitmapToFloat32Raw(image)
-                val maskBytes = maskToFloat32Raw(mask, inverted = false)
-
-                FileOutputStream(imgRaw).use { it.write(imgBytes) }
-                FileOutputStream(maskRaw).use { it.write(maskBytes) }
-                imgRaw.setReadable(true, false)
-                imgRaw.setWritable(true, false)
-                maskRaw.setReadable(true, false)
-                maskRaw.setWritable(true, false)
-
-                val stepArg = if (is20Step) "20" else "8"
-                val cmd = arrayOf(
-                    "/system/bin/sh", "-c",
-                    "cd $DEVICE_SD_DIR && " +
-                    "export LD_LIBRARY_PATH=$DEVICE_SD_DIR:\$LD_LIBRARY_PATH && " +
-                    "export ADSP_LIBRARY_PATH='$DEVICE_SD_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp' && " +
-                    "rm -f sd_output.png 2>/dev/null; " +
-                    "umask 000; " +
-                    "$runnerBin \"$sanitizedPos\" \"$stepArg\" 2.0; " +
-                    "RET=\$?; chmod 666 sd_output.png 2>/dev/null; exit \$RET"
-                )
-
-                val startTemp = readPeakTemperatureC()
-                val tracker = HardwareTelemetryTracker()
-                tracker.start()
-
-                val process = ProcessBuilder(*cmd).redirectErrorStream(true).start()
-                val logText = process.inputStream.bufferedReader().readText()
-                val exitCode = process.waitFor()
-                android.util.Log.d("OnDeviceProcessDriver", "$runnerBin exit=$exitCode: $logText")
-                val totalLatency = System.currentTimeMillis() - startTime
-                val endTemp = readPeakTemperatureC()
-                val (realPower, realEnergy, realDelta) = tracker.stop(totalLatency, startTemp, endTemp)
-                val rawCurrent = readActiveCurrentUa()
-                val rawVoltage = readActiveVoltageUv()
-
-                if (exitCode == 0 && outPng.exists() && outPng.lastModified() >= startTime) {
-                    val rawBmp = android.graphics.BitmapFactory.decodeFile(outPng.absolutePath)
-                    val resultBmp = if (rawBmp != null) compositeInpaintResult(image, rawBmp, mask) else image
-                    InferenceTelemetry(
-                        modelName = runnerName,
-                        executionMode = execMode,
-                        latencyMs = totalLatency,
-                        energyJoules = realEnergy,
-                        powerWatts = realPower,
-                        thermalDeltaC = realDelta,
-                        startTempC = startTemp,
-                        endTempC = endTemp,
-                        rawCurrentUa = rawCurrent,
-                        rawVoltageUv = rawVoltage,
-                        resultBitmap = resultBmp
-                    )
+            val steps = if (is20Step || isInefficientSd) 20 else 12
+            var pos = positivePrompt.trim()
+            var neg = negativePrompt.trim()
+            val isSmart = smartPrompt || targetModel.contains("SMART")
+            if (isSmart) {
+                val img512 = if (image.width == 512 && image.height == 512) image else Bitmap.createScaledBitmap(image, 512, 512, true)
+                val msk512 = if (mask.width == 512 && mask.height == 512) mask else Bitmap.createScaledBitmap(mask, 512, 512, false)
+                val argb = IntArray(512 * 512).also { img512.getPixels(it, 0, 512, 0, 0, 512, 512) }
+                val d = SmartPrompt.analyse(argb, ClassicalInpainter.holeBytes(msk512), 512, 512)
+                if (d != null) {
+                    Log.i("QIDK.SD", "context: $d")
+                    pos = SmartPrompt.build(pos, d)
+                    neg = SmartPrompt.negative(neg)
                 } else {
-                    throw RuntimeException("$runnerName failed on NPU (exit $exitCode):\n$logText")
+                    Log.w("QIDK.SD", "smart prompt: no usable context ring, using the user's text unchanged")
                 }
-            } catch (e: Exception) {
-                android.util.Log.e("OnDeviceProcessDriver", "SD execution error", e)
-                throw e
+            }
+            if (neg.isEmpty()) neg = "painting, drawing, illustration, glitch, deformed, mutated, cross-eyed, ugly, disfigured"
+            Log.i("QIDK.SD", "runner=$runnerBin steps=$steps cfg=2.0 seed=$seed smart=$isSmart pos='$pos' neg='$neg'")
+
+            val sdDir = File(DEVICE_SD_DIR)
+            val imgRaw = File(sdDir, "image.raw")
+            val maskRaw = File(sdDir, "mask.raw")
+            val outPng = File(sdDir, "sd_output.png")
+
+            if (imgRaw.exists()) imgRaw.delete()
+            if (maskRaw.exists()) maskRaw.delete()
+            if (outPng.exists()) outPng.delete()
+
+            val imgBytes = bitmapToFloat32Raw(image)
+            val maskBytes = maskToFloat32Raw(mask, inverted = false)
+
+            FileOutputStream(imgRaw).use { it.write(imgBytes) }
+            FileOutputStream(maskRaw).use { it.write(maskBytes) }
+            imgRaw.setReadable(true, false)
+            imgRaw.setWritable(true, false)
+            maskRaw.setReadable(true, false)
+            maskRaw.setWritable(true, false)
+
+            val script = SdRunnerCommand.script(
+                runnerBin, DEVICE_SD_DIR,
+                listOf(
+                    "export LD_LIBRARY_PATH=$DEVICE_SD_DIR:\$LD_LIBRARY_PATH",
+                    "export ADSP_LIBRARY_PATH='$DEVICE_SD_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp'"
+                ),
+                steps, 2.0f, seed
+            )
+
+            val startTemp = readPeakTemperatureC()
+            val tracker = HardwareTelemetryTracker()
+            tracker.start()
+
+            val pb = ProcessBuilder("/system/bin/sh", "-c", script).redirectErrorStream(true)
+            pb.environment().putAll(SdRunnerCommand.environment(pos, neg))
+            val process = pb.start()
+            val logText = process.inputStream.bufferedReader().readText()
+            val exitCode = process.waitFor()
+            Log.d("OnDeviceProcessDriver", "$runnerBin exit=$exitCode: $logText")
+            val totalLatency = System.currentTimeMillis() - startTime
+            val endTemp = readPeakTemperatureC()
+            val (realPower, realEnergy, realDelta) = tracker.stop(totalLatency, startTemp, endTemp)
+            val rawCurrent = readActiveCurrentUa()
+            val rawVoltage = readActiveVoltageUv()
+
+            if (exitCode == 0 && outPng.exists() && outPng.lastModified() >= startTime) {
+                val rawBmp = BitmapFactory.decodeFile(outPng.absolutePath)
+                val resultBmp = if (rawBmp != null) compositeInpaintResult(image, rawBmp, mask) else image
+                Log.i("QIDK.Run", "model=$runnerName backend=$backend via=sd-runner engineMs=$totalLatency")
+                return InferenceTelemetry(
+                    modelName = runnerName,
+                    executionMode = execMode,
+                    latencyMs = totalLatency,
+                    energyJoules = realEnergy,
+                    powerWatts = realPower,
+                    thermalDeltaC = realDelta,
+                    startTempC = startTemp,
+                    endTempC = endTemp,
+                    rawCurrentUa = rawCurrent,
+                    rawVoltageUv = rawVoltage,
+                    resultBitmap = resultBmp
+                )
+            } else {
+                throw RuntimeException("$runnerName failed on NPU (exit $exitCode):\n$logText")
             }
         }
 
         // =====================================================================
-        // 2. SNPE Pipeline (MIGAN, LaMa, AOT-GAN) -> ALL EXECUTED ON NPU (DSP)
+        // 2. SNPE Pipeline (MIGAN, LaMa, AOT-GAN) -> NPU / GPU / CPU
         // =====================================================================
         val isMigan = targetModel.contains("MIGAN")
         val isAot = targetModel.contains("AOT")
         val isLama = targetModel.contains("LAMA")
+        val family = when {
+            isMigan -> ModelFamily.MIGAN
+            isAot -> ModelFamily.AOT_GAN
+            isLama -> ModelFamily.LAMA
+            else -> ModelFamily.MIGAN
+        }
+        BackendMatrix.require(family, backend)
 
-        // Use pre-compiled HTP init cache if present on device to eliminate cold-start
-        val (dlcName, initCacheFlag) = when {
-            isMigan -> Pair(
-                if (File(DEVICE_LAMA_DIR, "migan_htp_v79.dlc").exists()) "migan_htp_v79.dlc" else "migan.dlc",
-                ""
-            )
-            isAot -> if (File(DEVICE_LAMA_DIR, "bench_cache_aotgan.dlc").exists()) {
-                Pair("bench_cache_aotgan.dlc", "--enable_init_cache")
-            } else {
-                Pair("aotgan.dlc", "")
-            }
-            isLama -> if (File(DEVICE_LAMA_DIR, "bench_cache_lama_dilated.dlc").exists()) {
-                Pair("bench_cache_lama_dilated.dlc", "--enable_init_cache")
-            } else {
-                Pair("lama_dilated.dlc", "")
-            }
-            else -> Pair(
-                if (File(DEVICE_LAMA_DIR, "migan_htp_v79.dlc").exists()) "migan_htp_v79.dlc" else "migan.dlc",
-                ""
-            )
+        val base = when {
+            isMigan -> "migan"
+            isAot -> "aotgan"
+            isLama -> "lama"
+            else -> "migan"
+        }
+        val daemonKey = base + when (backend) {
+            Backend.NPU -> ""
+            Backend.GPU -> "_gpu"
+            Backend.CPU -> "_cpu"
         }
 
-        // Target Silicon Backend: NPU (Default / Resident), GPU (OpenCL), or CPU (NEON)
-        val isGpu = runtimeHardware.uppercase().contains("GPU")
-        val isCpu = runtimeHardware.uppercase().contains("CPU")
-        val runtimeFlag = when {
-            isGpu -> "--use_gpu"
-            isCpu -> "--use_cpu"
-            else -> "--use_dsp"
+        val (dlcName, initCacheFlag) = when (backend) {
+            Backend.GPU, Backend.CPU -> when {
+                isMigan -> Pair("migan.dlc", "")
+                isAot -> Pair("aotgan.dlc", "")
+                isLama -> Pair("lama_dilated.dlc", "")
+                else -> Pair("migan.dlc", "")
+            }
+            Backend.NPU -> when {
+                isMigan -> Pair(if (File(DEVICE_LAMA_DIR, "migan_htp_v79.dlc").exists()) "migan_htp_v79.dlc" else "migan.dlc", "")
+                isAot -> Pair(if (File(DEVICE_LAMA_DIR, "bench_cache_aotgan.dlc").exists()) "bench_cache_aotgan.dlc" else "aotgan.dlc", if (File(DEVICE_LAMA_DIR, "bench_cache_aotgan.dlc").exists()) "--enable_init_cache" else "")
+                isLama -> Pair(if (File(DEVICE_LAMA_DIR, "bench_cache_lama_dilated.dlc").exists()) "bench_cache_lama_dilated.dlc" else "lama_dilated.dlc", if (File(DEVICE_LAMA_DIR, "bench_cache_lama_dilated.dlc").exists()) "--enable_init_cache" else "")
+                else -> Pair("migan.dlc", "")
+            }
+        }
+
+        val runtimeFlag = when (backend) {
+            Backend.GPU -> "--use_gpu"
+            Backend.CPU -> ""
+            Backend.NPU -> "--use_dsp"
         }
         val displayName = when {
             isMigan -> "MIGAN (Portraits & Speed)"
@@ -501,10 +499,10 @@ object OnDeviceProcessDriver {
             isLama -> "LaMa Dilated (Large Voids)"
             else -> targetModel
         }
-        val execMode = when {
-            isGpu -> "Qualcomm Adreno GPU (OpenCL Backend)"
-            isCpu -> "Qualcomm Oryon CPU (NEON Backend)"
-            else -> "Qualcomm Hexagon NPU (HTP v79 DSP Live)"
+        val execMode = when (backend) {
+            Backend.NPU -> "Qualcomm Hexagon NPU (HTP v79 DSP Live)"
+            Backend.GPU -> "Adreno 830 GPU (OpenCL)"
+            Backend.CPU -> "Oryon CPU (ARM64)"
         }
 
         val imgBytes = bitmapToFloat32Raw(image)
@@ -514,7 +512,6 @@ object OnDeviceProcessDriver {
             val inputDir = File(DEVICE_LAMA_DIR, "input")
             if (!inputDir.exists()) inputDir.mkdirs()
 
-            // Isolate filenames to v2 to avoid UID permission collisions across app instances
             val rawImgFile = File(inputDir, "live_img_v4.raw")
             val rawMaskFile = File(inputDir, "live_mask_v4.raw")
             val listFile = File(DEVICE_LAMA_DIR, "live_input_v4.txt")
@@ -550,44 +547,30 @@ object OnDeviceProcessDriver {
             val tracker = HardwareTelemetryTracker()
             tracker.start()
 
-            // Check if Resident FastRPC NPU Daemon is active on 127.0.0.1:55555 (only when targeting NPU)
-            val daemonKey = when {
-                (!isGpu && !isCpu) && isMigan -> "migan"
-                (!isGpu && !isCpu) && isAot -> "aotgan"
-                (!isGpu && !isCpu) && isLama -> "lama"
-                else -> null
-            }
-
-            var usedResidentDaemon = false
-            var daemonLatencyMs = 0L
+            // Check if Resident FastRPC Daemon is active on 127.0.0.1:55555
             val residentOutFile = File(outDir, "output_0.raw")
             if (!outDir.exists()) outDir.mkdirs()
 
-            if (daemonKey != null) {
-                val (daemonOk, dLat) = executeViaResidentDaemon(daemonKey, rawImgFile, rawMaskFile, residentOutFile)
-                if (daemonOk && residentOutFile.exists() && residentOutFile.length() > 0) {
-                    usedResidentDaemon = true
-                    daemonLatencyMs = dLat
-                    android.util.Log.i("OnDeviceProcessDriver", "⚡ Hexagon Resident Daemon executed $daemonKey in ${daemonLatencyMs}ms")
-                }
+            var usedResidentDaemon = false
+            var daemonLatencyMs = 0L
+
+            val (daemonOk, dLat) = executeViaResidentDaemon(daemonKey, rawImgFile, rawMaskFile, residentOutFile)
+            if (daemonOk && residentOutFile.exists() && residentOutFile.length() > 0) {
+                usedResidentDaemon = true
+                daemonLatencyMs = dLat
+                Log.i("OnDeviceProcessDriver", "⚡ Resident Daemon executed $daemonKey in ${daemonLatencyMs}ms")
             }
 
             var exitCode = 0
             var logText = ""
             if (!usedResidentDaemon) {
-                var process = ProcessBuilder(*cmd).redirectErrorStream(true).start()
+                val process = ProcessBuilder(*cmd).redirectErrorStream(true).start()
                 logText = process.inputStream.bufferedReader().readText()
                 exitCode = process.waitFor()
-                android.util.Log.d("OnDeviceProcessDriver", "snpe-net-run ($dlcName) exit=$exitCode: $logText")
+                Log.d("OnDeviceProcessDriver", "snpe-net-run ($dlcName) exit=$exitCode: $logText")
 
-                // Graceful fallback from GPU to Hexagon NPU if GPU runtime fails
-                if (exitCode != 0 && isGpu) {
-                    android.util.Log.w("OnDeviceProcessDriver", "GPU execution returned exit $exitCode, falling back to Hexagon NPU...")
-                    val fallbackCmd = cmd.clone()
-                    fallbackCmd[2] = fallbackCmd[2].replace("--use_gpu", "--use_dsp")
-                    process = ProcessBuilder(*fallbackCmd).redirectErrorStream(true).start()
-                    logText = process.inputStream.bufferedReader().readText()
-                    exitCode = process.waitFor()
+                if (exitCode != 0) {
+                    throw RuntimeException("SNPE ($dlcName) inference failed on $backend (exit code $exitCode):\n$logText")
                 }
             }
 
@@ -613,9 +596,10 @@ object OnDeviceProcessDriver {
                 val rawOutBytes = resultRawFile!!.readBytes()
                 val rawBmp = rawFloat32ToBitmap(rawOutBytes, 512, 512)
                 val resultBmp = compositeInpaintResult(image, rawBmp, mask)
+                Log.i("QIDK.Run", "model=$displayName backend=$backend via=${if (usedResidentDaemon) "daemon" else "snpe-net-run"} engineMs=${if (usedResidentDaemon) daemonLatencyMs else totalLatency}")
                 InferenceTelemetry(
                     modelName = displayName,
-                    executionMode = if (usedResidentDaemon) "Qualcomm Hexagon NPU (HTP v79 Resident CDSP FastRPC)" else execMode,
+                    executionMode = if (usedResidentDaemon && backend == Backend.NPU) "Qualcomm Hexagon NPU (HTP v79 Resident CDSP FastRPC)" else execMode,
                     latencyMs = totalLatency,
                     energyJoules = realEnergy,
                     powerWatts = realPower,
@@ -627,10 +611,10 @@ object OnDeviceProcessDriver {
                     resultBitmap = resultBmp
                 )
             } else {
-                throw RuntimeException("SNPE ($dlcName) inference failed on NPU (exit code $exitCode):\n$logText")
+                throw RuntimeException("SNPE ($dlcName) inference failed on $backend (exit code $exitCode):\n$logText")
             }
         } catch (e: Exception) {
-            android.util.Log.e("OnDeviceProcessDriver", "SNPE execution error", e)
+            Log.e("OnDeviceProcessDriver", "SNPE execution error", e)
             throw e
         }
     }

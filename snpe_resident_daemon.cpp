@@ -49,6 +49,7 @@ typedef const char* (*Util_GetLastError_fn)();
 struct ResidentModel {
     std::string modelName;
     std::string dlcPath;
+    std::string runtime;          // "dsp" (NPU), "gpu" or "cpu"
     Handle_t snpe = nullptr;
     Handle_t inputMap = nullptr;
     Handle_t outputMap = nullptr;
@@ -90,12 +91,12 @@ Util_GetLastError_fn ErrorCode_GetLastErrorString;
 
 std::unordered_map<std::string, ResidentModel> g_models;
 
-bool initSNPEModel(const std::string& key, const std::string& dlcPath) {
+bool initSNPEModel(const std::string& key, const std::string& dlcPath, const std::string& runtime) {
     if (g_models.find(key) != g_models.end()) {
         return true; // Already loaded
     }
 
-    std::cout << "[DAEMON] Loading resident model '" << key << "' from " << dlcPath << "..." << std::endl;
+    std::cout << "[DAEMON] Loading resident model '" << key << "' (" << runtime << ") from " << dlcPath << "..." << std::endl;
     Handle_t container = DlContainer_Open(dlcPath.c_str());
     if (!container) {
         std::cerr << "[DAEMON ERROR] Failed opening container: " << dlcPath << std::endl;
@@ -103,9 +104,19 @@ bool initSNPEModel(const std::string& key, const std::string& dlcPath) {
     }
 
     Handle_t builder = SNPEBuilder_Create(container);
+    int rtId = -1;
+    if (runtime == "dsp" || runtime == "DSP") rtId = 3;
+    else if (runtime == "gpu" || runtime == "GPU") rtId = 1;
+    else if (runtime == "cpu" || runtime == "CPU") rtId = 0;
+    else if (RuntimeList_StringToRuntime) rtId = RuntimeList_StringToRuntime(runtime.c_str());
+
+    if (rtId < 0) {
+        std::cerr << "[DAEMON ERROR] Unknown runtime '" << runtime << "'" << std::endl;
+        SNPEBuilder_Delete(builder);
+        return false;
+    }
     Handle_t rList = RuntimeList_Create();
-    int dspRuntime = RuntimeList_StringToRuntime("dsp");
-    RuntimeList_Add(rList, dspRuntime);
+    RuntimeList_Add(rList, rtId);       // exactly one runtime: a GPU/CPU model must never silently run on the DSP
     SNPEBuilder_SetRuntimeProcessorOrder(builder, rList);
     RuntimeList_Delete(rList);
 
@@ -125,6 +136,7 @@ bool initSNPEModel(const std::string& key, const std::string& dlcPath) {
     ResidentModel m;
     m.modelName = key;
     m.dlcPath = dlcPath;
+    m.runtime = runtime;
     m.snpe = snpe;
     m.inputMap = TensorMap_Create();
     m.outputMap = TensorMap_Create();
@@ -148,8 +160,36 @@ bool initSNPEModel(const std::string& key, const std::string& dlcPath) {
     }
 
     g_models[key] = m;
-    std::cout << "[DAEMON] ✅ Model '" << key << "' RESIDENT in FastRPC DSP memory in " << initMs << " ms! (Output: " << m.outputTensorName << ")" << std::endl;
+    std::cout << "[DAEMON] ✅ Model '" << key << "' RESIDENT on " << runtime << " in " << initMs << " ms! (Output: " << m.outputTensorName << ")" << std::endl;
     return true;
+}
+
+
+// Every key the app may send in "INFER <key> ...". <model>_gpu / <model>_cpu are loaded lazily on first use and need the
+// UNQUANTISED float DLC (the *_htp_v79 / bench_cache_* files are HTP-only). A missing file yields "ERROR model unavailable".
+struct ModelSpec { const char* key; const char* dlc; const char* runtime; };
+static const ModelSpec kModels[] = {
+    {"migan",      "/data/local/tmp/lama/migan_htp_v79.dlc",            "dsp"},
+    {"lama",       "/data/local/tmp/lama/bench_cache_lama_dilated.dlc", "dsp"},
+    {"aotgan",     "/data/local/tmp/lama/bench_cache_aotgan.dlc",       "dsp"},
+    {"migan_gpu",  "/data/local/tmp/lama/migan.dlc",                    "gpu"},
+    {"migan_cpu",  "/data/local/tmp/lama/migan.dlc",                    "cpu"},
+    {"lama_gpu",   "/data/local/tmp/lama/lama_dilated.dlc",             "gpu"},
+    {"lama_cpu",   "/data/local/tmp/lama/lama_dilated.dlc",             "cpu"},
+    {"aotgan_gpu", "/data/local/tmp/lama/aotgan.dlc",                   "gpu"},
+    {"aotgan_cpu", "/data/local/tmp/lama/aotgan.dlc",                   "cpu"},
+};
+
+bool ensureModelLoaded(const std::string& key, std::string& err) {
+    if (g_models.find(key) != g_models.end()) return true;
+    for (const ModelSpec& sp : kModels) {
+        if (key != sp.key) continue;
+        if (access(sp.dlc, R_OK) != 0) { err = std::string("model unavailable: ") + key + " (missing " + sp.dlc + ")"; return false; }
+        if (!initSNPEModel(key, sp.dlc, sp.runtime)) { err = std::string("model unavailable: ") + key + " (SNPE build failed on " + sp.runtime + ")"; return false; }
+        return true;
+    }
+    err = "Model not found: " + key;
+    return false;
 }
 
 bool executeInference(
@@ -265,12 +305,8 @@ int main(int argc, char** argv) {
     SNPE_ExecuteITensors = (SNPE_ExecuteITensors_fn)dlsym(snpeLib, "Snpe_SNPE_ExecuteITensors");
     ErrorCode_GetLastErrorString = (Util_GetLastError_fn)dlsym(snpeLib, "Snpe_ErrorCode_GetLastErrorString");
 
-    // Pre-warm and resident load MIGAN
-    initSNPEModel("migan", "/data/local/tmp/lama/migan_htp_v79.dlc");
-    // Pre-warm and resident load LaMa Dilated
-    initSNPEModel("lama", "/data/local/tmp/lama/bench_cache_lama_dilated.dlc");
-    // Pre-warm and resident load AOT-GAN
-    initSNPEModel("aotgan", "/data/local/tmp/lama/bench_cache_aotgan.dlc");
+    // Pre-warm the three NPU (DSP) models; GPU/CPU variants are loaded lazily on their first request.
+    for (const char* k : {"migan", "lama", "aotgan"}) { std::string e; ensureModelLoaded(k, e); }
 
     // Setup TCP server on 127.0.0.1:port
     int serverFd = socket(AF_INET, SOCK_STREAM, 0);
@@ -281,6 +317,9 @@ int main(int argc, char** argv) {
 
     int opt = 1;
     setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+#ifdef SO_REUSEPORT
+    setsockopt(serverFd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
+#endif
 
     sockaddr_in addr{};
     addr.sin_family = AF_INET;
@@ -328,7 +367,7 @@ int main(int argc, char** argv) {
 
                 double latency = 0.0;
                 std::string err;
-                bool ok = executeInference(modelKey, imgPath, maskPath, outPath, latency, err);
+                bool ok = ensureModelLoaded(modelKey, err) && executeInference(modelKey, imgPath, maskPath, outPath, latency, err);
                 if (ok) {
                     std::string reply = "OK " + std::to_string(latency) + "\n";
                     write(clientFd, reply.c_str(), reply.size());
@@ -338,6 +377,11 @@ int main(int argc, char** argv) {
                     write(clientFd, reply.c_str(), reply.size());
                     std::cerr << "[DAEMON] ❌ INFER '" << modelKey << "' FAILED: " << err << std::endl;
                 }
+            } else if (cmd == "STATUS") {
+                std::string reply = "OK";
+                for (const auto& kv : g_models) reply += " " + kv.first + ":" + kv.second.runtime;
+                reply += "\n";
+                write(clientFd, reply.c_str(), reply.size());
             } else if (cmd == "STOP") {
                 const char* reply = "BYE\n";
                 write(clientFd, reply, std::strlen(reply));

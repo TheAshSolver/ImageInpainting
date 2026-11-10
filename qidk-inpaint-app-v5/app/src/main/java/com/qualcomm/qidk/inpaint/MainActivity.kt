@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,13 +24,18 @@ import com.qualcomm.qidk.inpaint.utils.GrabCutEngine
 import com.qualcomm.qidk.inpaint.utils.MagicTouchEngine
 import java.io.File
 import java.io.InputStream
+import java.security.MessageDigest
+import org.opencv.android.OpenCVLoader
+import qidk.fix.*
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var canvasView: InpaintCanvasView
     private lateinit var resultImageView: ImageView
     private lateinit var modelSpinner: Spinner
-    private lateinit var runtimeSpinner: Spinner
+    private lateinit var backendSpinner: Spinner
+    val runtimeSpinner: Spinner get() = backendSpinner
+    private lateinit var srEngines: List<SrEngine>
     private lateinit var routerBadgeText: TextView
     private lateinit var routerJustificationText: TextView
     private lateinit var preloadStatusBadge: TextView
@@ -54,12 +60,22 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        try {
+            System.loadLibrary("qidk_classical")
+        } catch (t: Throwable) {
+            Log.e("MainActivity", "Failed to load qidk_classical: ${t.message}")
+        }
+        if (!OpenCVLoader.initDebug()) {
+            Log.e("MainActivity", "OpenCVLoader.initDebug() failed")
+        } else {
+            Log.i("MainActivity", "OpenCV loaded successfully")
+        }
         setContentView(R.layout.activity_main)
 
         canvasView = findViewById(R.id.inpaintCanvasView)
         resultImageView = findViewById(R.id.resultImageView)
         modelSpinner = findViewById(R.id.modelSpinner)
-        runtimeSpinner = findViewById(R.id.runtimeSpinner)
+        backendSpinner = findViewById(R.id.backendSpinner)
         routerBadgeText = findViewById(R.id.routerBadgeText)
         routerJustificationText = findViewById(R.id.routerJustificationText)
         preloadStatusBadge = findViewById(R.id.preloadStatusBadge)
@@ -70,86 +86,59 @@ class MainActivity : AppCompatActivity() {
         telemetryText = findViewById(R.id.telemetryText)
         progressBar = findViewById(R.id.progressBar)
 
-        setupRuntimeSpinner()
         setupModelSpinner()
         setupButtons()
         triggerModelPreload()
-        MediaPipeSegmenter.initialize(applicationContext)
+
+        srEngines = listOf(
+            BicubicSrEngine(),
+            TarshSrEngine(),
+            UnavailableSrEngine("migan_sr", "MIGAN 2x Checkerboard Inpainting", ModelFamily.SR_MIGAN, "benchmark recipe not ported (Phase 5.3)"),
+            UnavailableSrEngine("lama_sr", "LaMa 2x Inpainting", ModelFamily.SR_LAMA, "benchmark recipe not ported (Phase 5.3)")
+        )
+        val srPage = SuperResolutionView(this, srEngines) { canvasView.getSourceBitmap() }
+        SuperResolutionTab.install(this, srPage)
+
+        RouterRuntime.init(applicationContext)
+        registerDebugHooks()
 
         if (savedInstanceState == null) {
             loadDefaultSample()
         }
     }
 
-    private fun updateModelSpinnerForRuntime(runtime: String) {
-        val models = when {
-            runtime.contains("GPU") -> arrayOf(
-                "LaMa Dilated (Neural GPU)",
-                "MIGAN - Faces (Neural GPU)",
-                "AOT-GAN (Neural GPU)",
-                "Hybrid / Auto"
-            )
-            runtime.contains("CPU") -> arrayOf(
-                "Fast Marching (Telea - Algorithmic CPU)",
-                "Fluid Streamlines (Navier-Stokes - Algorithmic CPU)",
-                "Criminisi Exemplar (Algorithmic CPU)",
-                "Biharmonic Poisson (Algorithmic CPU)",
-                "LaMa Dilated (Neural CPU)",
-                "MIGAN - Faces (Neural CPU)",
-                "AOT-GAN (Neural CPU)",
-                "Hybrid / Auto"
-            )
-            else -> arrayOf(
-                "LaMa Dilated (Neural NPU)",
-                "MIGAN - Faces (Neural NPU)",
-                "AOT-GAN (Neural NPU)",
-                "Stable Diffusion 1.5 (Latent Diffusion)",
-                "Smart Stable Diffusion (Vision-Prompt Synthesized)",
-                "Inpainting 2x Super-Resolution",
-                "Hybrid / Auto"
-            )
-        }
-
-        val previousSelection = modelSpinner.selectedItem?.toString() ?: ""
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, models)
-        modelSpinner.adapter = adapter
-
-        // Preserve previous selection if it is feasible on the new hardware runtime
-        val matchingIdx = models.indexOfFirst {
-            val key = when {
-                it.contains("LaMa") -> "LaMa"
-                it.contains("MIGAN") -> "MIGAN"
-                it.contains("AOT") -> "AOT"
-                it.contains("Telea") -> "Telea"
-                it.contains("Navier") -> "Navier"
-                it.contains("Criminisi") -> "Criminisi"
-                it.contains("Biharmonic") -> "Biharmonic"
-                it.contains("Diffusion") -> "Diffusion"
-                it.contains("Super-Resolution") -> "Super-Resolution"
-                it.contains("Hybrid") || it.contains("Auto") -> "Auto"
-                else -> ""
-            }
-            key.isNotEmpty() && previousSelection.contains(key)
-        }
-
-        if (matchingIdx >= 0) {
-            modelSpinner.setSelection(matchingIdx)
-        } else {
-            modelSpinner.setSelection(0)
-        }
-
-        val selected = modelSpinner.selectedItem?.toString() ?: ""
-        promptCard.visibility = if (selected.contains("Diffusion")) View.VISIBLE else View.GONE
+    private fun refreshBackends(modelText: String) {
+        val family = BackendMatrix.familyOf(modelText)
+        val allowed = family?.let { BackendMatrix.allowed(it) } ?: listOf(Backend.NPU)
+        val prev = backendSpinner.selectedItem?.toString()
+        backendSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, allowed.map { it.label })
+        allowed.indexOfFirst { it.label == prev }.takeIf { it >= 0 }?.let { backendSpinner.setSelection(it) }
+        backendSpinner.isEnabled = allowed.size > 1
     }
 
+    private fun selectedBackend(): Backend = Backend.values().firstOrNull { it.label == backendSpinner.selectedItem?.toString() } ?: Backend.NPU
+
     private fun setupModelSpinner() {
-        val currentRuntime = runtimeSpinner.selectedItem?.toString() ?: "Hexagon NPU (HTP v79)"
-        updateModelSpinnerForRuntime(currentRuntime)
+        val models = arrayOf(
+            "Auto (Router Recommended)",
+            "LaMa Dilated (Large Voids)",
+            "MIGAN (Portraits & Speed)",
+            "AOT-GAN (Dense Texture)",
+            "Stable Diffusion 1.5 (Inpainting - DPM 12-step)",
+            "Smart SD",
+            "Fast Marching (Telea)",
+            "Fluid Streamlines (Navier-Stokes)",
+            "Criminisi Exemplar",
+            "Biharmonic Poisson"
+        )
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, models)
+        modelSpinner.adapter = adapter
 
         modelSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selected = parent?.getItemAtPosition(position)?.toString() ?: ""
-                val isSd = selected.contains("Stable Diffusion") || selected.contains("Diffusion")
+                refreshBackends(selected)
+                val isSd = selected.contains("Stable Diffusion") || selected.contains("Diffusion") || selected.contains("Smart SD")
                 promptCard.visibility = if (isSd) View.VISIBLE else View.GONE
             }
 
@@ -157,26 +146,7 @@ class MainActivity : AppCompatActivity() {
                 promptCard.visibility = View.GONE
             }
         }
-    }
-
-    private fun setupRuntimeSpinner() {
-        val runtimes = arrayOf(
-            "Hexagon NPU (HTP v79)",
-            "Adreno GPU (OpenCL)",
-            "Oryon CPU (NEON)"
-        )
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, runtimes)
-        runtimeSpinner.adapter = adapter
-
-        runtimeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selectedRuntime = parent?.getItemAtPosition(position)?.toString() ?: "Hexagon NPU"
-                updateModelSpinnerForRuntime(selectedRuntime)
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-            }
-        }
+        refreshBackends(models[0])
     }
 
     private fun triggerModelPreload() {
@@ -198,7 +168,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() {
-        val btnModeCircle = findViewById<Button>(R.id.btnModeCircle)
+        val btnModeSmart = findViewById<Button>(R.id.btnModeSmart)
         val btnModeBrush = findViewById<Button>(R.id.btnModeBrush)
         val btnModeBox = findViewById<Button>(R.id.btnModeBox)
         val btnSegGrabCut = findViewById<Button>(R.id.btnSegGrabCut)
@@ -206,8 +176,8 @@ class MainActivity : AppCompatActivity() {
         val btnSegExact = findViewById<Button>(R.id.btnSegExact)
 
         fun updateModeButtons(activeMode: InpaintCanvasView.Mode) {
-            btnModeCircle?.backgroundTintList = ColorStateList.valueOf(
-                if (activeMode == InpaintCanvasView.Mode.CIRCLE_SELECT) Color.parseColor("#7C3AED") else Color.parseColor("#4B5563")
+            btnModeSmart?.backgroundTintList = ColorStateList.valueOf(
+                if (activeMode == InpaintCanvasView.Mode.SMART) Color.parseColor("#0E7490") else Color.parseColor("#4B5563")
             )
             btnModeBrush?.backgroundTintList = ColorStateList.valueOf(
                 if (activeMode == InpaintCanvasView.Mode.BRUSH) Color.parseColor("#2563EB") else Color.parseColor("#4B5563")
@@ -229,7 +199,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        updateModeButtons(InpaintCanvasView.Mode.CIRCLE_SELECT)
+        updateModeButtons(InpaintCanvasView.Mode.SMART)
         updateEngineButtons(InpaintCanvasView.SegmentationEngine.AUTO_GRABCUT)
 
         findViewById<Button>(R.id.btnGallery).setOnClickListener {
@@ -248,20 +218,24 @@ class MainActivity : AppCompatActivity() {
             updateRouterLogic()
         }
 
+        canvasView.onSmartMessage = { msg ->
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+        }
+
         findViewById<Button>(R.id.btnCamera).setOnClickListener {
             takePhotoLauncher.launch(null)
         }
 
-        btnModeCircle?.setOnClickListener {
-            canvasView.setMode(InpaintCanvasView.Mode.CIRCLE_SELECT)
-            updateModeButtons(InpaintCanvasView.Mode.CIRCLE_SELECT)
-            Toast.makeText(this, "⭕ Circle Select Mode: Circle any object to mask it", Toast.LENGTH_SHORT).show()
+        btnModeSmart?.setOnClickListener {
+            canvasView.setMode(InpaintCanvasView.Mode.SMART)
+            updateModeButtons(InpaintCanvasView.Mode.SMART)
+            Toast.makeText(this, "Smart AI Touch: circle an object or scribble over it", Toast.LENGTH_SHORT).show()
         }
 
         btnModeBrush?.setOnClickListener {
             canvasView.setMode(InpaintCanvasView.Mode.BRUSH)
             updateModeButtons(InpaintCanvasView.Mode.BRUSH)
-            Toast.makeText(this, "🖌️ Brush Mode: Finger draw mask", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "🖌️ Manual Precision: Finger draw mask", Toast.LENGTH_SHORT).show()
         }
 
         btnModeBox?.setOnClickListener {
@@ -522,21 +496,17 @@ class MainActivity : AppCompatActivity() {
         val btnRunInpaint = findViewById<Button>(R.id.btnRunInpaint)
         btnRunInpaint.isEnabled = false
         modelSpinner.isEnabled = false
-        runtimeSpinner.isEnabled = false
+        backendSpinner.isEnabled = false
         progressBar.visibility = View.VISIBLE
 
-        val selectedOption = modelSpinner.selectedItem?.toString() ?: "Auto"
-        val selectedRuntime = runtimeSpinner.selectedItem?.toString() ?: "Hexagon NPU"
-
-        val targetRuntime = when {
-            selectedRuntime.contains("GPU") -> "GPU"
-            selectedRuntime.contains("CPU") -> "CPU"
-            else -> "NPU"
-        }
+        val selectedOption = modelSpinner.selectedItem?.toString() ?: "Auto (Router Recommended)"
+        val backend = selectedBackend()
 
         val targetModel = when {
             selectedOption.contains("Telea") || selectedOption.contains("Fast Marching") -> "TELEA"
             selectedOption.contains("Navier") || selectedOption.contains("Streamlines") -> "NAVIER_STOKES"
+            selectedOption.contains("Criminisi") || selectedOption.contains("Exemplar") -> "CRIMINISI"
+            selectedOption.contains("Biharmonic") || selectedOption.contains("Poisson") -> "BIHARMONIC"
             selectedOption.contains("Hybrid") || selectedOption.contains("Auto") -> {
                 val dec = RouterClassifier.classifyAndRoute(src, mask)
                 dec.recommendedModel
@@ -544,21 +514,25 @@ class MainActivity : AppCompatActivity() {
             selectedOption.contains("MIGAN") -> "MIGAN"
             selectedOption.contains("LaMa") -> "LAMA"
             selectedOption.contains("AOT") -> "AOTGAN"
-            selectedOption.contains("Stable Diffusion") || selectedOption.contains("Diffusion") -> "SD"
+            selectedOption.contains("Stable Diffusion") || selectedOption.contains("Diffusion") || selectedOption.contains("Smart SD") -> "SD"
             else -> "LAMA"
         }
 
         val posPrompt = etPromptPositive.text.toString().trim()
         val negPrompt = etPromptNegative.text.toString().trim()
+        val swSmartPrompt = findViewById<Switch>(R.id.swSmartPrompt)
+        val isSmartPrompt = (swSmartPrompt?.isChecked == true) || selectedOption.contains("Smart")
 
         Thread {
             try {
-                val telemetry = OnDeviceProcessDriver.executeInference(src, mask, targetModel, posPrompt, negPrompt, targetRuntime)
+                val telemetry = OnDeviceProcessDriver.executeInference(
+                    src, mask, targetModel, backend, posPrompt, negPrompt, smartPrompt = isSmartPrompt
+                )
                 runOnUiThread {
                     progressBar.visibility = View.GONE
                     btnRunInpaint.isEnabled = true
                     modelSpinner.isEnabled = true
-                    runtimeSpinner.isEnabled = true
+                    backendSpinner.isEnabled = true
                     resultImageView.setImageBitmap(telemetry.resultBitmap)
                     telemetryCard.visibility = View.VISIBLE
 
@@ -588,6 +562,7 @@ class MainActivity : AppCompatActivity() {
                     progressBar.visibility = View.GONE
                     btnRunInpaint.isEnabled = true
                     modelSpinner.isEnabled = true
+                    backendSpinner.isEnabled = true
                     AlertDialog.Builder(this)
                         .setTitle("❌ Inference Error")
                         .setMessage(e.message ?: "An unexpected error occurred during inference")
@@ -596,6 +571,141 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }.start()
+    }
+
+    private fun findSample(name: String): Pair<File, File>? {
+        val dirs = listOf(
+            File(filesDir, "samples"),
+            File(getExternalFilesDir(null), "samples"),
+            File("/sdcard/Android/data/$packageName/files/samples"),
+            File("/sdcard/Pictures/Inpainting102"),
+            File("/data/local/tmp/lama/samples")
+        )
+        for (d in dirs) {
+            val f = File(d, "$name.png")
+            if (f.exists()) return f to d
+            val fNoExt = File(d, name)
+            if (fNoExt.exists()) return fNoExt to d
+        }
+        return null
+    }
+
+    private fun registerDebugHooks() {
+        DebugHooks.install(this, mapOf(
+            "qidk.debug.MODE" to { i ->
+                val m = i.getStringExtra("mode") ?: "brush"
+                canvasView.setMode(when (m) {
+                    "smart" -> InpaintCanvasView.Mode.SMART
+                    "box" -> InpaintCanvasView.Mode.BOUNDING_BOX
+                    else -> InpaintCanvasView.Mode.BRUSH
+                })
+                canvasView.logGeometry()
+                "mode=$m"
+            },
+            "qidk.debug.SAMPLE" to { i ->
+                val name = i.getStringExtra("name") ?: "001"
+                val withMask = i.getBooleanExtra("mask", false)
+                val s = findSample(name)
+                if (s == null) "sample $name not found" else {
+                    runOnUiThread {
+                        loadSampleFile(s.first, s.second)
+                        if (!withMask) canvasView.clearMask(saveUndo = false)
+                    }
+                    "loaded $name mask=$withMask"
+                }
+            },
+            "qidk.debug.STROKE" to { i ->
+                DebugHooks.injectStroke(canvasView, DebugHooks.parsePoints(i.getStringExtra("pts")))
+            },
+            "qidk.debug.CLASSICAL" to { i ->
+                val algoText = i.getStringExtra("algo") ?: "telea"
+                val algo = ClassicalAlgo.fromText(algoText)
+                val src = canvasView.getSourceBitmap()
+                val hole = if (src != null) ClassicalInpainter.holeBytes(canvasView.getMaskBitmap()) else null
+                if (algo == null || src == null || hole == null) "bad algo or no image" else DebugHooks.async("qidk.debug.CLASSICAL") {
+                    val out = ClassicalInpainter.run(src, hole, algo)
+                    val f = File(getExternalFilesDir(null), "out/classical_$algoText.png")
+                    f.parentFile?.mkdirs()
+                    f.outputStream().use { out.bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                    "used=${out.used} ms=${out.ms} out=${f.absolutePath}"
+                }
+            },
+            "qidk.debug.SD" to { i ->
+                val src = canvasView.getSourceBitmap()
+                val mask = canvasView.getMaskBitmap()
+                if (src == null) "no image" else DebugHooks.async("qidk.debug.SD") {
+                    val smart = (i.getStringExtra("mode") ?: "normal") == "smart"
+                    val t = OnDeviceProcessDriver.executeInference(
+                        src, mask, "SD", Backend.NPU,
+                        i.getStringExtra("prompt") ?: "", i.getStringExtra("neg") ?: "",
+                        smartPrompt = smart, seed = i.getIntExtra("seed", 42)
+                    )
+                    val f = File(getExternalFilesDir(null), "out/sd_${if (smart) "smart" else "normal"}_${i.getStringExtra("tag") ?: "x"}.png")
+                    f.parentFile?.mkdirs()
+                    f.outputStream().use { t.resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                    val sha = MessageDigest.getInstance("SHA-256").digest(f.readBytes()).joinToString("") { "%02x".format(it) }.take(16)
+                    "out=${f.absolutePath} sha256=$sha ms=${t.latencyMs}"
+                }
+            },
+            "qidk.debug.SR" to { i ->
+                DebugHooks.async("qidk.debug.SR") {
+                    val id = i.getStringExtra("engine") ?: "bicubic"
+                    val backend = Backend.values().firstOrNull { it.name == (i.getStringExtra("backend") ?: "CPU") } ?: Backend.CPU
+                    val srcPath = i.getStringExtra("src")
+                    val src = if (srcPath != null) BitmapFactory.decodeFile(srcPath) else canvasView.getSourceBitmap()
+                    val engine = srEngines.firstOrNull { it.id == id }
+                    if (src == null || engine == null) "no source or unknown engine $id"
+                    else if (engine.unavailableReason != null) "engine disabled: ${engine.unavailableReason}"
+                    else {
+                        BackendMatrix.require(engine.family, backend)
+                        val t0 = System.nanoTime()
+                        val out = engine.run(src, backend)
+                        val ms = (System.nanoTime() - t0) / 1_000_000
+                        i.getStringExtra("out")?.let { p ->
+                            File(p).apply { parentFile?.mkdirs() }.outputStream().use { out.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                        }
+                        Log.i("QIDK.SR", "engine=$id backend=$backend out=${out.width}x${out.height} ms=$ms")
+                        "engine=$id backend=$backend out=${out.width}x${out.height} ms=$ms"
+                    }
+                }
+            },
+            "qidk.debug.FEATURES" to { i ->
+                DebugHooks.async("qidk.debug.FEATURES") {
+                    val names = (i.getStringExtra("names") ?: "").split(',').filter { it.isNotBlank() }
+                    val dir = File(i.getStringExtra("dir") ?: "/sdcard/Android/data/$packageName/files/samples")
+                    val out = File(getExternalFilesDir(null), "out/features_app.csv").apply { parentFile?.mkdirs() }
+                    val sb = StringBuilder("image," + names.joinToString(",") + "\n")
+                    val files = (dir.listFiles { f -> f.name.endsWith(".png") } ?: emptyArray()).sortedBy { it.name }
+                    for (f in files) {
+                        val img = BitmapFactory.decodeFile(f.absolutePath)?.let { Bitmap.createScaledBitmap(it, 512, 512, true) } ?: continue
+                        val mf = File(dir, "masks/${f.name}")
+                        val m = (if (mf.exists()) BitmapFactory.decodeFile(mf.absolutePath) else null)?.let { Bitmap.createScaledBitmap(it, 512, 512, false) } ?: continue
+                        val argb = IntArray(512 * 512).also { img.getPixels(it, 0, 512, 0, 0, 512, 512) }
+                        val grid = ProxyGrid.build(argb, ClassicalInpainter.holeBytes(m), 512, 512)
+                        sb.append(f.name).append(',').append(names.joinToString(",") { n -> RouterFeatures.registry[n.lowercase()]?.invoke(grid)?.toString() ?: "nan" }).append('\n')
+                    }
+                    out.writeText(sb.toString())
+                    "rows=${files.size} out=${out.absolutePath}"
+                }
+            },
+            "qidk.debug.ROUTE" to { i ->
+                val src = canvasView.getSourceBitmap()
+                if (src == null) "no image" else {
+                    val d = RouterClassifier.classifyAndRoute(src, canvasView.getMaskBitmap())
+                    val policy = RouterRuntime.policy
+                    if (policy == null) "unusable: see QIDK.Router at start-up" else {
+                        val argb = IntArray(512 * 512).also { src.getPixels(it, 0, 512, 0, 0, 512, 512) }
+                        val grid = ProxyGrid.build(argb, ClassicalInpainter.holeBytes(canvasView.getMaskBitmap()), 512, 512)
+                        val n = i.getIntExtra("n", 1000)
+                        var feat = 0L
+                        var pol = 0L
+                        repeat(n) { policy.decide(grid)?.let { x -> feat += x.featureMicros; pol += x.policyMicros } }
+                        Log.i("QIDK.Router", "mode=${d.ruleTriggered} bench n=$n avg_feat_us=${feat / n} avg_policy_us=${pol / n}")
+                        "model=${d.recommendedModel} rule=${d.ruleTriggered} avg_feat_us=${feat / n} avg_policy_us=${pol / n}"
+                    }
+                }
+            }
+        ))
     }
 
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {

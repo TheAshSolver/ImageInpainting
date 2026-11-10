@@ -3,8 +3,13 @@ package com.qualcomm.qidk.inpaint.router
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.media.FaceDetector
+import android.util.Log
 import kotlin.math.abs
 import kotlin.math.sqrt
+import qidk.fix.ProxyGrid
+import qidk.fix.ClassicalInpainter
+import qidk.fix.RouterRuntime
+import qidk.fix.ModeDispatch
 
 data class RoutingDecision(
     val recommendedModel: String,
@@ -23,6 +28,28 @@ data class RoutingDecision(
 object RouterClassifier {
 
     fun classifyAndRoute(image: Bitmap, mask: Bitmap): RoutingDecision {
+        val ladder = classifyByRules(image, mask)
+        val policy = RouterRuntime.policy ?: return ladder
+        val img = if (image.width == 512 && image.height == 512) image else Bitmap.createScaledBitmap(image, 512, 512, true)
+        val msk = if (mask.width == 512 && mask.height == 512) mask else Bitmap.createScaledBitmap(mask, 512, 512, false)
+        val argb = IntArray(512 * 512).also { img.getPixels(it, 0, 512, 0, 0, 512, 512) }
+        val d = policy.decide(ProxyGrid.build(argb, ClassicalInpainter.holeBytes(msk), 512, 512)) ?: return ladder
+        val model = ModeDispatch.model(d.mode, ladder.recommendedModel, ladder.maskAreaRatio)
+        val t = d.telemetry
+        val scoreStr = d.scores.joinToString(prefix = "[", postfix = "]") { "%.3f".format(it) }
+        val tempStr = "%.1f".format(t.siliconTempC)
+        val cpuStr = "%.2f".format(t.cpuBusy)
+        val gpuStr = "%.2f".format(t.gpuBusy)
+        Log.i("QIDK.Router", "mode=${d.mode} arm=${d.armName} model=$model scores=$scoreStr feat_us=${d.featureMicros} policy_us=${d.policyMicros} T=${tempStr}C batt=${t.batteryPct.toInt()}% cpu=$cpuStr gpu=$gpuStr (${t.notes})")
+        val justStr = "LinUCB ${d.mode.label}: ${tempStr} °C, battery ${t.batteryPct.toInt()}%, CPU ${(t.cpuBusy * 100).toInt()}%, GPU ${(t.gpuBusy * 100).toInt()}% → $model"
+        return ladder.copy(
+            recommendedModel = model,
+            ruleTriggered = "LINUCB_${d.mode.name}",
+            justification = justStr
+        )
+    }
+
+    fun classifyByRules(image: Bitmap, mask: Bitmap): RoutingDecision {
         val w = 512
         val h = 512
         val imgScaled = if (image.width == w && image.height == h) image else Bitmap.createScaledBitmap(image, w, h, true)

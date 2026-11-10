@@ -1,0 +1,5887 @@
+{
+  "num_samples": 500,
+  "models": [
+    "aotgan_npu",
+    "lama_npu",
+    "migan_npu"
+  ],
+  "feature_count": 50,
+  "features": [
+    "mask_area_ratio_rho",
+    "mask_perimeter",
+    "compactness_isoperimetric",
+    "max_inscribed_radius_rmax",
+    "mean_hole_depth",
+    "std_hole_depth",
+    "max_to_mean_depth_ratio",
+    "convex_hull_solidity",
+    "mask_aspect_ratio",
+    "mask_extent",
+    "connected_components_count",
+    "euler_number",
+    "centroid_offset_x",
+    "centroid_offset_y",
+    "radial_eccentricity",
+    "rule_of_thirds_proximity",
+    "boundary_edge_density_sobel",
+    "boundary_edge_std_sobel",
+    "boundary_edge_max_sobel",
+    "boundary_scharr_energy",
+    "boundary_canny_density",
+    "gradient_direction_entropy",
+    "boundary_laplacian_var",
+    "boundary_laplacian_mean",
+    "glcm_contrast",
+    "glcm_dissimilarity",
+    "glcm_homogeneity",
+    "glcm_energy",
+    "glcm_correlation",
+    "lbp_entropy",
+    "lbp_uniformity",
+    "multi_scale_laplacian_ratio",
+    "fft_low_freq_energy",
+    "fft_mid_freq_energy",
+    "fft_high_freq_energy",
+    "fft_high_to_low_ratio",
+    "spectral_decay_slope",
+    "spectral_azimuthal_anisotropy",
+    "context_rgb_shannon_entropy",
+    "context_lab_delta_e_mean",
+    "context_hsv_saturation_mean",
+    "context_hsv_saturation_std",
+    "context_color_temperature_proxy",
+    "border_to_global_color_divergence",
+    "shi_tomasi_corner_count",
+    "fast_keypoint_density",
+    "contour_curvature_mean",
+    "contour_curvature_extrema",
+    "boundary_tortuosity",
+    "skeleton_branch_points"
+  ],
+  "correlations": {
+    "aotgan_npu": {
+      "lpips_pearson": {
+        "mask_area_ratio_rho": {
+          "r": 0.9663,
+          "p_val": 1.5434564516978984e-295
+        },
+        "mask_perimeter": {
+          "r": 0.3919,
+          "p_val": 8.430735001740079e-20
+        },
+        "compactness_isoperimetric": {
+          "r": 0.1205,
+          "p_val": 0.007003380259942902
+        },
+        "max_inscribed_radius_rmax": {
+          "r": 0.7527,
+          "p_val": 1.9206179875768716e-92
+        },
+        "mean_hole_depth": {
+          "r": 0.6991,
+          "p_val": 1.4871679153114638e-74
+        },
+        "std_hole_depth": {
+          "r": 0.7155,
+          "p_val": 1.3618767387875e-79
+        },
+        "max_to_mean_depth_ratio": {
+          "r": 0.0413,
+          "p_val": 0.3564136473583678
+        },
+        "convex_hull_solidity": {
+          "r": 0.1349,
+          "p_val": 0.0024994992027014295
+        },
+        "mask_aspect_ratio": {
+          "r": -0.0369,
+          "p_val": 0.4103206918341881
+        },
+        "mask_extent": {
+          "r": 0.3513,
+          "p_val": 5.759386451334372e-16
+        },
+        "connected_components_count": {
+          "r": -0.0923,
+          "p_val": 0.0391600526126044
+        },
+        "euler_number": {
+          "r": -0.0952,
+          "p_val": 0.03328298629847563
+        },
+        "centroid_offset_x": {
+          "r": -0.1402,
+          "p_val": 0.0016758106323381957
+        },
+        "centroid_offset_y": {
+          "r": -0.1976,
+          "p_val": 8.533712382493611e-06
+        },
+        "radial_eccentricity": {
+          "r": -0.2218,
+          "p_val": 5.460615735092411e-07
+        },
+        "rule_of_thirds_proximity": {
+          "r": -0.0446,
+          "p_val": 0.31912091188495145
+        },
+        "boundary_edge_density_sobel": {
+          "r": 0.0362,
+          "p_val": 0.41968878513326763
+        },
+        "boundary_edge_std_sobel": {
+          "r": 0.0305,
+          "p_val": 0.49581951519241885
+        },
+        "boundary_edge_max_sobel": {
+          "r": 0.0944,
+          "p_val": 0.034849894564773186
+        },
+        "boundary_scharr_energy": {
+          "r": 0.0349,
+          "p_val": 0.43675536150018957
+        },
+        "boundary_canny_density": {
+          "r": 0.0642,
+          "p_val": 0.15147003155456581
+        },
+        "gradient_direction_entropy": {
+          "r": 0.0812,
+          "p_val": 0.06980007468660718
+        },
+        "boundary_laplacian_var": {
+          "r": -0.0254,
+          "p_val": 0.5708774259671807
+        },
+        "boundary_laplacian_mean": {
+          "r": 0.0059,
+          "p_val": 0.8946450355677412
+        },
+        "glcm_contrast": {
+          "r": -0.0088,
+          "p_val": 0.8438488281481907
+        },
+        "glcm_dissimilarity": {
+          "r": -0.0036,
+          "p_val": 0.9365501726131861
+        },
+        "glcm_homogeneity": {
+          "r": -0.0014,
+          "p_val": 0.9755005931844751
+        },
+        "glcm_energy": {
+          "r": -0.0191,
+          "p_val": 0.6696387555440839
+        },
+        "glcm_correlation": {
+          "r": -0.033,
+          "p_val": 0.4612608704104828
+        },
+        "lbp_entropy": {
+          "r": 0.0553,
+          "p_val": 0.2172555286387919
+        },
+        "lbp_uniformity": {
+          "r": -0.0359,
+          "p_val": 0.4236326878687154
+        },
+        "multi_scale_laplacian_ratio": {
+          "r": 0.0147,
+          "p_val": 0.7422717911218958
+        },
+        "fft_low_freq_energy": {
+          "r": -0.0845,
+          "p_val": 0.05906556094502211
+        },
+        "fft_mid_freq_energy": {
+          "r": 0.0856,
+          "p_val": 0.05569670816795559
+        },
+        "fft_high_freq_energy": {
+          "r": 0.0721,
+          "p_val": 0.10717461028045586
+        },
+        "fft_high_to_low_ratio": {
+          "r": 0.0702,
+          "p_val": 0.11673518803504788
+        },
+        "spectral_decay_slope": {
+          "r": 0.1025,
+          "p_val": 0.021850051687096684
+        },
+        "spectral_azimuthal_anisotropy": {
+          "r": -0.0262,
+          "p_val": 0.5586872536679598
+        },
+        "context_rgb_shannon_entropy": {
+          "r": 0.1641,
+          "p_val": 0.00022765709051652218
+        },
+        "context_lab_delta_e_mean": {
+          "r": 0.0715,
+          "p_val": 0.11047516769881979
+        },
+        "context_hsv_saturation_mean": {
+          "r": 0.0172,
+          "p_val": 0.7009828147067335
+        },
+        "context_hsv_saturation_std": {
+          "r": 0.0323,
+          "p_val": 0.47096200453253806
+        },
+        "context_color_temperature_proxy": {
+          "r": -0.083,
+          "p_val": 0.0636914686585787
+        },
+        "border_to_global_color_divergence": {
+          "r": -0.3624,
+          "p_val": 5.828854095187839e-17
+        },
+        "shi_tomasi_corner_count": {
+          "r": 0.2435,
+          "p_val": 3.488802635978783e-08
+        },
+        "fast_keypoint_density": {
+          "r": -0.2597,
+          "p_val": 3.760010266241605e-09
+        },
+        "contour_curvature_mean": {
+          "r": -0.3084,
+          "p_val": 1.7605219221855191e-12
+        },
+        "contour_curvature_extrema": {
+          "r": 0.0453,
+          "p_val": 0.3125756873530265
+        },
+        "boundary_tortuosity": {
+          "r": -0.1051,
+          "p_val": 0.018735314489687353
+        },
+        "skeleton_branch_points": {
+          "r": -0.0308,
+          "p_val": 0.49269125059218394
+        }
+      },
+      "lpips_spearman": {
+        "mask_area_ratio_rho": {
+          "rho": 0.9692,
+          "p_val": 2.816089908394813e-305
+        },
+        "mask_perimeter": {
+          "rho": 0.4067,
+          "p_val": 2.4296280363515195e-21
+        },
+        "compactness_isoperimetric": {
+          "rho": 0.1559,
+          "p_val": 0.00046895750356065426
+        },
+        "max_inscribed_radius_rmax": {
+          "rho": 0.7524,
+          "p_val": 2.48390639468541e-92
+        },
+        "mean_hole_depth": {
+          "rho": 0.7104,
+          "p_val": 5.220613152066868e-78
+        },
+        "std_hole_depth": {
+          "rho": 0.7175,
+          "p_val": 3.19457788604285e-80
+        },
+        "max_to_mean_depth_ratio": {
+          "rho": 0.0381,
+          "p_val": 0.39587344247686684
+        },
+        "convex_hull_solidity": {
+          "rho": 0.1306,
+          "p_val": 0.003447693943073243
+        },
+        "mask_aspect_ratio": {
+          "rho": -0.0173,
+          "p_val": 0.69902500517279
+        },
+        "mask_extent": {
+          "rho": 0.4074,
+          "p_val": 2.0691286512509354e-21
+        },
+        "connected_components_count": {
+          "rho": -0.0781,
+          "p_val": 0.08091611240232487
+        },
+        "euler_number": {
+          "rho": -0.0839,
+          "p_val": 0.06072574046984353
+        },
+        "centroid_offset_x": {
+          "rho": -0.1197,
+          "p_val": 0.007382130084819945
+        },
+        "centroid_offset_y": {
+          "rho": -0.1623,
+          "p_val": 0.00026701616592441014
+        },
+        "radial_eccentricity": {
+          "rho": -0.1851,
+          "p_val": 3.1153259441534755e-05
+        },
+        "rule_of_thirds_proximity": {
+          "rho": -0.0451,
+          "p_val": 0.31375188231938894
+        },
+        "boundary_edge_density_sobel": {
+          "rho": 0.0183,
+          "p_val": 0.6825736858792891
+        },
+        "boundary_edge_std_sobel": {
+          "rho": 0.0114,
+          "p_val": 0.7987553577000409
+        },
+        "boundary_edge_max_sobel": {
+          "rho": 0.0837,
+          "p_val": 0.06151349106257731
+        },
+        "boundary_scharr_energy": {
+          "rho": 0.0176,
+          "p_val": 0.6946664026081318
+        },
+        "boundary_canny_density": {
+          "rho": 0.0772,
+          "p_val": 0.08478246136966819
+        },
+        "gradient_direction_entropy": {
+          "rho": 0.1116,
+          "p_val": 0.012553931459192001
+        },
+        "boundary_laplacian_var": {
+          "rho": 0.0119,
+          "p_val": 0.7905462732936073
+        },
+        "boundary_laplacian_mean": {
+          "rho": 0.0101,
+          "p_val": 0.8225002157851101
+        },
+        "glcm_contrast": {
+          "rho": -0.0266,
+          "p_val": 0.5526962021544238
+        },
+        "glcm_dissimilarity": {
+          "rho": -0.0123,
+          "p_val": 0.7830578294882365
+        },
+        "glcm_homogeneity": {
+          "rho": -0.0094,
+          "p_val": 0.8343754180346924
+        },
+        "glcm_energy": {
+          "rho": -0.0372,
+          "p_val": 0.4070319825738276
+        },
+        "glcm_correlation": {
+          "rho": -0.0492,
+          "p_val": 0.2725864645631765
+        },
+        "lbp_entropy": {
+          "rho": 0.0387,
+          "p_val": 0.3879253651732766
+        },
+        "lbp_uniformity": {
+          "rho": -0.0343,
+          "p_val": 0.44379045407830336
+        },
+        "multi_scale_laplacian_ratio": {
+          "rho": -0.0089,
+          "p_val": 0.8429589351365633
+        },
+        "fft_low_freq_energy": {
+          "rho": -0.0664,
+          "p_val": 0.13841353397210102
+        },
+        "fft_mid_freq_energy": {
+          "rho": 0.0636,
+          "p_val": 0.15541819408485208
+        },
+        "fft_high_freq_energy": {
+          "rho": 0.069,
+          "p_val": 0.12347658889677089
+        },
+        "fft_high_to_low_ratio": {
+          "rho": 0.068,
+          "p_val": 0.12900687027959118
+        },
+        "spectral_decay_slope": {
+          "rho": 0.1038,
+          "p_val": 0.02027139487948777
+        },
+        "spectral_azimuthal_anisotropy": {
+          "rho": -0.0379,
+          "p_val": 0.39804955545520276
+        },
+        "context_rgb_shannon_entropy": {
+          "rho": 0.1174,
+          "p_val": 0.008601590165085375
+        },
+        "context_lab_delta_e_mean": {
+          "rho": 0.0655,
+          "p_val": 0.1433176841459391
+        },
+        "context_hsv_saturation_mean": {
+          "rho": 0.0338,
+          "p_val": 0.4511686925933935
+        },
+        "context_hsv_saturation_std": {
+          "rho": 0.0414,
+          "p_val": 0.35532748069773623
+        },
+        "context_color_temperature_proxy": {
+          "rho": -0.0589,
+          "p_val": 0.18843984586968734
+        },
+        "border_to_global_color_divergence": {
+          "rho": -0.3526,
+          "p_val": 4.3716744104843847e-16
+        },
+        "shi_tomasi_corner_count": {
+          "rho": 0.2423,
+          "p_val": 4.129221704489238e-08
+        },
+        "fast_keypoint_density": {
+          "rho": -0.2474,
+          "p_val": 2.0622566740529105e-08
+        },
+        "contour_curvature_mean": {
+          "rho": -0.312,
+          "p_val": 9.406459782277932e-13
+        },
+        "contour_curvature_extrema": {
+          "rho": 0.0383,
+          "p_val": 0.3931728193703414
+        },
+        "boundary_tortuosity": {
+          "rho": -0.1032,
+          "p_val": 0.02093719521615767
+        },
+        "skeleton_branch_points": {
+          "rho": -0.0273,
+          "p_val": 0.542260181232206
+        }
+      },
+      "psnr_hole_pearson": {
+        "mask_area_ratio_rho": {
+          "r": -0.326,
+          "p_val": 7.680589098363693e-14
+        },
+        "mask_perimeter": {
+          "r": 0.1773,
+          "p_val": 6.711839050882428e-05
+        },
+        "compactness_isoperimetric": {
+          "r": -0.4023,
+          "p_val": 7.09448328346245e-21
+        },
+        "max_inscribed_radius_rmax": {
+          "r": -0.5152,
+          "p_val": 2.9899640045102325e-35
+        },
+        "mean_hole_depth": {
+          "r": -0.5424,
+          "p_val": 1.3967285857210782e-39
+        },
+        "std_hole_depth": {
+          "r": -0.5271,
+          "p_val": 4.206565653627532e-37
+        },
+        "max_to_mean_depth_ratio": {
+          "r": 0.1458,
+          "p_val": 0.0010774910965034902
+        },
+        "convex_hull_solidity": {
+          "r": -0.0454,
+          "p_val": 0.31052117909643884
+        },
+        "mask_aspect_ratio": {
+          "r": -0.0114,
+          "p_val": 0.7988585134652383
+        },
+        "mask_extent": {
+          "r": -0.4685,
+          "p_val": 1.195107973625554e-28
+        },
+        "connected_components_count": {
+          "r": 0.4062,
+          "p_val": 2.782026275654192e-21
+        },
+        "euler_number": {
+          "r": 0.3799,
+          "p_val": 1.2962866611422551e-18
+        },
+        "centroid_offset_x": {
+          "r": -0.1054,
+          "p_val": 0.018383337053922987
+        },
+        "centroid_offset_y": {
+          "r": -0.0066,
+          "p_val": 0.8836422652463235
+        },
+        "radial_eccentricity": {
+          "r": -0.0722,
+          "p_val": 0.10705423837765964
+        },
+        "rule_of_thirds_proximity": {
+          "r": -0.0867,
+          "p_val": 0.05258946703231524
+        },
+        "boundary_edge_density_sobel": {
+          "r": -0.5029,
+          "p_val": 2.094870449240242e-33
+        },
+        "boundary_edge_std_sobel": {
+          "r": -0.4265,
+          "p_val": 1.6282634231560192e-23
+        },
+        "boundary_edge_max_sobel": {
+          "r": -0.26,
+          "p_val": 3.5895861391662888e-09
+        },
+        "boundary_scharr_energy": {
+          "r": -0.5035,
+          "p_val": 1.6839735916413057e-33
+        },
+        "boundary_canny_density": {
+          "r": -0.4583,
+          "p_val": 2.4846801739982983e-27
+        },
+        "gradient_direction_entropy": {
+          "r": -0.1051,
+          "p_val": 0.018729287684197175
+        },
+        "boundary_laplacian_var": {
+          "r": -0.3977,
+          "p_val": 2.131953635779895e-20
+        },
+        "boundary_laplacian_mean": {
+          "r": -0.4744,
+          "p_val": 1.985949031541217e-29
+        },
+        "glcm_contrast": {
+          "r": -0.332,
+          "p_val": 2.5037933372866614e-14
+        },
+        "glcm_dissimilarity": {
+          "r": -0.3346,
+          "p_val": 1.5223520865192037e-14
+        },
+        "glcm_homogeneity": {
+          "r": 0.296,
+          "p_val": 1.4449814547670996e-11
+        },
+        "glcm_energy": {
+          "r": 0.1828,
+          "p_val": 3.9035906338252246e-05
+        },
+        "glcm_correlation": {
+          "r": 0.0369,
+          "p_val": 0.40972362515884003
+        },
+        "lbp_entropy": {
+          "r": -0.2055,
+          "p_val": 3.617969486992976e-06
+        },
+        "lbp_uniformity": {
+          "r": 0.1486,
+          "p_val": 0.0008589058568492634
+        },
+        "multi_scale_laplacian_ratio": {
+          "r": -0.1422,
+          "p_val": 0.0014372876685925285
+        },
+        "fft_low_freq_energy": {
+          "r": 0.2404,
+          "p_val": 5.2816457274039495e-08
+        },
+        "fft_mid_freq_energy": {
+          "r": -0.2427,
+          "p_val": 3.915017906702716e-08
+        },
+        "fft_high_freq_energy": {
+          "r": -0.207,
+          "p_val": 3.0454547790451264e-06
+        },
+        "fft_high_to_low_ratio": {
+          "r": -0.1996,
+          "p_val": 6.876229579088515e-06
+        },
+        "spectral_decay_slope": {
+          "r": -0.1334,
+          "p_val": 0.002795628842987898
+        },
+        "spectral_azimuthal_anisotropy": {
+          "r": 0.2097,
+          "p_val": 2.245057680933654e-06
+        },
+        "context_rgb_shannon_entropy": {
+          "r": -0.4433,
+          "p_val": 1.729210312986381e-25
+        },
+        "context_lab_delta_e_mean": {
+          "r": -0.4484,
+          "p_val": 4.216723821539247e-26
+        },
+        "context_hsv_saturation_mean": {
+          "r": -0.0611,
+          "p_val": 0.1725250738510502
+        },
+        "context_hsv_saturation_std": {
+          "r": -0.214,
+          "p_val": 1.3628910635260066e-06
+        },
+        "context_color_temperature_proxy": {
+          "r": -0.0231,
+          "p_val": 0.6068938524411738
+        },
+        "border_to_global_color_divergence": {
+          "r": 0.012,
+          "p_val": 0.7892380787110979
+        },
+        "shi_tomasi_corner_count": {
+          "r": -0.0241,
+          "p_val": 0.590536232379654
+        },
+        "fast_keypoint_density": {
+          "r": -0.3348,
+          "p_val": 1.463393927914813e-14
+        },
+        "contour_curvature_mean": {
+          "r": 0.3452,
+          "p_val": 1.9363587102206065e-15
+        },
+        "contour_curvature_extrema": {
+          "r": 0.3351,
+          "p_val": 1.3843915943412935e-14
+        },
+        "boundary_tortuosity": {
+          "r": 0.0358,
+          "p_val": 0.4244291825914981
+        },
+        "skeleton_branch_points": {
+          "r": 0.3725,
+          "p_val": 6.696119241965236e-18
+        }
+      },
+      "psnr_hole_spearman": {
+        "mask_area_ratio_rho": {
+          "rho": -0.2995,
+          "p_val": 8.010157666640173e-12
+        },
+        "mask_perimeter": {
+          "rho": 0.238,
+          "p_val": 7.230562051776577e-08
+        },
+        "compactness_isoperimetric": {
+          "rho": -0.4789,
+          "p_val": 5.039939808954551e-30
+        },
+        "max_inscribed_radius_rmax": {
+          "rho": -0.5367,
+          "p_val": 1.197914742973163e-38
+        },
+        "mean_hole_depth": {
+          "rho": -0.572,
+          "p_val": 8.702197769052724e-45
+        },
+        "std_hole_depth": {
+          "rho": -0.5565,
+          "p_val": 5.3940535132013264e-42
+        },
+        "max_to_mean_depth_ratio": {
+          "rho": 0.1612,
+          "p_val": 0.00029599507390869943
+        },
+        "convex_hull_solidity": {
+          "rho": -0.0451,
+          "p_val": 0.31434288264773413
+        },
+        "mask_aspect_ratio": {
+          "rho": -0.0104,
+          "p_val": 0.8158351950589291
+        },
+        "mask_extent": {
+          "rho": -0.5278,
+          "p_val": 3.277531110714993e-37
+        },
+        "connected_components_count": {
+          "rho": 0.4722,
+          "p_val": 3.92494002364253e-29
+        },
+        "euler_number": {
+          "rho": 0.4464,
+          "p_val": 7.409362874069878e-26
+        },
+        "centroid_offset_x": {
+          "rho": -0.114,
+          "p_val": 0.010710584484207131
+        },
+        "centroid_offset_y": {
+          "rho": -0.0712,
+          "p_val": 0.11177376086954534
+        },
+        "radial_eccentricity": {
+          "rho": -0.1262,
+          "p_val": 0.00470100652434396
+        },
+        "rule_of_thirds_proximity": {
+          "rho": -0.1116,
+          "p_val": 0.012536353768389437
+        },
+        "boundary_edge_density_sobel": {
+          "rho": -0.491,
+          "p_val": 1.066507694223567e-31
+        },
+        "boundary_edge_std_sobel": {
+          "rho": -0.4179,
+          "p_val": 1.4833919422759493e-22
+        },
+        "boundary_edge_max_sobel": {
+          "rho": -0.2129,
+          "p_val": 1.55742183708546e-06
+        },
+        "boundary_scharr_energy": {
+          "rho": -0.4914,
+          "p_val": 9.220417194303123e-32
+        },
+        "boundary_canny_density": {
+          "rho": -0.4463,
+          "p_val": 7.685427454729343e-26
+        },
+        "gradient_direction_entropy": {
+          "rho": -0.1174,
+          "p_val": 0.008582165705971034
+        },
+        "boundary_laplacian_var": {
+          "rho": -0.409,
+          "p_val": 1.3896922355123372e-21
+        },
+        "boundary_laplacian_mean": {
+          "rho": -0.4602,
+          "p_val": 1.4140247376731014e-27
+        },
+        "glcm_contrast": {
+          "rho": -0.3314,
+          "p_val": 2.8119389973703376e-14
+        },
+        "glcm_dissimilarity": {
+          "rho": -0.3401,
+          "p_val": 5.227841138054394e-15
+        },
+        "glcm_homogeneity": {
+          "rho": 0.3054,
+          "p_val": 2.959618801407711e-12
+        },
+        "glcm_energy": {
+          "rho": 0.2344,
+          "p_val": 1.1489671999611941e-07
+        },
+        "glcm_correlation": {
+          "rho": 0.0366,
+          "p_val": 0.41431132147338623
+        },
+        "lbp_entropy": {
+          "rho": -0.1878,
+          "p_val": 2.362901441028244e-05
+        },
+        "lbp_uniformity": {
+          "rho": 0.1447,
+          "p_val": 0.0011722982933103435
+        },
+        "multi_scale_laplacian_ratio": {
+          "rho": -0.1171,
+          "p_val": 0.008798001491452663
+        },
+        "fft_low_freq_energy": {
+          "rho": 0.2584,
+          "p_val": 4.539863729612872e-09
+        },
+        "fft_mid_freq_energy": {
+          "rho": -0.2537,
+          "p_val": 8.777642495960061e-09
+        },
+        "fft_high_freq_energy": {
+          "rho": -0.2538,
+          "p_val": 8.614875193309912e-09
+        },
+        "fft_high_to_low_ratio": {
+          "rho": -0.2534,
+          "p_val": 9.083156122258439e-09
+        },
+        "spectral_decay_slope": {
+          "rho": -0.1222,
+          "p_val": 0.0062400792204410725
+        },
+        "spectral_azimuthal_anisotropy": {
+          "rho": 0.2522,
+          "p_val": 1.0854097999972848e-08
+        },
+        "context_rgb_shannon_entropy": {
+          "rho": -0.4065,
+          "p_val": 2.5488114190531282e-21
+        },
+        "context_lab_delta_e_mean": {
+          "rho": -0.4539,
+          "p_val": 8.74923595819581e-27
+        },
+        "context_hsv_saturation_mean": {
+          "rho": -0.0431,
+          "p_val": 0.3361533226215233
+        },
+        "context_hsv_saturation_std": {
+          "rho": -0.214,
+          "p_val": 1.362490767956529e-06
+        },
+        "context_color_temperature_proxy": {
+          "rho": -0.0222,
+          "p_val": 0.6197143391371056
+        },
+        "border_to_global_color_divergence": {
+          "rho": -0.0984,
+          "p_val": 0.027860640154918254
+        },
+        "shi_tomasi_corner_count": {
+          "rho": 0.017,
+          "p_val": 0.7047241380827597
+        },
+        "fast_keypoint_density": {
+          "rho": -0.3944,
+          "p_val": 4.6366328918677724e-20
+        },
+        "contour_curvature_mean": {
+          "rho": 0.369,
+          "p_val": 1.4175730826697748e-17
+        },
+        "contour_curvature_extrema": {
+          "rho": 0.3909,
+          "p_val": 1.0472527348185992e-19
+        },
+        "boundary_tortuosity": {
+          "rho": 0.0436,
+          "p_val": 0.33102567028033447
+        },
+        "skeleton_branch_points": {
+          "rho": 0.4515,
+          "p_val": 1.724939354312284e-26
+        }
+      },
+      "ssim_pearson": {
+        "mask_area_ratio_rho": {
+          "r": -0.8023,
+          "p_val": 1.1480211630696093e-113
+        },
+        "mask_perimeter": {
+          "r": -0.2262,
+          "p_val": 3.2046061712657823e-07
+        },
+        "compactness_isoperimetric": {
+          "r": -0.2172,
+          "p_val": 9.460923541632127e-07
+        },
+        "max_inscribed_radius_rmax": {
+          "r": -0.7155,
+          "p_val": 1.3012528668810454e-79
+        },
+        "mean_hole_depth": {
+          "r": -0.6841,
+          "p_val": 3.041224068357287e-70
+        },
+        "std_hole_depth": {
+          "r": -0.691,
+          "p_val": 3.402789627673727e-72
+        },
+        "max_to_mean_depth_ratio": {
+          "r": 0.0099,
+          "p_val": 0.8253984894865584
+        },
+        "convex_hull_solidity": {
+          "r": -0.0926,
+          "p_val": 0.03854728732235011
+        },
+        "mask_aspect_ratio": {
+          "r": 0.0233,
+          "p_val": 0.6038548703614387
+        },
+        "mask_extent": {
+          "r": -0.3976,
+          "p_val": 2.1818834136908357e-20
+        },
+        "connected_components_count": {
+          "r": 0.1878,
+          "p_val": 2.376204498151602e-05
+        },
+        "euler_number": {
+          "r": 0.1718,
+          "p_val": 0.0001135577535906375
+        },
+        "centroid_offset_x": {
+          "r": 0.0802,
+          "p_val": 0.07303404164562635
+        },
+        "centroid_offset_y": {
+          "r": 0.1467,
+          "p_val": 0.001002342872193705
+        },
+        "radial_eccentricity": {
+          "r": 0.1484,
+          "p_val": 0.00087644854507722
+        },
+        "rule_of_thirds_proximity": {
+          "r": 0.0152,
+          "p_val": 0.7347340905972509
+        },
+        "boundary_edge_density_sobel": {
+          "r": -0.3408,
+          "p_val": 4.575902060254117e-15
+        },
+        "boundary_edge_std_sobel": {
+          "r": -0.205,
+          "p_val": 3.7887965539547825e-06
+        },
+        "boundary_edge_max_sobel": {
+          "r": -0.1695,
+          "p_val": 0.00014025507686692406
+        },
+        "boundary_scharr_energy": {
+          "r": -0.3405,
+          "p_val": 4.890601895313683e-15
+        },
+        "boundary_canny_density": {
+          "r": -0.3597,
+          "p_val": 1.0269579446267786e-16
+        },
+        "gradient_direction_entropy": {
+          "r": -0.1523,
+          "p_val": 0.0006307585533598974
+        },
+        "boundary_laplacian_var": {
+          "r": -0.2036,
+          "p_val": 4.442811398835939e-06
+        },
+        "boundary_laplacian_mean": {
+          "r": -0.3089,
+          "p_val": 1.6223943683159166e-12
+        },
+        "glcm_contrast": {
+          "r": -0.1855,
+          "p_val": 3.0085013894118207e-05
+        },
+        "glcm_dissimilarity": {
+          "r": -0.245,
+          "p_val": 2.851111868774949e-08
+        },
+        "glcm_homogeneity": {
+          "r": 0.2583,
+          "p_val": 4.620682879333407e-09
+        },
+        "glcm_energy": {
+          "r": 0.2192,
+          "p_val": 7.407900218688825e-07
+        },
+        "glcm_correlation": {
+          "r": 0.1061,
+          "p_val": 0.017680503537518592
+        },
+        "lbp_entropy": {
+          "r": -0.1676,
+          "p_val": 0.00016684159970014608
+        },
+        "lbp_uniformity": {
+          "r": 0.1183,
+          "p_val": 0.008101690736048743
+        },
+        "multi_scale_laplacian_ratio": {
+          "r": -0.1304,
+          "p_val": 0.0034924686259784426
+        },
+        "fft_low_freq_energy": {
+          "r": 0.267,
+          "p_val": 1.3136901557908269e-09
+        },
+        "fft_mid_freq_energy": {
+          "r": -0.2656,
+          "p_val": 1.6181706793138956e-09
+        },
+        "fft_high_freq_energy": {
+          "r": -0.2427,
+          "p_val": 3.8770155582054845e-08
+        },
+        "fft_high_to_low_ratio": {
+          "r": -0.2366,
+          "p_val": 8.656033708645284e-08
+        },
+        "spectral_decay_slope": {
+          "r": -0.2137,
+          "p_val": 1.4238981686292883e-06
+        },
+        "spectral_azimuthal_anisotropy": {
+          "r": 0.157,
+          "p_val": 0.0004264326612919363
+        },
+        "context_rgb_shannon_entropy": {
+          "r": -0.3964,
+          "p_val": 2.920170007300989e-20
+        },
+        "context_lab_delta_e_mean": {
+          "r": -0.2404,
+          "p_val": 5.254741167478176e-08
+        },
+        "context_hsv_saturation_mean": {
+          "r": -0.0353,
+          "p_val": 0.4309655785256212
+        },
+        "context_hsv_saturation_std": {
+          "r": -0.1222,
+          "p_val": 0.006217853493191713
+        },
+        "context_color_temperature_proxy": {
+          "r": -0.0133,
+          "p_val": 0.767069508838729
+        },
+        "border_to_global_color_divergence": {
+          "r": 0.2889,
+          "p_val": 4.569541749294287e-11
+        },
+        "shi_tomasi_corner_count": {
+          "r": -0.2233,
+          "p_val": 4.5369629288653194e-07
+        },
+        "fast_keypoint_density": {
+          "r": 0.0211,
+          "p_val": 0.6378962298040391
+        },
+        "contour_curvature_mean": {
+          "r": 0.3375,
+          "p_val": 8.684109025038604e-15
+        },
+        "contour_curvature_extrema": {
+          "r": 0.0773,
+          "p_val": 0.08428200375100689
+        },
+        "boundary_tortuosity": {
+          "r": 0.086,
+          "p_val": 0.054698898893246174
+        },
+        "skeleton_branch_points": {
+          "r": 0.1439,
+          "p_val": 0.001249346020460016
+        }
+      },
+      "ssim_spearman": {
+        "mask_area_ratio_rho": {
+          "rho": -0.8135,
+          "p_val": 2.480411155693706e-119
+        },
+        "mask_perimeter": {
+          "rho": -0.2396,
+          "p_val": 5.8243023407206945e-08
+        },
+        "compactness_isoperimetric": {
+          "rho": -0.2481,
+          "p_val": 1.878351243869051e-08
+        },
+        "max_inscribed_radius_rmax": {
+          "rho": -0.7209,
+          "p_val": 2.5553428716223416e-81
+        },
+        "mean_hole_depth": {
+          "rho": -0.6952,
+          "p_val": 2.027280226663619e-73
+        },
+        "std_hole_depth": {
+          "rho": -0.6971,
+          "p_val": 5.7976755555050976e-74
+        },
+        "max_to_mean_depth_ratio": {
+          "rho": 0.0131,
+          "p_val": 0.7703556915973698
+        },
+        "convex_hull_solidity": {
+          "rho": -0.0855,
+          "p_val": 0.05604989160830003
+        },
+        "mask_aspect_ratio": {
+          "rho": 0.0084,
+          "p_val": 0.8522370065405405
+        },
+        "mask_extent": {
+          "rho": -0.4497,
+          "p_val": 2.883888827834672e-26
+        },
+        "connected_components_count": {
+          "rho": 0.1995,
+          "p_val": 6.96293600040233e-06
+        },
+        "euler_number": {
+          "rho": 0.1884,
+          "p_val": 2.2288000088006843e-05
+        },
+        "centroid_offset_x": {
+          "rho": 0.0683,
+          "p_val": 0.12723634130543768
+        },
+        "centroid_offset_y": {
+          "rho": 0.1223,
+          "p_val": 0.0061781020130143
+        },
+        "radial_eccentricity": {
+          "rho": 0.1207,
+          "p_val": 0.006906225568243322
+        },
+        "rule_of_thirds_proximity": {
+          "rho": 0.0162,
+          "p_val": 0.7185826665374501
+        },
+        "boundary_edge_density_sobel": {
+          "rho": -0.3268,
+          "p_val": 6.536568381118842e-14
+        },
+        "boundary_edge_std_sobel": {
+          "rho": -0.1791,
+          "p_val": 5.6309759326481276e-05
+        },
+        "boundary_edge_max_sobel": {
+          "rho": -0.1427,
+          "p_val": 0.001377297442141798
+        },
+        "boundary_scharr_energy": {
+          "rho": -0.327,
+          "p_val": 6.328259287654418e-14
+        },
+        "boundary_canny_density": {
+          "rho": -0.3773,
+          "p_val": 2.316263225646716e-18
+        },
+        "gradient_direction_entropy": {
+          "rho": -0.1734,
+          "p_val": 9.686334604472296e-05
+        },
+        "boundary_laplacian_var": {
+          "rho": -0.2446,
+          "p_val": 3.003494430799051e-08
+        },
+        "boundary_laplacian_mean": {
+          "rho": -0.3181,
+          "p_val": 3.207350513912431e-13
+        },
+        "glcm_contrast": {
+          "rho": -0.1519,
+          "p_val": 0.0006552718091653499
+        },
+        "glcm_dissimilarity": {
+          "rho": -0.225,
+          "p_val": 3.6802278969528614e-07
+        },
+        "glcm_homogeneity": {
+          "rho": 0.2561,
+          "p_val": 6.2791803976650345e-09
+        },
+        "glcm_energy": {
+          "rho": 0.2644,
+          "p_val": 1.9090158005125182e-09
+        },
+        "glcm_correlation": {
+          "rho": 0.1131,
+          "p_val": 0.01136400526044594
+        },
+        "lbp_entropy": {
+          "rho": -0.1566,
+          "p_val": 0.00044212574914362997
+        },
+        "lbp_uniformity": {
+          "rho": 0.1144,
+          "p_val": 0.010473562781347175
+        },
+        "multi_scale_laplacian_ratio": {
+          "rho": -0.0891,
+          "p_val": 0.046402368954411015
+        },
+        "fft_low_freq_energy": {
+          "rho": 0.2487,
+          "p_val": 1.7436589368317273e-08
+        },
+        "fft_mid_freq_energy": {
+          "rho": -0.2416,
+          "p_val": 4.479066680955465e-08
+        },
+        "fft_high_freq_energy": {
+          "rho": -0.2531,
+          "p_val": 9.456589642208356e-09
+        },
+        "fft_high_to_low_ratio": {
+          "rho": -0.2523,
+          "p_val": 1.0707014483679916e-08
+        },
+        "spectral_decay_slope": {
+          "rho": -0.2066,
+          "p_val": 3.1937708576602248e-06
+        },
+        "spectral_azimuthal_anisotropy": {
+          "rho": 0.1675,
+          "p_val": 0.0001686616106284251
+        },
+        "context_rgb_shannon_entropy": {
+          "rho": -0.3935,
+          "p_val": 5.800673057406406e-20
+        },
+        "context_lab_delta_e_mean": {
+          "rho": -0.2497,
+          "p_val": 1.518237510574149e-08
+        },
+        "context_hsv_saturation_mean": {
+          "rho": -0.0441,
+          "p_val": 0.3254577841916994
+        },
+        "context_hsv_saturation_std": {
+          "rho": -0.1394,
+          "p_val": 0.001779565041974586
+        },
+        "context_color_temperature_proxy": {
+          "rho": -0.0487,
+          "p_val": 0.27755667459852895
+        },
+        "border_to_global_color_divergence": {
+          "rho": 0.2684,
+          "p_val": 1.0693905508249455e-09
+        },
+        "shi_tomasi_corner_count": {
+          "rho": -0.2323,
+          "p_val": 1.4939252892835224e-07
+        },
+        "fast_keypoint_density": {
+          "rho": -0.0081,
+          "p_val": 0.8564120315451146
+        },
+        "contour_curvature_mean": {
+          "rho": 0.3582,
+          "p_val": 1.3836814656367632e-16
+        },
+        "contour_curvature_extrema": {
+          "rho": 0.0927,
+          "p_val": 0.03824738593588371
+        },
+        "boundary_tortuosity": {
+          "rho": 0.0926,
+          "p_val": 0.03856982875176349
+        },
+        "skeleton_branch_points": {
+          "rho": 0.151,
+          "p_val": 0.0007079399970549373
+        }
+      },
+      "latency_ms_pearson": {
+        "mask_area_ratio_rho": {
+          "r": -0.0076,
+          "p_val": 0.866099737659232
+        },
+        "mask_perimeter": {
+          "r": 0.0279,
+          "p_val": 0.5338310286745999
+        },
+        "compactness_isoperimetric": {
+          "r": -0.0369,
+          "p_val": 0.4100169128124783
+        },
+        "max_inscribed_radius_rmax": {
+          "r": -0.0211,
+          "p_val": 0.638619772514622
+        },
+        "mean_hole_depth": {
+          "r": -0.0265,
+          "p_val": 0.5547893468845353
+        },
+        "std_hole_depth": {
+          "r": -0.0186,
+          "p_val": 0.6777667457300248
+        },
+        "max_to_mean_depth_ratio": {
+          "r": 0.0077,
+          "p_val": 0.8639905191720844
+        },
+        "convex_hull_solidity": {
+          "r": 0.0619,
+          "p_val": 0.16709985896706647
+        },
+        "mask_aspect_ratio": {
+          "r": -0.0246,
+          "p_val": 0.5824389554524844
+        },
+        "mask_extent": {
+          "r": -0.0455,
+          "p_val": 0.31022147229453795
+        },
+        "connected_components_count": {
+          "r": 0.0646,
+          "p_val": 0.14922142598162497
+        },
+        "euler_number": {
+          "r": 0.0528,
+          "p_val": 0.23844334725449992
+        },
+        "centroid_offset_x": {
+          "r": 0.0332,
+          "p_val": 0.458431109315261
+        },
+        "centroid_offset_y": {
+          "r": 0.0014,
+          "p_val": 0.9748289128821496
+        },
+        "radial_eccentricity": {
+          "r": 0.0103,
+          "p_val": 0.8179176153644163
+        },
+        "rule_of_thirds_proximity": {
+          "r": 0.1047,
+          "p_val": 0.019178810556506838
+        },
+        "boundary_edge_density_sobel": {
+          "r": -0.0245,
+          "p_val": 0.5846009398426915
+        },
+        "boundary_edge_std_sobel": {
+          "r": -0.1002,
+          "p_val": 0.02507673887920452
+        },
+        "boundary_edge_max_sobel": {
+          "r": -0.0889,
+          "p_val": 0.04696661416638986
+        },
+        "boundary_scharr_energy": {
+          "r": -0.0234,
+          "p_val": 0.6019630790702271
+        },
+        "boundary_canny_density": {
+          "r": -0.0019,
+          "p_val": 0.9664219896202914
+        },
+        "gradient_direction_entropy": {
+          "r": 0.0776,
+          "p_val": 0.08285821191597219
+        },
+        "boundary_laplacian_var": {
+          "r": -0.0157,
+          "p_val": 0.7257263151292783
+        },
+        "boundary_laplacian_mean": {
+          "r": -0.0013,
+          "p_val": 0.9763944494045856
+        },
+        "glcm_contrast": {
+          "r": -0.0664,
+          "p_val": 0.13832603528899795
+        },
+        "glcm_dissimilarity": {
+          "r": -0.038,
+          "p_val": 0.39679408121844834
+        },
+        "glcm_homogeneity": {
+          "r": 0.0148,
+          "p_val": 0.7413018990665349
+        },
+        "glcm_energy": {
+          "r": 0.033,
+          "p_val": 0.4617988539472189
+        },
+        "glcm_correlation": {
+          "r": 0.034,
+          "p_val": 0.44753660066949985
+        },
+        "lbp_entropy": {
+          "r": 0.1144,
+          "p_val": 0.010448794078759214
+        },
+        "lbp_uniformity": {
+          "r": -0.0924,
+          "p_val": 0.038991681120398386
+        },
+        "multi_scale_laplacian_ratio": {
+          "r": 0.0122,
+          "p_val": 0.7859949760665469
+        },
+        "fft_low_freq_energy": {
+          "r": -0.0318,
+          "p_val": 0.4781762290180206
+        },
+        "fft_mid_freq_energy": {
+          "r": 0.0266,
+          "p_val": 0.5525517530495542
+        },
+        "fft_high_freq_energy": {
+          "r": 0.0447,
+          "p_val": 0.3184291574038106
+        },
+        "fft_high_to_low_ratio": {
+          "r": 0.0448,
+          "p_val": 0.31711878256217724
+        },
+        "spectral_decay_slope": {
+          "r": 0.0148,
+          "p_val": 0.7409869228807099
+        },
+        "spectral_azimuthal_anisotropy": {
+          "r": -0.0424,
+          "p_val": 0.34351048502985776
+        },
+        "context_rgb_shannon_entropy": {
+          "r": -0.0182,
+          "p_val": 0.6850293857160294
+        },
+        "context_lab_delta_e_mean": {
+          "r": -0.0624,
+          "p_val": 0.16340313155066752
+        },
+        "context_hsv_saturation_mean": {
+          "r": 0.0021,
+          "p_val": 0.9633166193969934
+        },
+        "context_hsv_saturation_std": {
+          "r": -0.1189,
+          "p_val": 0.0077923070797165
+        },
+        "context_color_temperature_proxy": {
+          "r": -0.1122,
+          "p_val": 0.012042132470762504
+        },
+        "border_to_global_color_divergence": {
+          "r": -0.0888,
+          "p_val": 0.04711069727835421
+        },
+        "shi_tomasi_corner_count": {
+          "r": -0.0019,
+          "p_val": 0.9669866959521823
+        },
+        "fast_keypoint_density": {
+          "r": 0.0127,
+          "p_val": 0.7769094893930472
+        },
+        "contour_curvature_mean": {
+          "r": 0.0376,
+          "p_val": 0.4017380809054702
+        },
+        "contour_curvature_extrema": {
+          "r": 0.05,
+          "p_val": 0.264452198048401
+        },
+        "boundary_tortuosity": {
+          "r": -0.0613,
+          "p_val": 0.17080531759813497
+        },
+        "skeleton_branch_points": {
+          "r": 0.0239,
+          "p_val": 0.5946609643864127
+        }
+      },
+      "latency_ms_spearman": {
+        "mask_area_ratio_rho": {
+          "rho": -0.0078,
+          "p_val": 0.8619837644210674
+        },
+        "mask_perimeter": {
+          "rho": 0.009,
+          "p_val": 0.8402598098210194
+        },
+        "compactness_isoperimetric": {
+          "rho": -0.0201,
+          "p_val": 0.6531318484477762
+        },
+        "max_inscribed_radius_rmax": {
+          "rho": -0.016,
+          "p_val": 0.7219079128022853
+        },
+        "mean_hole_depth": {
+          "rho": -0.0173,
+          "p_val": 0.6998977078004834
+        },
+        "std_hole_depth": {
+          "rho": -0.0104,
+          "p_val": 0.8164679919017189
+        },
+        "max_to_mean_depth_ratio": {
+          "rho": 0.011,
+          "p_val": 0.8070117359053838
+        },
+        "convex_hull_solidity": {
+          "rho": 0.074,
+          "p_val": 0.09836446420685266
+        },
+        "mask_aspect_ratio": {
+          "rho": -0.0117,
+          "p_val": 0.794313803480644
+        },
+        "mask_extent": {
+          "rho": -0.0352,
+          "p_val": 0.43281221307140916
+        },
+        "connected_components_count": {
+          "rho": 0.0564,
+          "p_val": 0.20806769768618877
+        },
+        "euler_number": {
+          "rho": 0.0511,
+          "p_val": 0.2544390976457208
+        },
+        "centroid_offset_x": {
+          "rho": 0.0464,
+          "p_val": 0.30030149893572833
+        },
+        "centroid_offset_y": {
+          "rho": 0.0379,
+          "p_val": 0.39807178430935414
+        },
+        "radial_eccentricity": {
+          "rho": 0.0421,
+          "p_val": 0.3477137423997128
+        },
+        "rule_of_thirds_proximity": {
+          "rho": 0.1067,
+          "p_val": 0.0170179504157362
+        },
+        "boundary_edge_density_sobel": {
+          "rho": -0.0246,
+          "p_val": 0.5825925091665995
+        },
+        "boundary_edge_std_sobel": {
+          "rho": -0.0865,
+          "p_val": 0.05337135975316723
+        },
+        "boundary_edge_max_sobel": {
+          "rho": -0.091,
+          "p_val": 0.041941133369543825
+        },
+        "boundary_scharr_energy": {
+          "rho": -0.0234,
+          "p_val": 0.6024452776971646
+        },
+        "boundary_canny_density": {
+          "rho": -0.0123,
+          "p_val": 0.7838738578524799
+        },
+        "gradient_direction_entropy": {
+          "rho": 0.0492,
+          "p_val": 0.2718226825822938
+        },
+        "boundary_laplacian_var": {
+          "rho": -0.0375,
+          "p_val": 0.40300357115997054
+        },
+        "boundary_laplacian_mean": {
+          "rho": -0.0117,
+          "p_val": 0.7936323683328926
+        },
+        "glcm_contrast": {
+          "rho": -0.0722,
+          "p_val": 0.10696999108810087
+        },
+        "glcm_dissimilarity": {
+          "rho": -0.0544,
+          "p_val": 0.22490964496703586
+        },
+        "glcm_homogeneity": {
+          "rho": 0.0247,
+          "p_val": 0.5814150698911262
+        },
+        "glcm_energy": {
+          "rho": 0.0011,
+          "p_val": 0.9812704547412758
+        },
+        "glcm_correlation": {
+          "rho": 0.031,
+          "p_val": 0.48892514633958467
+        },
+        "lbp_entropy": {
+          "rho": 0.0969,
+          "p_val": 0.030315518724258222
+        },
+        "lbp_uniformity": {
+          "rho": -0.0745,
+          "p_val": 0.09608654035581224
+        },
+        "multi_scale_laplacian_ratio": {
+          "rho": 0.0136,
+          "p_val": 0.762088858816921
+        },
+        "fft_low_freq_energy": {
+          "rho": -0.0544,
+          "p_val": 0.22459028505556003
+        },
+        "fft_mid_freq_energy": {
+          "rho": 0.0484,
+          "p_val": 0.2801345644029357
+        },
+        "fft_high_freq_energy": {
+          "rho": 0.0695,
+          "p_val": 0.12073435770159724
+        },
+        "fft_high_to_low_ratio": {
+          "rho": 0.0685,
+          "p_val": 0.12594640333340107
+        },
+        "spectral_decay_slope": {
+          "rho": 0.0403,
+          "p_val": 0.3689651807939517
+        },
+        "spectral_azimuthal_anisotropy": {
+          "rho": -0.093,
+          "p_val": 0.03762066353436101
+        },
+        "context_rgb_shannon_entropy": {
+          "rho": 0.0007,
+          "p_val": 0.9877692294327699
+        },
+        "context_lab_delta_e_mean": {
+          "rho": -0.0381,
+          "p_val": 0.39496415736586565
+        },
+        "context_hsv_saturation_mean": {
+          "rho": 0.0058,
+          "p_val": 0.8962874548139168
+        },
+        "context_hsv_saturation_std": {
+          "rho": -0.1091,
+          "p_val": 0.014658258896687962
+        },
+        "context_color_temperature_proxy": {
+          "rho": -0.09,
+          "p_val": 0.04419415245011548
+        },
+        "border_to_global_color_divergence": {
+          "rho": -0.0843,
+          "p_val": 0.05964954743815518
+        },
+        "shi_tomasi_corner_count": {
+          "rho": -0.0301,
+          "p_val": 0.5024325318754138
+        },
+        "fast_keypoint_density": {
+          "rho": -0.0091,
+          "p_val": 0.8392736353526593
+        },
+        "contour_curvature_mean": {
+          "rho": 0.0189,
+          "p_val": 0.6730502935054432
+        },
+        "contour_curvature_extrema": {
+          "rho": 0.0354,
+          "p_val": 0.43020276375989686
+        },
+        "boundary_tortuosity": {
+          "rho": -0.0562,
+          "p_val": 0.209501842651943
+        },
+        "skeleton_branch_points": {
+          "rho": 0.0188,
+          "p_val": 0.6752996107894417
+        }
+      }
+    },
+    "lama_npu": {
+      "lpips_pearson": {
+        "mask_area_ratio_rho": {
+          "r": 0.9803,
+          "p_val": 0.0
+        },
+        "mask_perimeter": {
+          "r": 0.5322,
+          "p_val": 6.560641001038213e-38
+        },
+        "compactness_isoperimetric": {
+          "r": -0.0271,
+          "p_val": 0.5456128777062927
+        },
+        "max_inscribed_radius_rmax": {
+          "r": 0.6708,
+          "p_val": 1.2106937135007582e-66
+        },
+        "mean_hole_depth": {
+          "r": 0.5879,
+          "p_val": 8.52371284935402e-48
+        },
+        "std_hole_depth": {
+          "r": 0.6211,
+          "p_val": 1.1349257885917352e-54
+        },
+        "max_to_mean_depth_ratio": {
+          "r": 0.1403,
+          "p_val": 0.0016582402815932013
+        },
+        "convex_hull_solidity": {
+          "r": 0.1049,
+          "p_val": 0.01894382685984824
+        },
+        "mask_aspect_ratio": {
+          "r": -0.0558,
+          "p_val": 0.2128430318886403
+        },
+        "mask_extent": {
+          "r": 0.2177,
+          "p_val": 8.897366490318466e-07
+        },
+        "connected_components_count": {
+          "r": 0.0311,
+          "p_val": 0.4878974520484263
+        },
+        "euler_number": {
+          "r": 0.012,
+          "p_val": 0.7896462754607173
+        },
+        "centroid_offset_x": {
+          "r": -0.1713,
+          "p_val": 0.00011819026708326903
+        },
+        "centroid_offset_y": {
+          "r": -0.2473,
+          "p_val": 2.0968771553390673e-08
+        },
+        "radial_eccentricity": {
+          "r": -0.2748,
+          "p_val": 4.08516987432941e-10
+        },
+        "rule_of_thirds_proximity": {
+          "r": -0.0724,
+          "p_val": 0.10595205231032546
+        },
+        "boundary_edge_density_sobel": {
+          "r": -0.1009,
+          "p_val": 0.02399908471332461
+        },
+        "boundary_edge_std_sobel": {
+          "r": -0.0108,
+          "p_val": 0.8100051369877548
+        },
+        "boundary_edge_max_sobel": {
+          "r": 0.1164,
+          "p_val": 0.00915819462283612
+        },
+        "boundary_scharr_energy": {
+          "r": -0.1023,
+          "p_val": 0.02216264077677611
+        },
+        "boundary_canny_density": {
+          "r": -0.0651,
+          "p_val": 0.14598822507878784
+        },
+        "gradient_direction_entropy": {
+          "r": 0.0678,
+          "p_val": 0.13027792201730556
+        },
+        "boundary_laplacian_var": {
+          "r": -0.1027,
+          "p_val": 0.02158755303662706
+        },
+        "boundary_laplacian_mean": {
+          "r": -0.1155,
+          "p_val": 0.009756675881343217
+        },
+        "glcm_contrast": {
+          "r": -0.0714,
+          "p_val": 0.110691758702025
+        },
+        "glcm_dissimilarity": {
+          "r": -0.097,
+          "p_val": 0.030045079494142753
+        },
+        "glcm_homogeneity": {
+          "r": 0.104,
+          "p_val": 0.02005712886652113
+        },
+        "glcm_energy": {
+          "r": 0.1091,
+          "p_val": 0.014626904107688344
+        },
+        "glcm_correlation": {
+          "r": -0.0186,
+          "p_val": 0.677935126064986
+        },
+        "lbp_entropy": {
+          "r": 0.0072,
+          "p_val": 0.8729437030531529
+        },
+        "lbp_uniformity": {
+          "r": -0.0049,
+          "p_val": 0.9132218749288312
+        },
+        "multi_scale_laplacian_ratio": {
+          "r": -0.0138,
+          "p_val": 0.7577706308824621
+        },
+        "fft_low_freq_energy": {
+          "r": 0.0302,
+          "p_val": 0.5006433308534236
+        },
+        "fft_mid_freq_energy": {
+          "r": -0.0301,
+          "p_val": 0.5019959756658805
+        },
+        "fft_high_freq_energy": {
+          "r": -0.0265,
+          "p_val": 0.553944994962864
+        },
+        "fft_high_to_low_ratio": {
+          "r": -0.0269,
+          "p_val": 0.5490256286069974
+        },
+        "spectral_decay_slope": {
+          "r": 0.0459,
+          "p_val": 0.3056412667138152
+        },
+        "spectral_azimuthal_anisotropy": {
+          "r": 0.0665,
+          "p_val": 0.13771825729585951
+        },
+        "context_rgb_shannon_entropy": {
+          "r": 0.0501,
+          "p_val": 0.263058921593797
+        },
+        "context_lab_delta_e_mean": {
+          "r": 0.0142,
+          "p_val": 0.7516657762207741
+        },
+        "context_hsv_saturation_mean": {
+          "r": 0.0036,
+          "p_val": 0.935823460181441
+        },
+        "context_hsv_saturation_std": {
+          "r": 0.0056,
+          "p_val": 0.9012072873447687
+        },
+        "context_color_temperature_proxy": {
+          "r": -0.1397,
+          "p_val": 0.0017361306676379217
+        },
+        "border_to_global_color_divergence": {
+          "r": -0.4257,
+          "p_val": 1.9822006997828604e-23
+        },
+        "shi_tomasi_corner_count": {
+          "r": 0.2955,
+          "p_val": 1.567915111994407e-11
+        },
+        "fast_keypoint_density": {
+          "r": -0.4024,
+          "p_val": 6.910680163155426e-21
+        },
+        "contour_curvature_mean": {
+          "r": -0.2497,
+          "p_val": 1.5097825414362216e-08
+        },
+        "contour_curvature_extrema": {
+          "r": 0.176,
+          "p_val": 7.635539267755869e-05
+        },
+        "boundary_tortuosity": {
+          "r": -0.0652,
+          "p_val": 0.1455712456110563
+        },
+        "skeleton_branch_points": {
+          "r": 0.0835,
+          "p_val": 0.062023046711506595
+        }
+      },
+      "lpips_spearman": {
+        "mask_area_ratio_rho": {
+          "rho": 0.9796,
+          "p_val": 0.0
+        },
+        "mask_perimeter": {
+          "rho": 0.5373,
+          "p_val": 9.614398042938846e-39
+        },
+        "compactness_isoperimetric": {
+          "rho": 0.006,
+          "p_val": 0.8943041406436462
+        },
+        "max_inscribed_radius_rmax": {
+          "rho": 0.6741,
+          "p_val": 1.5892526098237984e-67
+        },
+        "mean_hole_depth": {
+          "rho": 0.6034,
+          "p_val": 6.403188770599771e-51
+        },
+        "std_hole_depth": {
+          "rho": 0.627,
+          "p_val": 5.573029159307224e-56
+        },
+        "max_to_mean_depth_ratio": {
+          "rho": 0.1297,
+          "p_val": 0.0036787186410205514
+        },
+        "convex_hull_solidity": {
+          "rho": 0.1047,
+          "p_val": 0.019183460994654098
+        },
+        "mask_aspect_ratio": {
+          "rho": -0.03,
+          "p_val": 0.5028914678746701
+        },
+        "mask_extent": {
+          "rho": 0.2793,
+          "p_val": 2.0754955892062805e-10
+        },
+        "connected_components_count": {
+          "rho": 0.0534,
+          "p_val": 0.23338665315176385
+        },
+        "euler_number": {
+          "rho": 0.0336,
+          "p_val": 0.4528730473380335
+        },
+        "centroid_offset_x": {
+          "rho": -0.1452,
+          "p_val": 0.00112795449339962
+        },
+        "centroid_offset_y": {
+          "rho": -0.2075,
+          "p_val": 2.8808552755095046e-06
+        },
+        "radial_eccentricity": {
+          "rho": -0.2342,
+          "p_val": 1.165950451509072e-07
+        },
+        "rule_of_thirds_proximity": {
+          "rho": -0.0716,
+          "p_val": 0.10983099609279293
+        },
+        "boundary_edge_density_sobel": {
+          "rho": -0.1255,
+          "p_val": 0.004954713370022681
+        },
+        "boundary_edge_std_sobel": {
+          "rho": -0.0378,
+          "p_val": 0.3986401419441015
+        },
+        "boundary_edge_max_sobel": {
+          "rho": 0.1012,
+          "p_val": 0.023594155177601082
+        },
+        "boundary_scharr_energy": {
+          "rho": -0.1264,
+          "p_val": 0.0046524784385882124
+        },
+        "boundary_canny_density": {
+          "rho": -0.0624,
+          "p_val": 0.1636765088281754
+        },
+        "gradient_direction_entropy": {
+          "rho": 0.1167,
+          "p_val": 0.00898619747993529
+        },
+        "boundary_laplacian_var": {
+          "rho": -0.0627,
+          "p_val": 0.16124768098511824
+        },
+        "boundary_laplacian_mean": {
+          "rho": -0.1153,
+          "p_val": 0.009866920126555415
+        },
+        "glcm_contrast": {
+          "rho": -0.0796,
+          "p_val": 0.07550121663660969
+        },
+        "glcm_dissimilarity": {
+          "rho": -0.1017,
+          "p_val": 0.022923923267543642
+        },
+        "glcm_homogeneity": {
+          "rho": 0.0986,
+          "p_val": 0.02741124802315077
+        },
+        "glcm_energy": {
+          "rho": 0.0979,
+          "p_val": 0.028649791600065623
+        },
+        "glcm_correlation": {
+          "rho": -0.038,
+          "p_val": 0.395992233291237
+        },
+        "lbp_entropy": {
+          "rho": -0.004,
+          "p_val": 0.9287497078329419
+        },
+        "lbp_uniformity": {
+          "rho": -0.0138,
+          "p_val": 0.7574176450249873
+        },
+        "multi_scale_laplacian_ratio": {
+          "rho": -0.0283,
+          "p_val": 0.5280985417746863
+        },
+        "fft_low_freq_energy": {
+          "rho": 0.0498,
+          "p_val": 0.26595010938890307
+        },
+        "fft_mid_freq_energy": {
+          "rho": -0.0526,
+          "p_val": 0.24020664264291955
+        },
+        "fft_high_freq_energy": {
+          "rho": -0.0362,
+          "p_val": 0.4195219771445262
+        },
+        "fft_high_to_low_ratio": {
+          "rho": -0.0376,
+          "p_val": 0.40091457720918827
+        },
+        "spectral_decay_slope": {
+          "rho": 0.0547,
+          "p_val": 0.22194098316386543
+        },
+        "spectral_azimuthal_anisotropy": {
+          "rho": 0.0551,
+          "p_val": 0.2188566545746152
+        },
+        "context_rgb_shannon_entropy": {
+          "rho": -0.0172,
+          "p_val": 0.7010760626691608
+        },
+        "context_lab_delta_e_mean": {
+          "rho": -0.006,
+          "p_val": 0.8938012478637178
+        },
+        "context_hsv_saturation_mean": {
+          "rho": 0.0302,
+          "p_val": 0.500659169205694
+        },
+        "context_hsv_saturation_std": {
+          "rho": 0.0065,
+          "p_val": 0.8854483874262473
+        },
+        "context_color_temperature_proxy": {
+          "rho": -0.129,
+          "p_val": 0.003857604955273505
+        },
+        "border_to_global_color_divergence": {
+          "rho": -0.4123,
+          "p_val": 6.173974496267549e-22
+        },
+        "shi_tomasi_corner_count": {
+          "rho": 0.2874,
+          "p_val": 5.785629361167395e-11
+        },
+        "fast_keypoint_density": {
+          "rho": -0.4035,
+          "p_val": 5.339648109071522e-21
+        },
+        "contour_curvature_mean": {
+          "rho": -0.2439,
+          "p_val": 3.30594987757631e-08
+        },
+        "contour_curvature_extrema": {
+          "rho": 0.1657,
+          "p_val": 0.00019864276621497906
+        },
+        "boundary_tortuosity": {
+          "rho": -0.0605,
+          "p_val": 0.1771176579299627
+        },
+        "skeleton_branch_points": {
+          "rho": 0.0883,
+          "p_val": 0.04839561526292845
+        }
+      },
+      "psnr_hole_pearson": {
+        "mask_area_ratio_rho": {
+          "r": -0.3789,
+          "p_val": 1.6372321514493095e-18
+        },
+        "mask_perimeter": {
+          "r": 0.0817,
+          "p_val": 0.06793997950283144
+        },
+        "compactness_isoperimetric": {
+          "r": -0.2911,
+          "p_val": 3.207721898888634e-11
+        },
+        "max_inscribed_radius_rmax": {
+          "r": -0.5014,
+          "p_val": 3.418034542707753e-33
+        },
+        "mean_hole_depth": {
+          "r": -0.5086,
+          "p_val": 2.9582473852309234e-34
+        },
+        "std_hole_depth": {
+          "r": -0.5035,
+          "p_val": 1.701693906823446e-33
+        },
+        "max_to_mean_depth_ratio": {
+          "r": 0.0874,
+          "p_val": 0.05092770781623785
+        },
+        "convex_hull_solidity": {
+          "r": -0.0411,
+          "p_val": 0.3594009218753939
+        },
+        "mask_aspect_ratio": {
+          "r": -0.0225,
+          "p_val": 0.6151684267361773
+        },
+        "mask_extent": {
+          "r": -0.3695,
+          "p_val": 1.2634179047075997e-17
+        },
+        "connected_components_count": {
+          "r": 0.3087,
+          "p_val": 1.6966179242172807e-12
+        },
+        "euler_number": {
+          "r": 0.2942,
+          "p_val": 1.9326105830411392e-11
+        },
+        "centroid_offset_x": {
+          "r": -0.0838,
+          "p_val": 0.061203697942129126
+        },
+        "centroid_offset_y": {
+          "r": 0.0359,
+          "p_val": 0.42275879639939007
+        },
+        "radial_eccentricity": {
+          "r": -0.0299,
+          "p_val": 0.504028581111592
+        },
+        "rule_of_thirds_proximity": {
+          "r": -0.0897,
+          "p_val": 0.04487978847258265
+        },
+        "boundary_edge_density_sobel": {
+          "r": -0.5036,
+          "p_val": 1.6249758686324234e-33
+        },
+        "boundary_edge_std_sobel": {
+          "r": -0.4373,
+          "p_val": 9.044235418211247e-25
+        },
+        "boundary_edge_max_sobel": {
+          "r": -0.3116,
+          "p_val": 1.0077879600336466e-12
+        },
+        "boundary_scharr_energy": {
+          "r": -0.5046,
+          "p_val": 1.1651011514516307e-33
+        },
+        "boundary_canny_density": {
+          "r": -0.4776,
+          "p_val": 7.53273493209803e-30
+        },
+        "gradient_direction_entropy": {
+          "r": -0.1788,
+          "p_val": 5.833369638023083e-05
+        },
+        "boundary_laplacian_var": {
+          "r": -0.4153,
+          "p_val": 2.8593343130943132e-22
+        },
+        "boundary_laplacian_mean": {
+          "r": -0.4948,
+          "p_val": 3.072031224189671e-32
+        },
+        "glcm_contrast": {
+          "r": -0.3359,
+          "p_val": 1.1892529635105916e-14
+        },
+        "glcm_dissimilarity": {
+          "r": -0.3437,
+          "p_val": 2.6106804590288357e-15
+        },
+        "glcm_homogeneity": {
+          "r": 0.3051,
+          "p_val": 3.1246760078950573e-12
+        },
+        "glcm_energy": {
+          "r": 0.1869,
+          "p_val": 2.593866430990573e-05
+        },
+        "glcm_correlation": {
+          "r": 0.0902,
+          "p_val": 0.043805256154948014
+        },
+        "lbp_entropy": {
+          "r": -0.2279,
+          "p_val": 2.577032946692361e-07
+        },
+        "lbp_uniformity": {
+          "r": 0.1726,
+          "p_val": 0.0001051119821112844
+        },
+        "multi_scale_laplacian_ratio": {
+          "r": -0.1639,
+          "p_val": 0.00023223511918313693
+        },
+        "fft_low_freq_energy": {
+          "r": 0.266,
+          "p_val": 1.5240022110597234e-09
+        },
+        "fft_mid_freq_energy": {
+          "r": -0.265,
+          "p_val": 1.75252255345834e-09
+        },
+        "fft_high_freq_energy": {
+          "r": -0.2402,
+          "p_val": 5.396204449813961e-08
+        },
+        "fft_high_to_low_ratio": {
+          "r": -0.232,
+          "p_val": 1.5439908537181143e-07
+        },
+        "spectral_decay_slope": {
+          "r": -0.1635,
+          "p_val": 0.00024125749278367244
+        },
+        "spectral_azimuthal_anisotropy": {
+          "r": 0.2103,
+          "p_val": 2.09781125283508e-06
+        },
+        "context_rgb_shannon_entropy": {
+          "r": -0.4754,
+          "p_val": 1.4778024056413238e-29
+        },
+        "context_lab_delta_e_mean": {
+          "r": -0.4447,
+          "p_val": 1.1936963491926806e-25
+        },
+        "context_hsv_saturation_mean": {
+          "r": -0.066,
+          "p_val": 0.14034744526323725
+        },
+        "context_hsv_saturation_std": {
+          "r": -0.2432,
+          "p_val": 3.6354320040861814e-08
+        },
+        "context_color_temperature_proxy": {
+          "r": -0.0348,
+          "p_val": 0.43748281442260517
+        },
+        "border_to_global_color_divergence": {
+          "r": 0.1147,
+          "p_val": 0.01023951908539462
+        },
+        "shi_tomasi_corner_count": {
+          "r": -0.1044,
+          "p_val": 0.019531137977644126
+        },
+        "fast_keypoint_density": {
+          "r": -0.2583,
+          "p_val": 4.590541394501959e-09
+        },
+        "contour_curvature_mean": {
+          "r": 0.2968,
+          "p_val": 1.2634623782769556e-11
+        },
+        "contour_curvature_extrema": {
+          "r": 0.2416,
+          "p_val": 4.4781419657257625e-08
+        },
+        "boundary_tortuosity": {
+          "r": 0.034,
+          "p_val": 0.448542355815795
+        },
+        "skeleton_branch_points": {
+          "r": 0.2855,
+          "p_val": 7.774590856639894e-11
+        }
+      },
+      "psnr_hole_spearman": {
+        "mask_area_ratio_rho": {
+          "rho": -0.3617,
+          "p_val": 6.725433496768375e-17
+        },
+        "mask_perimeter": {
+          "rho": 0.134,
+          "p_val": 0.002669307354724399
+        },
+        "compactness_isoperimetric": {
+          "rho": -0.3919,
+          "p_val": 8.457876208326614e-20
+        },
+        "max_inscribed_radius_rmax": {
+          "rho": -0.5236,
+          "p_val": 1.4989585773421262e-36
+        },
+        "mean_hole_depth": {
+          "rho": -0.5365,
+          "p_val": 1.306286884275363e-38
+        },
+        "std_hole_depth": {
+          "rho": -0.5319,
+          "p_val": 7.373822418215562e-38
+        },
+        "max_to_mean_depth_ratio": {
+          "rho": 0.114,
+          "p_val": 0.01071534714393296
+        },
+        "convex_hull_solidity": {
+          "rho": -0.0571,
+          "p_val": 0.20230260297463762
+        },
+        "mask_aspect_ratio": {
+          "rho": -0.0114,
+          "p_val": 0.798516252772748
+        },
+        "mask_extent": {
+          "rho": -0.4308,
+          "p_val": 5.15663100756713e-24
+        },
+        "connected_components_count": {
+          "rho": 0.3684,
+          "p_val": 1.6311463486647007e-17
+        },
+        "euler_number": {
+          "rho": 0.3548,
+          "p_val": 2.8144659271470214e-16
+        },
+        "centroid_offset_x": {
+          "rho": -0.1155,
+          "p_val": 0.0097132611326204
+        },
+        "centroid_offset_y": {
+          "rho": -0.0442,
+          "p_val": 0.32355016300989564
+        },
+        "radial_eccentricity": {
+          "rho": -0.1073,
+          "p_val": 0.016353054499398032
+        },
+        "rule_of_thirds_proximity": {
+          "rho": -0.1243,
+          "p_val": 0.005386581108660759
+        },
+        "boundary_edge_density_sobel": {
+          "rho": -0.4748,
+          "p_val": 1.7974595306537518e-29
+        },
+        "boundary_edge_std_sobel": {
+          "rho": -0.3998,
+          "p_val": 1.2977639229277541e-20
+        },
+        "boundary_edge_max_sobel": {
+          "rho": -0.2559,
+          "p_val": 6.4747271582480495e-09
+        },
+        "boundary_scharr_energy": {
+          "rho": -0.4759,
+          "p_val": 1.2468630818314039e-29
+        },
+        "boundary_canny_density": {
+          "rho": -0.4435,
+          "p_val": 1.6655496343919935e-25
+        },
+        "gradient_direction_entropy": {
+          "rho": -0.1825,
+          "p_val": 4.0546634291417513e-05
+        },
+        "boundary_laplacian_var": {
+          "rho": -0.4161,
+          "p_val": 2.338656854879063e-22
+        },
+        "boundary_laplacian_mean": {
+          "rho": -0.4651,
+          "p_val": 3.2898542458673554e-28
+        },
+        "glcm_contrast": {
+          "rho": -0.3446,
+          "p_val": 2.1994545674864445e-15
+        },
+        "glcm_dissimilarity": {
+          "rho": -0.3468,
+          "p_val": 1.4154398235124657e-15
+        },
+        "glcm_homogeneity": {
+          "rho": 0.306,
+          "p_val": 2.6873465882794254e-12
+        },
+        "glcm_energy": {
+          "rho": 0.2196,
+          "p_val": 7.060426195935784e-07
+        },
+        "glcm_correlation": {
+          "rho": 0.0836,
+          "p_val": 0.06171869850272668
+        },
+        "lbp_entropy": {
+          "rho": -0.1795,
+          "p_val": 5.4015031985555985e-05
+        },
+        "lbp_uniformity": {
+          "rho": 0.1414,
+          "p_val": 0.0015222529208684895
+        },
+        "multi_scale_laplacian_ratio": {
+          "rho": -0.1328,
+          "p_val": 0.0029188579162872505
+        },
+        "fft_low_freq_energy": {
+          "rho": 0.2815,
+          "p_val": 1.4675884484115515e-10
+        },
+        "fft_mid_freq_energy": {
+          "rho": -0.2742,
+          "p_val": 4.48668924135799e-10
+        },
+        "fft_high_freq_energy": {
+          "rho": -0.2845,
+          "p_val": 9.209766385719397e-11
+        },
+        "fft_high_to_low_ratio": {
+          "rho": -0.2838,
+          "p_val": 1.0162219520624981e-10
+        },
+        "spectral_decay_slope": {
+          "rho": -0.1463,
+          "p_val": 0.001037070161556361
+        },
+        "spectral_azimuthal_anisotropy": {
+          "rho": 0.2574,
+          "p_val": 5.214545053957945e-09
+        },
+        "context_rgb_shannon_entropy": {
+          "rho": -0.402,
+          "p_val": 7.604210195243422e-21
+        },
+        "context_lab_delta_e_mean": {
+          "rho": -0.4301,
+          "p_val": 6.231121322800329e-24
+        },
+        "context_hsv_saturation_mean": {
+          "rho": -0.083,
+          "p_val": 0.06369419602035375
+        },
+        "context_hsv_saturation_std": {
+          "rho": -0.2448,
+          "p_val": 2.942478340231604e-08
+        },
+        "context_color_temperature_proxy": {
+          "rho": -0.0418,
+          "p_val": 0.35118454151579886
+        },
+        "border_to_global_color_divergence": {
+          "rho": -0.016,
+          "p_val": 0.7205538469609238
+        },
+        "shi_tomasi_corner_count": {
+          "rho": -0.0656,
+          "p_val": 0.14298699170175985
+        },
+        "fast_keypoint_density": {
+          "rho": -0.3201,
+          "p_val": 2.232547855851053e-13
+        },
+        "contour_curvature_mean": {
+          "rho": 0.3108,
+          "p_val": 1.1762147775575799e-12
+        },
+        "contour_curvature_extrema": {
+          "rho": 0.2807,
+          "p_val": 1.6497202796002433e-10
+        },
+        "boundary_tortuosity": {
+          "rho": 0.0606,
+          "p_val": 0.17634436663782513
+        },
+        "skeleton_branch_points": {
+          "rho": 0.3522,
+          "p_val": 4.770059873781169e-16
+        }
+      },
+      "ssim_pearson": {
+        "mask_area_ratio_rho": {
+          "r": -0.8228,
+          "p_val": 2.524481922562321e-124
+        },
+        "mask_perimeter": {
+          "r": -0.2909,
+          "p_val": 3.319802751386514e-11
+        },
+        "compactness_isoperimetric": {
+          "r": -0.1487,
+          "p_val": 0.0008513762017083319
+        },
+        "max_inscribed_radius_rmax": {
+          "r": -0.693,
+          "p_val": 8.855582941901299e-73
+        },
+        "mean_hole_depth": {
+          "r": -0.6472,
+          "p_val": 1.120487380361511e-60
+        },
+        "std_hole_depth": {
+          "r": -0.6629,
+          "p_val": 1.4012113676104325e-64
+        },
+        "max_to_mean_depth_ratio": {
+          "r": -0.0329,
+          "p_val": 0.4632258328873616
+        },
+        "convex_hull_solidity": {
+          "r": -0.1021,
+          "p_val": 0.022394116698242088
+        },
+        "mask_aspect_ratio": {
+          "r": 0.0271,
+          "p_val": 0.5455442836382519
+        },
+        "mask_extent": {
+          "r": -0.3434,
+          "p_val": 2.7535607089045578e-15
+        },
+        "connected_components_count": {
+          "r": 0.128,
+          "p_val": 0.0041507358860849355
+        },
+        "euler_number": {
+          "r": 0.1209,
+          "p_val": 0.006807065569905374
+        },
+        "centroid_offset_x": {
+          "r": 0.0762,
+          "p_val": 0.088790075442262
+        },
+        "centroid_offset_y": {
+          "r": 0.1617,
+          "p_val": 0.0002828423599842219
+        },
+        "radial_eccentricity": {
+          "r": 0.155,
+          "p_val": 0.0005040306780050195
+        },
+        "rule_of_thirds_proximity": {
+          "r": 0.018,
+          "p_val": 0.6875307753999459
+        },
+        "boundary_edge_density_sobel": {
+          "r": -0.3176,
+          "p_val": 3.5297684330588375e-13
+        },
+        "boundary_edge_std_sobel": {
+          "r": -0.1937,
+          "p_val": 1.2904764614823343e-05
+        },
+        "boundary_edge_max_sobel": {
+          "r": -0.1813,
+          "p_val": 4.55566013467773e-05
+        },
+        "boundary_scharr_energy": {
+          "r": -0.3174,
+          "p_val": 3.6253015378993367e-13
+        },
+        "boundary_canny_density": {
+          "r": -0.3451,
+          "p_val": 1.9723479148293656e-15
+        },
+        "gradient_direction_entropy": {
+          "r": -0.1697,
+          "p_val": 0.0001369322615128823
+        },
+        "boundary_laplacian_var": {
+          "r": -0.2011,
+          "p_val": 5.824717388312461e-06
+        },
+        "boundary_laplacian_mean": {
+          "r": -0.3006,
+          "p_val": 6.64848656177287e-12
+        },
+        "glcm_contrast": {
+          "r": -0.1814,
+          "p_val": 4.5146485988580634e-05
+        },
+        "glcm_dissimilarity": {
+          "r": -0.2442,
+          "p_val": 3.185597690423848e-08
+        },
+        "glcm_homogeneity": {
+          "r": 0.2587,
+          "p_val": 4.3165404640870775e-09
+        },
+        "glcm_energy": {
+          "r": 0.2047,
+          "p_val": 3.937829898535768e-06
+        },
+        "glcm_correlation": {
+          "r": 0.1239,
+          "p_val": 0.005524960530693959
+        },
+        "lbp_entropy": {
+          "r": -0.1714,
+          "p_val": 0.00011768080125869025
+        },
+        "lbp_uniformity": {
+          "r": 0.1239,
+          "p_val": 0.005534784972413203
+        },
+        "multi_scale_laplacian_ratio": {
+          "r": -0.1422,
+          "p_val": 0.001438310236057759
+        },
+        "fft_low_freq_energy": {
+          "r": 0.2574,
+          "p_val": 5.192253345053356e-09
+        },
+        "fft_mid_freq_energy": {
+          "r": -0.2547,
+          "p_val": 7.585002050928801e-09
+        },
+        "fft_high_freq_energy": {
+          "r": -0.2383,
+          "p_val": 6.881281247006759e-08
+        },
+        "fft_high_to_low_ratio": {
+          "r": -0.2318,
+          "p_val": 1.5923902576057198e-07
+        },
+        "spectral_decay_slope": {
+          "r": -0.2227,
+          "p_val": 4.901069229372768e-07
+        },
+        "spectral_azimuthal_anisotropy": {
+          "r": 0.1387,
+          "p_val": 0.001878206424677366
+        },
+        "context_rgb_shannon_entropy": {
+          "r": -0.3819,
+          "p_val": 8.196791416125463e-19
+        },
+        "context_lab_delta_e_mean": {
+          "r": -0.2195,
+          "p_val": 7.163053529169113e-07
+        },
+        "context_hsv_saturation_mean": {
+          "r": -0.0548,
+          "p_val": 0.22097640764353876
+        },
+        "context_hsv_saturation_std": {
+          "r": -0.1278,
+          "p_val": 0.004192394189222704
+        },
+        "context_color_temperature_proxy": {
+          "r": -0.0051,
+          "p_val": 0.9093721143262516
+        },
+        "border_to_global_color_divergence": {
+          "r": 0.3356,
+          "p_val": 1.2534912859960878e-14
+        },
+        "shi_tomasi_corner_count": {
+          "r": -0.2596,
+          "p_val": 3.813994795537705e-09
+        },
+        "fast_keypoint_density": {
+          "r": 0.0665,
+          "p_val": 0.1375931928838971
+        },
+        "contour_curvature_mean": {
+          "r": 0.2979,
+          "p_val": 1.0551195360259967e-11
+        },
+        "contour_curvature_extrema": {
+          "r": 0.0135,
+          "p_val": 0.7641124680134886
+        },
+        "boundary_tortuosity": {
+          "r": 0.084,
+          "p_val": 0.06043029454205799
+        },
+        "skeleton_branch_points": {
+          "r": 0.0937,
+          "p_val": 0.03611983151029981
+        }
+      },
+      "ssim_spearman": {
+        "mask_area_ratio_rho": {
+          "rho": -0.8339,
+          "p_val": 1.1799499934474767e-130
+        },
+        "mask_perimeter": {
+          "rho": -0.3054,
+          "p_val": 2.985914792789412e-12
+        },
+        "compactness_isoperimetric": {
+          "rho": -0.1848,
+          "p_val": 3.202525001983591e-05
+        },
+        "max_inscribed_radius_rmax": {
+          "rho": -0.7016,
+          "p_val": 2.56808980546532e-75
+        },
+        "mean_hole_depth": {
+          "rho": -0.6621,
+          "p_val": 2.221607301400643e-64
+        },
+        "std_hole_depth": {
+          "rho": -0.6732,
+          "p_val": 2.7856668392659686e-67
+        },
+        "max_to_mean_depth_ratio": {
+          "rho": -0.0268,
+          "p_val": 0.5493496679469768
+        },
+        "convex_hull_solidity": {
+          "rho": -0.0926,
+          "p_val": 0.03839555371902746
+        },
+        "mask_aspect_ratio": {
+          "rho": 0.0129,
+          "p_val": 0.7732965662554497
+        },
+        "mask_extent": {
+          "rho": -0.3974,
+          "p_val": 2.314822904570565e-20
+        },
+        "connected_components_count": {
+          "rho": 0.1322,
+          "p_val": 0.0030540032659409915
+        },
+        "euler_number": {
+          "rho": 0.1296,
+          "p_val": 0.00370950657330887
+        },
+        "centroid_offset_x": {
+          "rho": 0.0647,
+          "p_val": 0.14860232063199463
+        },
+        "centroid_offset_y": {
+          "rho": 0.1313,
+          "p_val": 0.0032689956638794725
+        },
+        "radial_eccentricity": {
+          "rho": 0.1242,
+          "p_val": 0.005424682343582818
+        },
+        "rule_of_thirds_proximity": {
+          "rho": 0.0159,
+          "p_val": 0.7229580233899445
+        },
+        "boundary_edge_density_sobel": {
+          "rho": -0.2974,
+          "p_val": 1.1401371516841949e-11
+        },
+        "boundary_edge_std_sobel": {
+          "rho": -0.1598,
+          "p_val": 0.00033306769840451054
+        },
+        "boundary_edge_max_sobel": {
+          "rho": -0.1543,
+          "p_val": 0.000535779398963683
+        },
+        "boundary_scharr_energy": {
+          "rho": -0.2978,
+          "p_val": 1.0728296150433e-11
+        },
+        "boundary_canny_density": {
+          "rho": -0.3556,
+          "p_val": 2.3867035793751865e-16
+        },
+        "gradient_direction_entropy": {
+          "rho": -0.1904,
+          "p_val": 1.818891883108049e-05
+        },
+        "boundary_laplacian_var": {
+          "rho": -0.235,
+          "p_val": 1.0576881465748825e-07
+        },
+        "boundary_laplacian_mean": {
+          "rho": -0.3016,
+          "p_val": 5.69037930994057e-12
+        },
+        "glcm_contrast": {
+          "rho": -0.1453,
+          "p_val": 0.0011248070215855075
+        },
+        "glcm_dissimilarity": {
+          "rho": -0.2178,
+          "p_val": 8.792226254522132e-07
+        },
+        "glcm_homogeneity": {
+          "rho": 0.2487,
+          "p_val": 1.7308922290970073e-08
+        },
+        "glcm_energy": {
+          "rho": 0.2498,
+          "p_val": 1.4999404436330425e-08
+        },
+        "glcm_correlation": {
+          "rho": 0.1301,
+          "p_val": 0.0035765087082427548
+        },
+        "lbp_entropy": {
+          "rho": -0.1542,
+          "p_val": 0.0005377504129323599
+        },
+        "lbp_uniformity": {
+          "rho": 0.1148,
+          "p_val": 0.010203879789724191
+        },
+        "multi_scale_laplacian_ratio": {
+          "rho": -0.1003,
+          "p_val": 0.024837147799367475
+        },
+        "fft_low_freq_energy": {
+          "rho": 0.237,
+          "p_val": 8.145503557154797e-08
+        },
+        "fft_mid_freq_energy": {
+          "rho": -0.2282,
+          "p_val": 2.4861175553765074e-07
+        },
+        "fft_high_freq_energy": {
+          "rho": -0.2483,
+          "p_val": 1.827883206675944e-08
+        },
+        "fft_high_to_low_ratio": {
+          "rho": -0.2472,
+          "p_val": 2.127669059988969e-08
+        },
+        "spectral_decay_slope": {
+          "rho": -0.2112,
+          "p_val": 1.9013512580636807e-06
+        },
+        "spectral_azimuthal_anisotropy": {
+          "rho": 0.1445,
+          "p_val": 0.0011986667765266502
+        },
+        "context_rgb_shannon_entropy": {
+          "rho": -0.3714,
+          "p_val": 8.515512262920691e-18
+        },
+        "context_lab_delta_e_mean": {
+          "rho": -0.218,
+          "p_val": 8.553436566910139e-07
+        },
+        "context_hsv_saturation_mean": {
+          "rho": -0.0632,
+          "p_val": 0.15812763736457
+        },
+        "context_hsv_saturation_std": {
+          "rho": -0.145,
+          "p_val": 0.0011515258064329667
+        },
+        "context_color_temperature_proxy": {
+          "rho": -0.0441,
+          "p_val": 0.3254873026925311
+        },
+        "border_to_global_color_divergence": {
+          "rho": 0.3137,
+          "p_val": 7.0010685537507e-13
+        },
+        "shi_tomasi_corner_count": {
+          "rho": -0.2652,
+          "p_val": 1.7132328651597523e-09
+        },
+        "fast_keypoint_density": {
+          "rho": 0.044,
+          "p_val": 0.3258376618257307
+        },
+        "contour_curvature_mean": {
+          "rho": 0.3198,
+          "p_val": 2.3723705221499093e-13
+        },
+        "contour_curvature_extrema": {
+          "rho": 0.024,
+          "p_val": 0.5924522180170133
+        },
+        "boundary_tortuosity": {
+          "rho": 0.0846,
+          "p_val": 0.05877127554871945
+        },
+        "skeleton_branch_points": {
+          "rho": 0.0965,
+          "p_val": 0.031004878308404718
+        }
+      },
+      "latency_ms_pearson": {
+        "mask_area_ratio_rho": {
+          "r": -0.0287,
+          "p_val": 0.5223595541096985
+        },
+        "mask_perimeter": {
+          "r": -0.0237,
+          "p_val": 0.5965225806817546
+        },
+        "compactness_isoperimetric": {
+          "r": 0.0219,
+          "p_val": 0.6250882827771242
+        },
+        "max_inscribed_radius_rmax": {
+          "r": -0.0244,
+          "p_val": 0.5865027641762741
+        },
+        "mean_hole_depth": {
+          "r": -0.0159,
+          "p_val": 0.722771814841809
+        },
+        "std_hole_depth": {
+          "r": -0.0213,
+          "p_val": 0.635077422778871
+        },
+        "max_to_mean_depth_ratio": {
+          "r": -0.0356,
+          "p_val": 0.4271496991066427
+        },
+        "convex_hull_solidity": {
+          "r": 0.0217,
+          "p_val": 0.6279854428849089
+        },
+        "mask_aspect_ratio": {
+          "r": 0.0143,
+          "p_val": 0.7499096726330028
+        },
+        "mask_extent": {
+          "r": -0.0018,
+          "p_val": 0.9683280562456752
+        },
+        "connected_components_count": {
+          "r": -0.0248,
+          "p_val": 0.5807239451562209
+        },
+        "euler_number": {
+          "r": -0.0413,
+          "p_val": 0.3565829946934995
+        },
+        "centroid_offset_x": {
+          "r": -0.062,
+          "p_val": 0.1665090457365807
+        },
+        "centroid_offset_y": {
+          "r": 0.0388,
+          "p_val": 0.386130267351191
+        },
+        "radial_eccentricity": {
+          "r": -0.0206,
+          "p_val": 0.645934092414983
+        },
+        "rule_of_thirds_proximity": {
+          "r": -0.0034,
+          "p_val": 0.9395905068348716
+        },
+        "boundary_edge_density_sobel": {
+          "r": -0.0443,
+          "p_val": 0.3230743602720097
+        },
+        "boundary_edge_std_sobel": {
+          "r": -0.0834,
+          "p_val": 0.06251586592694848
+        },
+        "boundary_edge_max_sobel": {
+          "r": -0.067,
+          "p_val": 0.13447400360699843
+        },
+        "boundary_scharr_energy": {
+          "r": -0.045,
+          "p_val": 0.31494137581102344
+        },
+        "boundary_canny_density": {
+          "r": -0.0341,
+          "p_val": 0.446700346428431
+        },
+        "gradient_direction_entropy": {
+          "r": 0.0479,
+          "p_val": 0.285009410202124
+        },
+        "boundary_laplacian_var": {
+          "r": -0.0731,
+          "p_val": 0.10276900532635129
+        },
+        "boundary_laplacian_mean": {
+          "r": -0.0633,
+          "p_val": 0.15788538228757437
+        },
+        "glcm_contrast": {
+          "r": -0.0271,
+          "p_val": 0.5460490954737087
+        },
+        "glcm_dissimilarity": {
+          "r": 0.0038,
+          "p_val": 0.9322268576864928
+        },
+        "glcm_homogeneity": {
+          "r": -0.0191,
+          "p_val": 0.6707523377497269
+        },
+        "glcm_energy": {
+          "r": 0.0012,
+          "p_val": 0.9792910573023488
+        },
+        "glcm_correlation": {
+          "r": 0.0571,
+          "p_val": 0.2020510550566387
+        },
+        "lbp_entropy": {
+          "r": 0.0169,
+          "p_val": 0.7062175317166479
+        },
+        "lbp_uniformity": {
+          "r": -0.0214,
+          "p_val": 0.6338414818331953
+        },
+        "multi_scale_laplacian_ratio": {
+          "r": -0.055,
+          "p_val": 0.2193903325304619
+        },
+        "fft_low_freq_energy": {
+          "r": 0.0913,
+          "p_val": 0.04131660033834765
+        },
+        "fft_mid_freq_energy": {
+          "r": -0.0825,
+          "p_val": 0.0654185006364748
+        },
+        "fft_high_freq_energy": {
+          "r": -0.1092,
+          "p_val": 0.01453789819978048
+        },
+        "fft_high_to_low_ratio": {
+          "r": -0.1098,
+          "p_val": 0.014055597111498437
+        },
+        "spectral_decay_slope": {
+          "r": -0.1577,
+          "p_val": 0.0003989839064419513
+        },
+        "spectral_azimuthal_anisotropy": {
+          "r": 0.0747,
+          "p_val": 0.09509112994108006
+        },
+        "context_rgb_shannon_entropy": {
+          "r": -0.0331,
+          "p_val": 0.4608555050099733
+        },
+        "context_lab_delta_e_mean": {
+          "r": 0.0003,
+          "p_val": 0.9937974022883244
+        },
+        "context_hsv_saturation_mean": {
+          "r": 0.1305,
+          "p_val": 0.0034745387330127582
+        },
+        "context_hsv_saturation_std": {
+          "r": 0.0876,
+          "p_val": 0.05023395837190645
+        },
+        "context_color_temperature_proxy": {
+          "r": 0.0026,
+          "p_val": 0.9544510231681975
+        },
+        "border_to_global_color_divergence": {
+          "r": -0.012,
+          "p_val": 0.7896546393259295
+        },
+        "shi_tomasi_corner_count": {
+          "r": -0.05,
+          "p_val": 0.26417564389580495
+        },
+        "fast_keypoint_density": {
+          "r": 0.0467,
+          "p_val": 0.2969396855717702
+        },
+        "contour_curvature_mean": {
+          "r": 0.0049,
+          "p_val": 0.9123156367788013
+        },
+        "contour_curvature_extrema": {
+          "r": -0.0384,
+          "p_val": 0.39176516253703303
+        },
+        "boundary_tortuosity": {
+          "r": -0.052,
+          "p_val": 0.2455499854277562
+        },
+        "skeleton_branch_points": {
+          "r": -0.0142,
+          "p_val": 0.752245362662404
+        }
+      },
+      "latency_ms_spearman": {
+        "mask_area_ratio_rho": {
+          "rho": -0.0232,
+          "p_val": 0.604182991114051
+        },
+        "mask_perimeter": {
+          "rho": -0.0171,
+          "p_val": 0.7024035639413777
+        },
+        "compactness_isoperimetric": {
+          "rho": 0.0111,
+          "p_val": 0.8045429560802563
+        },
+        "max_inscribed_radius_rmax": {
+          "rho": -0.0084,
+          "p_val": 0.8506791456571949
+        },
+        "mean_hole_depth": {
+          "rho": -0.0045,
+          "p_val": 0.9197145714128716
+        },
+        "std_hole_depth": {
+          "rho": -0.007,
+          "p_val": 0.8756512605301423
+        },
+        "max_to_mean_depth_ratio": {
+          "rho": -0.0428,
+          "p_val": 0.3390614213120744
+        },
+        "convex_hull_solidity": {
+          "rho": 0.0185,
+          "p_val": 0.6801082106424341
+        },
+        "mask_aspect_ratio": {
+          "rho": -0.0038,
+          "p_val": 0.9317864174569092
+        },
+        "mask_extent": {
+          "rho": -0.0072,
+          "p_val": 0.8726328140578257
+        },
+        "connected_components_count": {
+          "rho": -0.0084,
+          "p_val": 0.8505954968661243
+        },
+        "euler_number": {
+          "rho": -0.0282,
+          "p_val": 0.52905933143056
+        },
+        "centroid_offset_x": {
+          "rho": -0.0535,
+          "p_val": 0.23228426821612647
+        },
+        "centroid_offset_y": {
+          "rho": 0.0443,
+          "p_val": 0.32322613382399595
+        },
+        "radial_eccentricity": {
+          "rho": -0.0217,
+          "p_val": 0.6287298505548216
+        },
+        "rule_of_thirds_proximity": {
+          "rho": 0.0049,
+          "p_val": 0.9132291113268889
+        },
+        "boundary_edge_density_sobel": {
+          "rho": -0.0362,
+          "p_val": 0.4192638634571948
+        },
+        "boundary_edge_std_sobel": {
+          "rho": -0.0479,
+          "p_val": 0.28486759889488167
+        },
+        "boundary_edge_max_sobel": {
+          "rho": -0.0416,
+          "p_val": 0.3537260542894007
+        },
+        "boundary_scharr_energy": {
+          "rho": -0.0366,
+          "p_val": 0.41415417828901196
+        },
+        "boundary_canny_density": {
+          "rho": -0.0279,
+          "p_val": 0.5330969332937722
+        },
+        "gradient_direction_entropy": {
+          "rho": 0.0319,
+          "p_val": 0.47598489690375706
+        },
+        "boundary_laplacian_var": {
+          "rho": -0.0508,
+          "p_val": 0.2569445455965928
+        },
+        "boundary_laplacian_mean": {
+          "rho": -0.0443,
+          "p_val": 0.322346096544737
+        },
+        "glcm_contrast": {
+          "rho": -0.0279,
+          "p_val": 0.5337136977403529
+        },
+        "glcm_dissimilarity": {
+          "rho": 0.0086,
+          "p_val": 0.8483127315938883
+        },
+        "glcm_homogeneity": {
+          "rho": -0.0344,
+          "p_val": 0.44315639790778877
+        },
+        "glcm_energy": {
+          "rho": -0.0206,
+          "p_val": 0.6465137888488465
+        },
+        "glcm_correlation": {
+          "rho": 0.0583,
+          "p_val": 0.19333779025409814
+        },
+        "lbp_entropy": {
+          "rho": -0.004,
+          "p_val": 0.9285047042566231
+        },
+        "lbp_uniformity": {
+          "rho": -0.01,
+          "p_val": 0.8232395993225919
+        },
+        "multi_scale_laplacian_ratio": {
+          "rho": -0.0596,
+          "p_val": 0.1831030812110896
+        },
+        "fft_low_freq_energy": {
+          "rho": 0.0734,
+          "p_val": 0.10092299755520917
+        },
+        "fft_mid_freq_energy": {
+          "rho": -0.0624,
+          "p_val": 0.16324269791607593
+        },
+        "fft_high_freq_energy": {
+          "rho": -0.1015,
+          "p_val": 0.02325843229411916
+        },
+        "fft_high_to_low_ratio": {
+          "rho": -0.1023,
+          "p_val": 0.022106883773077762
+        },
+        "spectral_decay_slope": {
+          "rho": -0.1377,
+          "p_val": 0.0020340193606997146
+        },
+        "spectral_azimuthal_anisotropy": {
+          "rho": 0.0554,
+          "p_val": 0.21639027230312846
+        },
+        "context_rgb_shannon_entropy": {
+          "rho": 0.0054,
+          "p_val": 0.9040708808015132
+        },
+        "context_lab_delta_e_mean": {
+          "rho": 0.0135,
+          "p_val": 0.7627635636563073
+        },
+        "context_hsv_saturation_mean": {
+          "rho": 0.1465,
+          "p_val": 0.001017979808997095
+        },
+        "context_hsv_saturation_std": {
+          "rho": 0.1203,
+          "p_val": 0.007091452093193429
+        },
+        "context_color_temperature_proxy": {
+          "rho": 0.0318,
+          "p_val": 0.4786769181845874
+        },
+        "border_to_global_color_divergence": {
+          "rho": -0.0263,
+          "p_val": 0.5577346310036706
+        },
+        "shi_tomasi_corner_count": {
+          "rho": -0.0279,
+          "p_val": 0.5330624916372886
+        },
+        "fast_keypoint_density": {
+          "rho": 0.0139,
+          "p_val": 0.7560072018106001
+        },
+        "contour_curvature_mean": {
+          "rho": 0.0067,
+          "p_val": 0.8819722014037675
+        },
+        "contour_curvature_extrema": {
+          "rho": -0.0231,
+          "p_val": 0.6059421887789835
+        },
+        "boundary_tortuosity": {
+          "rho": -0.0595,
+          "p_val": 0.18439537051108637
+        },
+        "skeleton_branch_points": {
+          "rho": -0.0072,
+          "p_val": 0.8718826632665997
+        }
+      }
+    },
+    "migan_npu": {
+      "lpips_pearson": {
+        "mask_area_ratio_rho": {
+          "r": 0.9793,
+          "p_val": 0.0
+        },
+        "mask_perimeter": {
+          "r": 0.564,
+          "p_val": 2.497555661193618e-43
+        },
+        "compactness_isoperimetric": {
+          "r": -0.0627,
+          "p_val": 0.1618663390241913
+        },
+        "max_inscribed_radius_rmax": {
+          "r": 0.629,
+          "p_val": 1.9632683294861398e-56
+        },
+        "mean_hole_depth": {
+          "r": 0.545,
+          "p_val": 5.050098808876462e-40
+        },
+        "std_hole_depth": {
+          "r": 0.5768,
+          "p_val": 1.0964669077378018e-45
+        },
+        "max_to_mean_depth_ratio": {
+          "r": 0.1458,
+          "p_val": 0.0010805172516108116
+        },
+        "convex_hull_solidity": {
+          "r": 0.1139,
+          "p_val": 0.010782112769468126
+        },
+        "mask_aspect_ratio": {
+          "r": -0.0534,
+          "p_val": 0.23350180250480976
+        },
+        "mask_extent": {
+          "r": 0.1771,
+          "p_val": 6.842814704373921e-05
+        },
+        "connected_components_count": {
+          "r": 0.0712,
+          "p_val": 0.1120111592263444
+        },
+        "euler_number": {
+          "r": 0.0525,
+          "p_val": 0.2408270820180468
+        },
+        "centroid_offset_x": {
+          "r": -0.1945,
+          "p_val": 1.1911695211236315e-05
+        },
+        "centroid_offset_y": {
+          "r": -0.2523,
+          "p_val": 1.0650223202410761e-08
+        },
+        "radial_eccentricity": {
+          "r": -0.2933,
+          "p_val": 2.2276822057766255e-11
+        },
+        "rule_of_thirds_proximity": {
+          "r": -0.09,
+          "p_val": 0.04436104436408499
+        },
+        "boundary_edge_density_sobel": {
+          "r": -0.1259,
+          "p_val": 0.004799577799606647
+        },
+        "boundary_edge_std_sobel": {
+          "r": -0.0271,
+          "p_val": 0.5452093686808454
+        },
+        "boundary_edge_max_sobel": {
+          "r": 0.1173,
+          "p_val": 0.008674171181808505
+        },
+        "boundary_scharr_energy": {
+          "r": -0.1274,
+          "p_val": 0.004340678737131775
+        },
+        "boundary_canny_density": {
+          "r": -0.0862,
+          "p_val": 0.05400375359079193
+        },
+        "gradient_direction_entropy": {
+          "r": 0.0774,
+          "p_val": 0.0836888643557056
+        },
+        "boundary_laplacian_var": {
+          "r": -0.1285,
+          "p_val": 0.0040013490331050625
+        },
+        "boundary_laplacian_mean": {
+          "r": -0.1477,
+          "p_val": 0.0009239722832970409
+        },
+        "glcm_contrast": {
+          "r": -0.0881,
+          "p_val": 0.04896563355036554
+        },
+        "glcm_dissimilarity": {
+          "r": -0.1187,
+          "p_val": 0.007862105267314635
+        },
+        "glcm_homogeneity": {
+          "r": 0.1261,
+          "p_val": 0.0047595668832307635
+        },
+        "glcm_energy": {
+          "r": 0.1134,
+          "p_val": 0.011181375609122577
+        },
+        "glcm_correlation": {
+          "r": 0.0047,
+          "p_val": 0.9166244815626785
+        },
+        "lbp_entropy": {
+          "r": -0.0179,
+          "p_val": 0.6902436392597645
+        },
+        "lbp_uniformity": {
+          "r": 0.0143,
+          "p_val": 0.75004265443542
+        },
+        "multi_scale_laplacian_ratio": {
+          "r": -0.041,
+          "p_val": 0.3605376356376002
+        },
+        "fft_low_freq_energy": {
+          "r": 0.0488,
+          "p_val": 0.2760319624451393
+        },
+        "fft_mid_freq_energy": {
+          "r": -0.0477,
+          "p_val": 0.2869746439101734
+        },
+        "fft_high_freq_energy": {
+          "r": -0.0463,
+          "p_val": 0.3010234915704261
+        },
+        "fft_high_to_low_ratio": {
+          "r": -0.0454,
+          "p_val": 0.3106150171103881
+        },
+        "spectral_decay_slope": {
+          "r": 0.0099,
+          "p_val": 0.8252522240827929
+        },
+        "spectral_azimuthal_anisotropy": {
+          "r": 0.0656,
+          "p_val": 0.14302854693177308
+        },
+        "context_rgb_shannon_entropy": {
+          "r": 0.0405,
+          "p_val": 0.36562540732959076
+        },
+        "context_lab_delta_e_mean": {
+          "r": 0.0043,
+          "p_val": 0.9228425442636766
+        },
+        "context_hsv_saturation_mean": {
+          "r": -0.0223,
+          "p_val": 0.6189698805294258
+        },
+        "context_hsv_saturation_std": {
+          "r": 0.0032,
+          "p_val": 0.942461228788929
+        },
+        "context_color_temperature_proxy": {
+          "r": -0.1327,
+          "p_val": 0.002938361191672729
+        },
+        "border_to_global_color_divergence": {
+          "r": -0.4317,
+          "p_val": 4.046759456906357e-24
+        },
+        "shi_tomasi_corner_count": {
+          "r": 0.323,
+          "p_val": 1.3150022469987937e-13
+        },
+        "fast_keypoint_density": {
+          "r": -0.4423,
+          "p_val": 2.3170069634602382e-25
+        },
+        "contour_curvature_mean": {
+          "r": -0.2305,
+          "p_val": 1.8655124951155315e-07
+        },
+        "contour_curvature_extrema": {
+          "r": 0.207,
+          "p_val": 3.040166051018789e-06
+        },
+        "boundary_tortuosity": {
+          "r": -0.0769,
+          "p_val": 0.08586205316321972
+        },
+        "skeleton_branch_points": {
+          "r": 0.1278,
+          "p_val": 0.00422087281626762
+        }
+      },
+      "lpips_spearman": {
+        "mask_area_ratio_rho": {
+          "rho": 0.9786,
+          "p_val": 0.0
+        },
+        "mask_perimeter": {
+          "rho": 0.5705,
+          "p_val": 1.625149986246334e-44
+        },
+        "compactness_isoperimetric": {
+          "rho": -0.029,
+          "p_val": 0.5173386318097172
+        },
+        "max_inscribed_radius_rmax": {
+          "rho": 0.6373,
+          "p_val": 2.5281568146715293e-58
+        },
+        "mean_hole_depth": {
+          "rho": 0.5671,
+          "p_val": 6.830767875526122e-44
+        },
+        "std_hole_depth": {
+          "rho": 0.5881,
+          "p_val": 7.646828025342206e-48
+        },
+        "max_to_mean_depth_ratio": {
+          "rho": 0.1369,
+          "p_val": 0.0021532226691948885
+        },
+        "convex_hull_solidity": {
+          "rho": 0.1133,
+          "p_val": 0.011220347213264856
+        },
+        "mask_aspect_ratio": {
+          "rho": -0.0269,
+          "p_val": 0.5484915495014073
+        },
+        "mask_extent": {
+          "rho": 0.2418,
+          "p_val": 4.403537549206055e-08
+        },
+        "connected_components_count": {
+          "rho": 0.0969,
+          "p_val": 0.030199966910707032
+        },
+        "euler_number": {
+          "rho": 0.0775,
+          "p_val": 0.08342426957193902
+        },
+        "centroid_offset_x": {
+          "rho": -0.1665,
+          "p_val": 0.00018345818158565702
+        },
+        "centroid_offset_y": {
+          "rho": -0.2139,
+          "p_val": 1.3816841912464986e-06
+        },
+        "radial_eccentricity": {
+          "rho": -0.2537,
+          "p_val": 8.791379799494832e-09
+        },
+        "rule_of_thirds_proximity": {
+          "rho": -0.0881,
+          "p_val": 0.04887495940830196
+        },
+        "boundary_edge_density_sobel": {
+          "rho": -0.1453,
+          "p_val": 0.0011254913794655193
+        },
+        "boundary_edge_std_sobel": {
+          "rho": -0.0483,
+          "p_val": 0.2810600321708807
+        },
+        "boundary_edge_max_sobel": {
+          "rho": 0.1077,
+          "p_val": 0.015943589193396186
+        },
+        "boundary_scharr_energy": {
+          "rho": -0.1462,
+          "p_val": 0.0010421833322666314
+        },
+        "boundary_canny_density": {
+          "rho": -0.0771,
+          "p_val": 0.08489341151838788
+        },
+        "gradient_direction_entropy": {
+          "rho": 0.1285,
+          "p_val": 0.003993441347467678
+        },
+        "boundary_laplacian_var": {
+          "rho": -0.084,
+          "p_val": 0.06051480649983692
+        },
+        "boundary_laplacian_mean": {
+          "rho": -0.1426,
+          "p_val": 0.001384137671257833
+        },
+        "glcm_contrast": {
+          "rho": -0.0959,
+          "p_val": 0.03207249235918995
+        },
+        "glcm_dissimilarity": {
+          "rho": -0.1234,
+          "p_val": 0.00571953675719456
+        },
+        "glcm_homogeneity": {
+          "rho": 0.1192,
+          "p_val": 0.007611898044329062
+        },
+        "glcm_energy": {
+          "rho": 0.1106,
+          "p_val": 0.013336855370716341
+        },
+        "glcm_correlation": {
+          "rho": -0.0121,
+          "p_val": 0.7869421529843055
+        },
+        "lbp_entropy": {
+          "rho": -0.0362,
+          "p_val": 0.41932795783615007
+        },
+        "lbp_uniformity": {
+          "rho": 0.015,
+          "p_val": 0.7379694611967312
+        },
+        "multi_scale_laplacian_ratio": {
+          "rho": -0.0514,
+          "p_val": 0.2515647745422741
+        },
+        "fft_low_freq_energy": {
+          "rho": 0.0665,
+          "p_val": 0.1373830093856424
+        },
+        "fft_mid_freq_energy": {
+          "rho": -0.0668,
+          "p_val": 0.13606730266427736
+        },
+        "fft_high_freq_energy": {
+          "rho": -0.06,
+          "p_val": 0.18048879159495532
+        },
+        "fft_high_to_low_ratio": {
+          "rho": -0.0612,
+          "p_val": 0.17196394233043558
+        },
+        "spectral_decay_slope": {
+          "rho": 0.0239,
+          "p_val": 0.5944990900474177
+        },
+        "spectral_azimuthal_anisotropy": {
+          "rho": 0.0534,
+          "p_val": 0.23340611520263382
+        },
+        "context_rgb_shannon_entropy": {
+          "rho": -0.0272,
+          "p_val": 0.5440617454265181
+        },
+        "context_lab_delta_e_mean": {
+          "rho": -0.0157,
+          "p_val": 0.7257422981986053
+        },
+        "context_hsv_saturation_mean": {
+          "rho": 0.0185,
+          "p_val": 0.6794121390974103
+        },
+        "context_hsv_saturation_std": {
+          "rho": 0.0061,
+          "p_val": 0.8922597321444682
+        },
+        "context_color_temperature_proxy": {
+          "rho": -0.1126,
+          "p_val": 0.01173428210810232
+        },
+        "border_to_global_color_divergence": {
+          "rho": -0.4233,
+          "p_val": 3.683488027841245e-23
+        },
+        "shi_tomasi_corner_count": {
+          "rho": 0.3161,
+          "p_val": 4.561260056286082e-13
+        },
+        "fast_keypoint_density": {
+          "rho": -0.4499,
+          "p_val": 2.7339546131222453e-26
+        },
+        "contour_curvature_mean": {
+          "rho": -0.2218,
+          "p_val": 5.440016910229112e-07
+        },
+        "contour_curvature_extrema": {
+          "rho": 0.1975,
+          "p_val": 8.640792382870556e-06
+        },
+        "boundary_tortuosity": {
+          "rho": -0.0747,
+          "p_val": 0.09530816752613626
+        },
+        "skeleton_branch_points": {
+          "rho": 0.136,
+          "p_val": 0.0023032722822517605
+        }
+      },
+      "psnr_hole_pearson": {
+        "mask_area_ratio_rho": {
+          "r": -0.3481,
+          "p_val": 1.0826827558497848e-15
+        },
+        "mask_perimeter": {
+          "r": 0.0747,
+          "p_val": 0.09520908825154455
+        },
+        "compactness_isoperimetric": {
+          "r": -0.2804,
+          "p_val": 1.7311883415443225e-10
+        },
+        "max_inscribed_radius_rmax": {
+          "r": -0.4503,
+          "p_val": 2.43523470661825e-26
+        },
+        "mean_hole_depth": {
+          "r": -0.4646,
+          "p_val": 3.8815089664474073e-28
+        },
+        "std_hole_depth": {
+          "r": -0.4553,
+          "p_val": 5.950826884137353e-27
+        },
+        "max_to_mean_depth_ratio": {
+          "r": 0.1033,
+          "p_val": 0.020913245284831454
+        },
+        "convex_hull_solidity": {
+          "r": -0.0491,
+          "p_val": 0.27326984009406663
+        },
+        "mask_aspect_ratio": {
+          "r": -0.029,
+          "p_val": 0.5178578771946779
+        },
+        "mask_extent": {
+          "r": -0.3538,
+          "p_val": 3.4171728457419843e-16
+        },
+        "connected_components_count": {
+          "r": 0.2891,
+          "p_val": 4.388082329656236e-11
+        },
+        "euler_number": {
+          "r": 0.2766,
+          "p_val": 3.1293161338517633e-10
+        },
+        "centroid_offset_x": {
+          "r": -0.1035,
+          "p_val": 0.02062503240281209
+        },
+        "centroid_offset_y": {
+          "r": -0.0042,
+          "p_val": 0.9260635059059913
+        },
+        "radial_eccentricity": {
+          "r": -0.0663,
+          "p_val": 0.13857622445816015
+        },
+        "rule_of_thirds_proximity": {
+          "r": -0.0714,
+          "p_val": 0.11060923350476132
+        },
+        "boundary_edge_density_sobel": {
+          "r": -0.5283,
+          "p_val": 2.7112557755963306e-37
+        },
+        "boundary_edge_std_sobel": {
+          "r": -0.489,
+          "p_val": 2.0362595564711613e-31
+        },
+        "boundary_edge_max_sobel": {
+          "r": -0.3602,
+          "p_val": 9.109263242947715e-17
+        },
+        "boundary_scharr_energy": {
+          "r": -0.5296,
+          "p_val": 1.7049896110553272e-37
+        },
+        "boundary_canny_density": {
+          "r": -0.4898,
+          "p_val": 1.5491729975436022e-31
+        },
+        "gradient_direction_entropy": {
+          "r": -0.2124,
+          "p_val": 1.6550159148028315e-06
+        },
+        "boundary_laplacian_var": {
+          "r": -0.4541,
+          "p_val": 8.354882850609338e-27
+        },
+        "boundary_laplacian_mean": {
+          "r": -0.5157,
+          "p_val": 2.57956882100084e-35
+        },
+        "glcm_contrast": {
+          "r": -0.3853,
+          "p_val": 3.8344788655392486e-19
+        },
+        "glcm_dissimilarity": {
+          "r": -0.3754,
+          "p_val": 3.542228566022046e-18
+        },
+        "glcm_homogeneity": {
+          "r": 0.322,
+          "p_val": 1.5838416602495514e-13
+        },
+        "glcm_energy": {
+          "r": 0.1777,
+          "p_val": 6.47139917113206e-05
+        },
+        "glcm_correlation": {
+          "r": 0.0495,
+          "p_val": 0.26932528653748583
+        },
+        "lbp_entropy": {
+          "r": -0.2236,
+          "p_val": 4.368677397765656e-07
+        },
+        "lbp_uniformity": {
+          "r": 0.1653,
+          "p_val": 0.00020593505633958664
+        },
+        "multi_scale_laplacian_ratio": {
+          "r": -0.1503,
+          "p_val": 0.0007483711503218385
+        },
+        "fft_low_freq_energy": {
+          "r": 0.2493,
+          "p_val": 1.612424148646267e-08
+        },
+        "fft_mid_freq_energy": {
+          "r": -0.2469,
+          "p_val": 2.234100765005471e-08
+        },
+        "fft_high_freq_energy": {
+          "r": -0.2303,
+          "p_val": 1.9096879718547292e-07
+        },
+        "fft_high_to_low_ratio": {
+          "r": -0.2229,
+          "p_val": 4.7619466545263806e-07
+        },
+        "spectral_decay_slope": {
+          "r": -0.1397,
+          "p_val": 0.001735257724246244
+        },
+        "spectral_azimuthal_anisotropy": {
+          "r": 0.2416,
+          "p_val": 4.519802230514799e-08
+        },
+        "context_rgb_shannon_entropy": {
+          "r": -0.4926,
+          "p_val": 6.383678662603843e-32
+        },
+        "context_lab_delta_e_mean": {
+          "r": -0.5103,
+          "p_val": 1.6845214864609197e-34
+        },
+        "context_hsv_saturation_mean": {
+          "r": -0.0599,
+          "p_val": 0.18145983905576957
+        },
+        "context_hsv_saturation_std": {
+          "r": -0.289,
+          "p_val": 4.495969180648978e-11
+        },
+        "context_color_temperature_proxy": {
+          "r": -0.0235,
+          "p_val": 0.5995720902073748
+        },
+        "border_to_global_color_divergence": {
+          "r": 0.0938,
+          "p_val": 0.03601352004912062
+        },
+        "shi_tomasi_corner_count": {
+          "r": -0.1339,
+          "p_val": 0.0027022354749622842
+        },
+        "fast_keypoint_density": {
+          "r": -0.2589,
+          "p_val": 4.195395896150924e-09
+        },
+        "contour_curvature_mean": {
+          "r": 0.2685,
+          "p_val": 1.053322635368033e-09
+        },
+        "contour_curvature_extrema": {
+          "r": 0.2229,
+          "p_val": 4.7677710091774995e-07
+        },
+        "boundary_tortuosity": {
+          "r": 0.0348,
+          "p_val": 0.43717053331556327
+        },
+        "skeleton_branch_points": {
+          "r": 0.2775,
+          "p_val": 2.722630591645102e-10
+        }
+      },
+      "psnr_hole_spearman": {
+        "mask_area_ratio_rho": {
+          "rho": -0.3185,
+          "p_val": 2.9771542467572703e-13
+        },
+        "mask_perimeter": {
+          "rho": 0.1444,
+          "p_val": 0.001202088938989722
+        },
+        "compactness_isoperimetric": {
+          "rho": -0.3811,
+          "p_val": 9.853478613130181e-19
+        },
+        "max_inscribed_radius_rmax": {
+          "rho": -0.4784,
+          "p_val": 5.805072338823998e-30
+        },
+        "mean_hole_depth": {
+          "rho": -0.4999,
+          "p_val": 5.724713930109353e-33
+        },
+        "std_hole_depth": {
+          "rho": -0.4909,
+          "p_val": 1.0913452790798888e-31
+        },
+        "max_to_mean_depth_ratio": {
+          "rho": 0.1338,
+          "p_val": 0.00272373199589015
+        },
+        "convex_hull_solidity": {
+          "rho": -0.0619,
+          "p_val": 0.16683559797610034
+        },
+        "mask_aspect_ratio": {
+          "rho": -0.013,
+          "p_val": 0.7724973984012394
+        },
+        "mask_extent": {
+          "rho": -0.4264,
+          "p_val": 1.665486994401745e-23
+        },
+        "connected_components_count": {
+          "rho": 0.3536,
+          "p_val": 3.5572690657428576e-16
+        },
+        "euler_number": {
+          "rho": 0.3357,
+          "p_val": 1.2355529882936764e-14
+        },
+        "centroid_offset_x": {
+          "rho": -0.1206,
+          "p_val": 0.00696126299043536
+        },
+        "centroid_offset_y": {
+          "rho": -0.0753,
+          "p_val": 0.09239852434086744
+        },
+        "radial_eccentricity": {
+          "rho": -0.1322,
+          "p_val": 0.003053140411302301
+        },
+        "rule_of_thirds_proximity": {
+          "rho": -0.1018,
+          "p_val": 0.022864226903957653
+        },
+        "boundary_edge_density_sobel": {
+          "rho": -0.4941,
+          "p_val": 3.8900730697119384e-32
+        },
+        "boundary_edge_std_sobel": {
+          "rho": -0.4585,
+          "p_val": 2.3428878397716744e-27
+        },
+        "boundary_edge_max_sobel": {
+          "rho": -0.3052,
+          "p_val": 3.050668291753942e-12
+        },
+        "boundary_scharr_energy": {
+          "rho": -0.4952,
+          "p_val": 2.717076735798459e-32
+        },
+        "boundary_canny_density": {
+          "rho": -0.4444,
+          "p_val": 1.2923515046281436e-25
+        },
+        "gradient_direction_entropy": {
+          "rho": -0.2407,
+          "p_val": 5.084355189073794e-08
+        },
+        "boundary_laplacian_var": {
+          "rho": -0.461,
+          "p_val": 1.1109735536436755e-27
+        },
+        "boundary_laplacian_mean": {
+          "rho": -0.4853,
+          "p_val": 6.564945583356677e-31
+        },
+        "glcm_contrast": {
+          "rho": -0.3862,
+          "p_val": 3.132944880677861e-19
+        },
+        "glcm_dissimilarity": {
+          "rho": -0.3609,
+          "p_val": 7.862595696584887e-17
+        },
+        "glcm_homogeneity": {
+          "rho": 0.3003,
+          "p_val": 7.059298798275759e-12
+        },
+        "glcm_energy": {
+          "rho": 0.208,
+          "p_val": 2.7183061158594133e-06
+        },
+        "glcm_correlation": {
+          "rho": 0.0312,
+          "p_val": 0.48573422359994767
+        },
+        "lbp_entropy": {
+          "rho": -0.2,
+          "p_val": 6.60398215103962e-06
+        },
+        "lbp_uniformity": {
+          "rho": 0.1648,
+          "p_val": 0.00021508724730640998
+        },
+        "multi_scale_laplacian_ratio": {
+          "rho": -0.1236,
+          "p_val": 0.005630731283798362
+        },
+        "fft_low_freq_energy": {
+          "rho": 0.2665,
+          "p_val": 1.4136370985050884e-09
+        },
+        "fft_mid_freq_energy": {
+          "rho": -0.2594,
+          "p_val": 3.946369137465817e-09
+        },
+        "fft_high_freq_energy": {
+          "rho": -0.2684,
+          "p_val": 1.0656383593943487e-09
+        },
+        "fft_high_to_low_ratio": {
+          "rho": -0.2675,
+          "p_val": 1.2286209987669435e-09
+        },
+        "spectral_decay_slope": {
+          "rho": -0.1232,
+          "p_val": 0.005819686507575604
+        },
+        "spectral_azimuthal_anisotropy": {
+          "rho": 0.2881,
+          "p_val": 5.167722578847611e-11
+        },
+        "context_rgb_shannon_entropy": {
+          "rho": -0.4257,
+          "p_val": 2.0114471310833132e-23
+        },
+        "context_lab_delta_e_mean": {
+          "rho": -0.4853,
+          "p_val": 6.592469218042579e-31
+        },
+        "context_hsv_saturation_mean": {
+          "rho": -0.0813,
+          "p_val": 0.06947445464300972
+        },
+        "context_hsv_saturation_std": {
+          "rho": -0.2841,
+          "p_val": 9.771650966668678e-11
+        },
+        "context_color_temperature_proxy": {
+          "rho": -0.0294,
+          "p_val": 0.5112564940669211
+        },
+        "border_to_global_color_divergence": {
+          "rho": -0.0437,
+          "p_val": 0.32892609695923175
+        },
+        "shi_tomasi_corner_count": {
+          "rho": -0.0957,
+          "p_val": 0.0324036321112689
+        },
+        "fast_keypoint_density": {
+          "rho": -0.3172,
+          "p_val": 3.7826298709373376e-13
+        },
+        "contour_curvature_mean": {
+          "rho": 0.2754,
+          "p_val": 3.7374413309237464e-10
+        },
+        "contour_curvature_extrema": {
+          "rho": 0.2754,
+          "p_val": 3.770783348756418e-10
+        },
+        "boundary_tortuosity": {
+          "rho": 0.0514,
+          "p_val": 0.2511655816345245
+        },
+        "skeleton_branch_points": {
+          "rho": 0.3453,
+          "p_val": 1.886861801969306e-15
+        }
+      },
+      "ssim_pearson": {
+        "mask_area_ratio_rho": {
+          "r": -0.9259,
+          "p_val": 1.0518355113355965e-212
+        },
+        "mask_perimeter": {
+          "r": -0.3453,
+          "p_val": 1.9042537267965095e-15
+        },
+        "compactness_isoperimetric": {
+          "r": -0.1381,
+          "p_val": 0.001970758208051493
+        },
+        "max_inscribed_radius_rmax": {
+          "r": -0.7491,
+          "p_val": 4.143283321200315e-91
+        },
+        "mean_hole_depth": {
+          "r": -0.6979,
+          "p_val": 3.253151200043994e-74
+        },
+        "std_hole_depth": {
+          "r": -0.7146,
+          "p_val": 2.68272691672048e-79
+        },
+        "max_to_mean_depth_ratio": {
+          "r": -0.0334,
+          "p_val": 0.45578596203235283
+        },
+        "convex_hull_solidity": {
+          "r": -0.1282,
+          "p_val": 0.004096962882398016
+        },
+        "mask_aspect_ratio": {
+          "r": 0.0311,
+          "p_val": 0.48722200614273586
+        },
+        "mask_extent": {
+          "r": -0.3549,
+          "p_val": 2.771393225508363e-16
+        },
+        "connected_components_count": {
+          "r": 0.1193,
+          "p_val": 0.007567460308938975
+        },
+        "euler_number": {
+          "r": 0.1157,
+          "p_val": 0.009612855871315103
+        },
+        "centroid_offset_x": {
+          "r": 0.1061,
+          "p_val": 0.017620801463015062
+        },
+        "centroid_offset_y": {
+          "r": 0.1837,
+          "p_val": 3.597108131922542e-05
+        },
+        "radial_eccentricity": {
+          "r": 0.1898,
+          "p_val": 1.9272823004193805e-05
+        },
+        "rule_of_thirds_proximity": {
+          "r": 0.031,
+          "p_val": 0.48910654882740273
+        },
+        "boundary_edge_density_sobel": {
+          "r": -0.1732,
+          "p_val": 9.878867483523628e-05
+        },
+        "boundary_edge_std_sobel": {
+          "r": -0.1249,
+          "p_val": 0.005167020538125903
+        },
+        "boundary_edge_max_sobel": {
+          "r": -0.1567,
+          "p_val": 0.0004353871519894425
+        },
+        "boundary_scharr_energy": {
+          "r": -0.1728,
+          "p_val": 0.00010329273851199032
+        },
+        "boundary_canny_density": {
+          "r": -0.2016,
+          "p_val": 5.547159097875291e-06
+        },
+        "gradient_direction_entropy": {
+          "r": -0.1516,
+          "p_val": 0.0006726035842783388
+        },
+        "boundary_laplacian_var": {
+          "r": -0.0954,
+          "p_val": 0.033022778407826886
+        },
+        "boundary_laplacian_mean": {
+          "r": -0.1542,
+          "p_val": 0.0005403884606595331
+        },
+        "glcm_contrast": {
+          "r": -0.0977,
+          "p_val": 0.028945594682820333
+        },
+        "glcm_dissimilarity": {
+          "r": -0.1269,
+          "p_val": 0.004476057811942668
+        },
+        "glcm_homogeneity": {
+          "r": 0.1332,
+          "p_val": 0.002840732094797906
+        },
+        "glcm_energy": {
+          "r": 0.1024,
+          "p_val": 0.022004426745545605
+        },
+        "glcm_correlation": {
+          "r": 0.0845,
+          "p_val": 0.05910430221670264
+        },
+        "lbp_entropy": {
+          "r": -0.1195,
+          "p_val": 0.007450815552945071
+        },
+        "lbp_uniformity": {
+          "r": 0.0834,
+          "p_val": 0.0622871606235406
+        },
+        "multi_scale_laplacian_ratio": {
+          "r": -0.0768,
+          "p_val": 0.08625492314197893
+        },
+        "fft_low_freq_energy": {
+          "r": 0.147,
+          "p_val": 0.0009811611025666324
+        },
+        "fft_mid_freq_energy": {
+          "r": -0.1441,
+          "p_val": 0.0012344917136580982
+        },
+        "fft_high_freq_energy": {
+          "r": -0.1407,
+          "p_val": 0.001605947058425918
+        },
+        "fft_high_to_low_ratio": {
+          "r": -0.1369,
+          "p_val": 0.002157483753566585
+        },
+        "spectral_decay_slope": {
+          "r": -0.1588,
+          "p_val": 0.00036356737418892103
+        },
+        "spectral_azimuthal_anisotropy": {
+          "r": 0.0669,
+          "p_val": 0.13536097306633962
+        },
+        "context_rgb_shannon_entropy": {
+          "r": -0.2787,
+          "p_val": 2.2586178953471977e-10
+        },
+        "context_lab_delta_e_mean": {
+          "r": -0.1562,
+          "p_val": 0.0004576168486555184
+        },
+        "context_hsv_saturation_mean": {
+          "r": -0.0138,
+          "p_val": 0.7585776563935317
+        },
+        "context_hsv_saturation_std": {
+          "r": -0.0747,
+          "p_val": 0.09540741442097414
+        },
+        "context_color_temperature_proxy": {
+          "r": 0.0689,
+          "p_val": 0.12365091993831197
+        },
+        "border_to_global_color_divergence": {
+          "r": 0.3472,
+          "p_val": 1.3124016877577767e-15
+        },
+        "shi_tomasi_corner_count": {
+          "r": -0.2708,
+          "p_val": 7.519097734311835e-10
+        },
+        "fast_keypoint_density": {
+          "r": 0.1785,
+          "p_val": 5.9903862148253815e-05
+        },
+        "contour_curvature_mean": {
+          "r": 0.3102,
+          "p_val": 1.2998303145776082e-12
+        },
+        "contour_curvature_extrema": {
+          "r": -0.0146,
+          "p_val": 0.7443724341986621
+        },
+        "boundary_tortuosity": {
+          "r": 0.0997,
+          "p_val": 0.02577836710817487
+        },
+        "skeleton_branch_points": {
+          "r": 0.0768,
+          "p_val": 0.0863262278745416
+        }
+      },
+      "ssim_spearman": {
+        "mask_area_ratio_rho": {
+          "rho": -0.9312,
+          "p_val": 1.875008321023366e-220
+        },
+        "mask_perimeter": {
+          "rho": -0.3618,
+          "p_val": 6.576369290734664e-17
+        },
+        "compactness_isoperimetric": {
+          "rho": -0.1838,
+          "p_val": 3.5687192719182774e-05
+        },
+        "max_inscribed_radius_rmax": {
+          "rho": -0.7549,
+          "p_val": 2.6370272296470977e-93
+        },
+        "mean_hole_depth": {
+          "rho": -0.7151,
+          "p_val": 1.8284046889724146e-79
+        },
+        "std_hole_depth": {
+          "rho": -0.723,
+          "p_val": 5.2153256577715787e-82
+        },
+        "max_to_mean_depth_ratio": {
+          "rho": -0.0286,
+          "p_val": 0.5239345013606064
+        },
+        "convex_hull_solidity": {
+          "rho": -0.1268,
+          "p_val": 0.004529196958447338
+        },
+        "mask_aspect_ratio": {
+          "rho": 0.0097,
+          "p_val": 0.8286937500894122
+        },
+        "mask_extent": {
+          "rho": -0.4114,
+          "p_val": 7.63003051348005e-22
+        },
+        "connected_components_count": {
+          "rho": 0.1104,
+          "p_val": 0.013542964702608845
+        },
+        "euler_number": {
+          "rho": 0.1118,
+          "p_val": 0.012355199755220774
+        },
+        "centroid_offset_x": {
+          "rho": 0.0886,
+          "p_val": 0.047706046706608614
+        },
+        "centroid_offset_y": {
+          "rho": 0.1488,
+          "p_val": 0.0008479408501137167
+        },
+        "radial_eccentricity": {
+          "rho": 0.1548,
+          "p_val": 0.00051167394806258
+        },
+        "rule_of_thirds_proximity": {
+          "rho": 0.031,
+          "p_val": 0.48919217681775495
+        },
+        "boundary_edge_density_sobel": {
+          "rho": -0.1524,
+          "p_val": 0.0006259715382130729
+        },
+        "boundary_edge_std_sobel": {
+          "rho": -0.0947,
+          "p_val": 0.034208799283881264
+        },
+        "boundary_edge_max_sobel": {
+          "rho": -0.1353,
+          "p_val": 0.002437399403891857
+        },
+        "boundary_scharr_energy": {
+          "rho": -0.1525,
+          "p_val": 0.0006242529559476009
+        },
+        "boundary_canny_density": {
+          "rho": -0.2107,
+          "p_val": 1.9950245223771386e-06
+        },
+        "gradient_direction_entropy": {
+          "rho": -0.1893,
+          "p_val": 2.0302851182544746e-05
+        },
+        "boundary_laplacian_var": {
+          "rho": -0.1323,
+          "p_val": 0.00303416769401808
+        },
+        "boundary_laplacian_mean": {
+          "rho": -0.1563,
+          "p_val": 0.0004521503792420318
+        },
+        "glcm_contrast": {
+          "rho": -0.0754,
+          "p_val": 0.09222259141605267
+        },
+        "glcm_dissimilarity": {
+          "rho": -0.1178,
+          "p_val": 0.008361612255476145
+        },
+        "glcm_homogeneity": {
+          "rho": 0.1404,
+          "p_val": 0.0016429779278626223
+        },
+        "glcm_energy": {
+          "rho": 0.1298,
+          "p_val": 0.003652881685255076
+        },
+        "glcm_correlation": {
+          "rho": 0.0991,
+          "p_val": 0.02675427389381802
+        },
+        "lbp_entropy": {
+          "rho": -0.1061,
+          "p_val": 0.017657927401631014
+        },
+        "lbp_uniformity": {
+          "rho": 0.0873,
+          "p_val": 0.05109760793386128
+        },
+        "multi_scale_laplacian_ratio": {
+          "rho": -0.0466,
+          "p_val": 0.2978797518048721
+        },
+        "fft_low_freq_energy": {
+          "rho": 0.1336,
+          "p_val": 0.002756418465559129
+        },
+        "fft_mid_freq_energy": {
+          "rho": -0.1276,
+          "p_val": 0.004267819171884634
+        },
+        "fft_high_freq_energy": {
+          "rho": -0.1434,
+          "p_val": 0.0013088563119155571
+        },
+        "fft_high_to_low_ratio": {
+          "rho": -0.1421,
+          "p_val": 0.0014442844835127837
+        },
+        "spectral_decay_slope": {
+          "rho": -0.1527,
+          "p_val": 0.0006136348710005991
+        },
+        "spectral_azimuthal_anisotropy": {
+          "rho": 0.0787,
+          "p_val": 0.07855360642433257
+        },
+        "context_rgb_shannon_entropy": {
+          "rho": -0.2428,
+          "p_val": 3.844310502841798e-08
+        },
+        "context_lab_delta_e_mean": {
+          "rho": -0.1505,
+          "p_val": 0.0007361332374030555
+        },
+        "context_hsv_saturation_mean": {
+          "rho": -0.0427,
+          "p_val": 0.34067596099591774
+        },
+        "context_hsv_saturation_std": {
+          "rho": -0.0912,
+          "p_val": 0.041475241250964134
+        },
+        "context_color_temperature_proxy": {
+          "rho": 0.0361,
+          "p_val": 0.4211868301309721
+        },
+        "border_to_global_color_divergence": {
+          "rho": 0.3256,
+          "p_val": 8.28913628984843e-14
+        },
+        "shi_tomasi_corner_count": {
+          "rho": -0.2731,
+          "p_val": 5.34066789804265e-10
+        },
+        "fast_keypoint_density": {
+          "rho": 0.1564,
+          "p_val": 0.00044747771235452346
+        },
+        "contour_curvature_mean": {
+          "rho": 0.3199,
+          "p_val": 2.315459679112279e-13
+        },
+        "contour_curvature_extrema": {
+          "rho": -0.0089,
+          "p_val": 0.8418203874073269
+        },
+        "boundary_tortuosity": {
+          "rho": 0.1037,
+          "p_val": 0.020429580998770375
+        },
+        "skeleton_branch_points": {
+          "rho": 0.0732,
+          "p_val": 0.1019992162954646
+        }
+      },
+      "latency_ms_pearson": {
+        "mask_area_ratio_rho": {
+          "r": 0.0331,
+          "p_val": 0.4606287789941212
+        },
+        "mask_perimeter": {
+          "r": -0.0298,
+          "p_val": 0.5055343977116495
+        },
+        "compactness_isoperimetric": {
+          "r": 0.0284,
+          "p_val": 0.5265062049708401
+        },
+        "max_inscribed_radius_rmax": {
+          "r": 0.0688,
+          "p_val": 0.12421792495202112
+        },
+        "mean_hole_depth": {
+          "r": 0.0766,
+          "p_val": 0.08718653006568432
+        },
+        "std_hole_depth": {
+          "r": 0.0789,
+          "p_val": 0.07801922501251979
+        },
+        "max_to_mean_depth_ratio": {
+          "r": -0.0323,
+          "p_val": 0.4716363317746258
+        },
+        "convex_hull_solidity": {
+          "r": -0.0034,
+          "p_val": 0.9393834829730987
+        },
+        "mask_aspect_ratio": {
+          "r": 0.0578,
+          "p_val": 0.1968364096922504
+        },
+        "mask_extent": {
+          "r": 0.0643,
+          "p_val": 0.151175516173609
+        },
+        "connected_components_count": {
+          "r": -0.0614,
+          "p_val": 0.17018392417057862
+        },
+        "euler_number": {
+          "r": -0.0686,
+          "p_val": 0.1257855075455347
+        },
+        "centroid_offset_x": {
+          "r": 0.0887,
+          "p_val": 0.04733013420568654
+        },
+        "centroid_offset_y": {
+          "r": 0.0445,
+          "p_val": 0.3205191745939018
+        },
+        "radial_eccentricity": {
+          "r": 0.0913,
+          "p_val": 0.04124117328529415
+        },
+        "rule_of_thirds_proximity": {
+          "r": 0.1037,
+          "p_val": 0.020425003749172874
+        },
+        "boundary_edge_density_sobel": {
+          "r": -0.1518,
+          "p_val": 0.0006578910714233418
+        },
+        "boundary_edge_std_sobel": {
+          "r": -0.2484,
+          "p_val": 1.8246377657660998e-08
+        },
+        "boundary_edge_max_sobel": {
+          "r": -0.2592,
+          "p_val": 4.070437125861907e-09
+        },
+        "boundary_scharr_energy": {
+          "r": -0.1519,
+          "p_val": 0.0006564393084214174
+        },
+        "boundary_canny_density": {
+          "r": -0.055,
+          "p_val": 0.2198763737486632
+        },
+        "gradient_direction_entropy": {
+          "r": -0.0778,
+          "p_val": 0.08240977470166351
+        },
+        "boundary_laplacian_var": {
+          "r": -0.221,
+          "p_val": 6.008656369771896e-07
+        },
+        "boundary_laplacian_mean": {
+          "r": -0.1625,
+          "p_val": 0.00026377520810480856
+        },
+        "glcm_contrast": {
+          "r": -0.3171,
+          "p_val": 3.8156833645585124e-13
+        },
+        "glcm_dissimilarity": {
+          "r": -0.2053,
+          "p_val": 3.69583751997583e-06
+        },
+        "glcm_homogeneity": {
+          "r": 0.1068,
+          "p_val": 0.01691712666279639
+        },
+        "glcm_energy": {
+          "r": 0.1569,
+          "p_val": 0.0004290163002412118
+        },
+        "glcm_correlation": {
+          "r": -0.0794,
+          "p_val": 0.07595238870750218
+        },
+        "lbp_entropy": {
+          "r": -0.0254,
+          "p_val": 0.5706744082892263
+        },
+        "lbp_uniformity": {
+          "r": 0.0393,
+          "p_val": 0.38046885866019253
+        },
+        "multi_scale_laplacian_ratio": {
+          "r": -0.1286,
+          "p_val": 0.003964236356359617
+        },
+        "fft_low_freq_energy": {
+          "r": 0.1271,
+          "p_val": 0.004417467700280394
+        },
+        "fft_mid_freq_energy": {
+          "r": -0.1198,
+          "p_val": 0.007301983455505194
+        },
+        "fft_high_freq_energy": {
+          "r": -0.136,
+          "p_val": 0.0023046970085813137
+        },
+        "fft_high_to_low_ratio": {
+          "r": -0.1298,
+          "p_val": 0.003647536717976438
+        },
+        "spectral_decay_slope": {
+          "r": -0.0539,
+          "p_val": 0.22934495895478768
+        },
+        "spectral_azimuthal_anisotropy": {
+          "r": 0.2326,
+          "p_val": 1.4310242633819497e-07
+        },
+        "context_rgb_shannon_entropy": {
+          "r": -0.1784,
+          "p_val": 6.017206974822594e-05
+        },
+        "context_lab_delta_e_mean": {
+          "r": -0.3277,
+          "p_val": 5.5284334741341207e-14
+        },
+        "context_hsv_saturation_mean": {
+          "r": -0.1498,
+          "p_val": 0.0007768605121375091
+        },
+        "context_hsv_saturation_std": {
+          "r": -0.3304,
+          "p_val": 3.360838185681372e-14
+        },
+        "context_color_temperature_proxy": {
+          "r": -0.231,
+          "p_val": 1.749844501843617e-07
+        },
+        "border_to_global_color_divergence": {
+          "r": -0.0222,
+          "p_val": 0.6197127536824815
+        },
+        "shi_tomasi_corner_count": {
+          "r": -0.0172,
+          "p_val": 0.7019531683238638
+        },
+        "fast_keypoint_density": {
+          "r": -0.0788,
+          "p_val": 0.0781626352409532
+        },
+        "contour_curvature_mean": {
+          "r": -0.0263,
+          "p_val": 0.5567310731564594
+        },
+        "contour_curvature_extrema": {
+          "r": -0.0568,
+          "p_val": 0.20498156954670269
+        },
+        "boundary_tortuosity": {
+          "r": 0.0311,
+          "p_val": 0.48710216303242937
+        },
+        "skeleton_branch_points": {
+          "r": -0.0944,
+          "p_val": 0.03485168487288806
+        }
+      },
+      "latency_ms_spearman": {
+        "mask_area_ratio_rho": {
+          "rho": 0.0369,
+          "p_val": 0.4108020305066303
+        },
+        "mask_perimeter": {
+          "rho": -0.0047,
+          "p_val": 0.9166216906143223
+        },
+        "compactness_isoperimetric": {
+          "rho": 0.0257,
+          "p_val": 0.5659377759546176
+        },
+        "max_inscribed_radius_rmax": {
+          "rho": 0.0376,
+          "p_val": 0.4014461279861307
+        },
+        "mean_hole_depth": {
+          "rho": 0.052,
+          "p_val": 0.24566791385697098
+        },
+        "std_hole_depth": {
+          "rho": 0.048,
+          "p_val": 0.2839499696421821
+        },
+        "max_to_mean_depth_ratio": {
+          "rho": -0.0298,
+          "p_val": 0.5065726769248557
+        },
+        "convex_hull_solidity": {
+          "rho": -0.0052,
+          "p_val": 0.9075077546960252
+        },
+        "mask_aspect_ratio": {
+          "rho": 0.0633,
+          "p_val": 0.15755027293973975
+        },
+        "mask_extent": {
+          "rho": 0.0426,
+          "p_val": 0.3416898476465942
+        },
+        "connected_components_count": {
+          "rho": -0.0193,
+          "p_val": 0.6663725965091248
+        },
+        "euler_number": {
+          "rho": -0.029,
+          "p_val": 0.5177363226330263
+        },
+        "centroid_offset_x": {
+          "rho": 0.0864,
+          "p_val": 0.053414039079170784
+        },
+        "centroid_offset_y": {
+          "rho": 0.0372,
+          "p_val": 0.4060150066920754
+        },
+        "radial_eccentricity": {
+          "rho": 0.0916,
+          "p_val": 0.04052130248902579
+        },
+        "rule_of_thirds_proximity": {
+          "rho": 0.0932,
+          "p_val": 0.03721188141182374
+        },
+        "boundary_edge_density_sobel": {
+          "rho": -0.1343,
+          "p_val": 0.0026135339338834752
+        },
+        "boundary_edge_std_sobel": {
+          "rho": -0.2412,
+          "p_val": 4.7510439063072354e-08
+        },
+        "boundary_edge_max_sobel": {
+          "rho": -0.2282,
+          "p_val": 2.4827286132133046e-07
+        },
+        "boundary_scharr_energy": {
+          "rho": -0.134,
+          "p_val": 0.0026815931686990126
+        },
+        "boundary_canny_density": {
+          "rho": -0.0349,
+          "p_val": 0.43667924778398537
+        },
+        "gradient_direction_entropy": {
+          "rho": -0.0558,
+          "p_val": 0.21327868569404032
+        },
+        "boundary_laplacian_var": {
+          "rho": -0.2141,
+          "p_val": 1.3564793543466983e-06
+        },
+        "boundary_laplacian_mean": {
+          "rho": -0.1416,
+          "p_val": 0.0015037837461221255
+        },
+        "glcm_contrast": {
+          "rho": -0.2732,
+          "p_val": 5.260278483547528e-10
+        },
+        "glcm_dissimilarity": {
+          "rho": -0.1615,
+          "p_val": 0.00028725620817523
+        },
+        "glcm_homogeneity": {
+          "rho": 0.0653,
+          "p_val": 0.1448402750082212
+        },
+        "glcm_energy": {
+          "rho": 0.1382,
+          "p_val": 0.0019464864513504905
+        },
+        "glcm_correlation": {
+          "rho": -0.0622,
+          "p_val": 0.1651879141679771
+        },
+        "lbp_entropy": {
+          "rho": 0.0139,
+          "p_val": 0.7563154403430752
+        },
+        "lbp_uniformity": {
+          "rho": -0.0262,
+          "p_val": 0.5596221110845188
+        },
+        "multi_scale_laplacian_ratio": {
+          "rho": -0.1206,
+          "p_val": 0.006922296583460841
+        },
+        "fft_low_freq_energy": {
+          "rho": 0.1906,
+          "p_val": 1.775642820249011e-05
+        },
+        "fft_mid_freq_energy": {
+          "rho": -0.1818,
+          "p_val": 4.334873313473522e-05
+        },
+        "fft_high_freq_energy": {
+          "rho": -0.2054,
+          "p_val": 3.6334991107080183e-06
+        },
+        "fft_high_to_low_ratio": {
+          "rho": -0.2061,
+          "p_val": 3.3665767806489087e-06
+        },
+        "spectral_decay_slope": {
+          "rho": -0.1028,
+          "p_val": 0.021563583140340396
+        },
+        "spectral_azimuthal_anisotropy": {
+          "rho": 0.2736,
+          "p_val": 4.89631491435421e-10
+        },
+        "context_rgb_shannon_entropy": {
+          "rho": -0.1915,
+          "p_val": 1.6268011137060476e-05
+        },
+        "context_lab_delta_e_mean": {
+          "rho": -0.2926,
+          "p_val": 2.4895606215522554e-11
+        },
+        "context_hsv_saturation_mean": {
+          "rho": -0.1293,
+          "p_val": 0.0037834252145846274
+        },
+        "context_hsv_saturation_std": {
+          "rho": -0.296,
+          "p_val": 1.4411330376932478e-11
+        },
+        "context_color_temperature_proxy": {
+          "rho": -0.1535,
+          "p_val": 0.000571507102754824
+        },
+        "border_to_global_color_divergence": {
+          "rho": -0.0495,
+          "p_val": 0.26969075544031806
+        },
+        "shi_tomasi_corner_count": {
+          "rho": 0.0063,
+          "p_val": 0.8889062440110507
+        },
+        "fast_keypoint_density": {
+          "rho": -0.0936,
+          "p_val": 0.03632813569827151
+        },
+        "contour_curvature_mean": {
+          "rho": -0.0421,
+          "p_val": 0.347770888290156
+        },
+        "contour_curvature_extrema": {
+          "rho": -0.019,
+          "p_val": 0.6719125909634839
+        },
+        "boundary_tortuosity": {
+          "rho": 0.0275,
+          "p_val": 0.5399229834383866
+        },
+        "skeleton_branch_points": {
+          "rho": -0.0645,
+          "p_val": 0.1497633244329775
+        }
+      }
+    }
+  },
+  "mutual_info": {
+    "aotgan_npu": {
+      "lpips": {
+        "mask_area_ratio_rho": 1.3425,
+        "mask_perimeter": 0.1757,
+        "compactness_isoperimetric": 0.0468,
+        "max_inscribed_radius_rmax": 0.5634,
+        "mean_hole_depth": 0.4734,
+        "std_hole_depth": 0.4613,
+        "max_to_mean_depth_ratio": 0.0547,
+        "convex_hull_solidity": 0.0,
+        "mask_aspect_ratio": 0.0055,
+        "mask_extent": 0.496,
+        "connected_components_count": 0.0,
+        "euler_number": 0.0,
+        "centroid_offset_x": 0.0126,
+        "centroid_offset_y": 0.0659,
+        "radial_eccentricity": 0.0001,
+        "rule_of_thirds_proximity": 0.0288,
+        "boundary_edge_density_sobel": 0.0158,
+        "boundary_edge_std_sobel": 0.0236,
+        "boundary_edge_max_sobel": 0.0058,
+        "boundary_scharr_energy": 0.0192,
+        "boundary_canny_density": 0.0806,
+        "gradient_direction_entropy": 0.0116,
+        "boundary_laplacian_var": 0.0564,
+        "boundary_laplacian_mean": 0.0504,
+        "glcm_contrast": 0.0659,
+        "glcm_dissimilarity": 0.0,
+        "glcm_homogeneity": 0.0,
+        "glcm_energy": 0.0,
+        "glcm_correlation": 0.0355,
+        "lbp_entropy": 0.0,
+        "lbp_uniformity": 0.0,
+        "multi_scale_laplacian_ratio": 0.0368,
+        "fft_low_freq_energy": 0.0,
+        "fft_mid_freq_energy": 0.0,
+        "fft_high_freq_energy": 0.0018,
+        "fft_high_to_low_ratio": 0.0,
+        "spectral_decay_slope": 0.0065,
+        "spectral_azimuthal_anisotropy": 0.0,
+        "context_rgb_shannon_entropy": 0.0,
+        "context_lab_delta_e_mean": 0.0,
+        "context_hsv_saturation_mean": 0.0238,
+        "context_hsv_saturation_std": 0.0494,
+        "context_color_temperature_proxy": 0.0536,
+        "border_to_global_color_divergence": 0.0769,
+        "shi_tomasi_corner_count": 0.0097,
+        "fast_keypoint_density": 0.0578,
+        "contour_curvature_mean": 0.0175,
+        "contour_curvature_extrema": 0.004,
+        "boundary_tortuosity": 0.0,
+        "skeleton_branch_points": 0.0156
+      },
+      "psnr_hole": {
+        "mask_area_ratio_rho": 0.0499,
+        "mask_perimeter": 0.0736,
+        "compactness_isoperimetric": 0.1627,
+        "max_inscribed_radius_rmax": 0.18,
+        "mean_hole_depth": 0.2292,
+        "std_hole_depth": 0.2438,
+        "max_to_mean_depth_ratio": 0.0453,
+        "convex_hull_solidity": 0.0599,
+        "mask_aspect_ratio": 0.0,
+        "mask_extent": 0.226,
+        "connected_components_count": 0.16,
+        "euler_number": 0.1143,
+        "centroid_offset_x": 0.0315,
+        "centroid_offset_y": 0.0,
+        "radial_eccentricity": 0.0482,
+        "rule_of_thirds_proximity": 0.0576,
+        "boundary_edge_density_sobel": 0.1405,
+        "boundary_edge_std_sobel": 0.0701,
+        "boundary_edge_max_sobel": 0.0532,
+        "boundary_scharr_energy": 0.1489,
+        "boundary_canny_density": 0.122,
+        "gradient_direction_entropy": 0.0041,
+        "boundary_laplacian_var": 0.1021,
+        "boundary_laplacian_mean": 0.1017,
+        "glcm_contrast": 0.1069,
+        "glcm_dissimilarity": 0.0956,
+        "glcm_homogeneity": 0.0981,
+        "glcm_energy": 0.062,
+        "glcm_correlation": 0.0202,
+        "lbp_entropy": 0.0375,
+        "lbp_uniformity": 0.0,
+        "multi_scale_laplacian_ratio": 0.0,
+        "fft_low_freq_energy": 0.0154,
+        "fft_mid_freq_energy": 0.0126,
+        "fft_high_freq_energy": 0.0638,
+        "fft_high_to_low_ratio": 0.0668,
+        "spectral_decay_slope": 0.0,
+        "spectral_azimuthal_anisotropy": 0.0672,
+        "context_rgb_shannon_entropy": 0.0484,
+        "context_lab_delta_e_mean": 0.0844,
+        "context_hsv_saturation_mean": 0.0,
+        "context_hsv_saturation_std": 0.0327,
+        "context_color_temperature_proxy": 0.0235,
+        "border_to_global_color_divergence": 0.0278,
+        "shi_tomasi_corner_count": 0.0,
+        "fast_keypoint_density": 0.0792,
+        "contour_curvature_mean": 0.0523,
+        "contour_curvature_extrema": 0.0697,
+        "boundary_tortuosity": 0.0164,
+        "skeleton_branch_points": 0.1229
+      },
+      "ssim": {
+        "mask_area_ratio_rho": 0.5589,
+        "mask_perimeter": 0.0523,
+        "compactness_isoperimetric": 0.0615,
+        "max_inscribed_radius_rmax": 0.4209,
+        "mean_hole_depth": 0.3941,
+        "std_hole_depth": 0.3977,
+        "max_to_mean_depth_ratio": 0.0422,
+        "convex_hull_solidity": 0.0076,
+        "mask_aspect_ratio": 0.0295,
+        "mask_extent": 0.3198,
+        "connected_components_count": 0.0,
+        "euler_number": 0.0,
+        "centroid_offset_x": 0.0,
+        "centroid_offset_y": 0.0,
+        "radial_eccentricity": 0.0264,
+        "rule_of_thirds_proximity": 0.0,
+        "boundary_edge_density_sobel": 0.0372,
+        "boundary_edge_std_sobel": 0.0383,
+        "boundary_edge_max_sobel": 0.0311,
+        "boundary_scharr_energy": 0.029,
+        "boundary_canny_density": 0.0965,
+        "gradient_direction_entropy": 0.0338,
+        "boundary_laplacian_var": 0.0397,
+        "boundary_laplacian_mean": 0.1072,
+        "glcm_contrast": 0.0,
+        "glcm_dissimilarity": 0.0579,
+        "glcm_homogeneity": 0.0926,
+        "glcm_energy": 0.0639,
+        "glcm_correlation": 0.0153,
+        "lbp_entropy": 0.0353,
+        "lbp_uniformity": 0.0,
+        "multi_scale_laplacian_ratio": 0.0535,
+        "fft_low_freq_energy": 0.0471,
+        "fft_mid_freq_energy": 0.0212,
+        "fft_high_freq_energy": 0.0339,
+        "fft_high_to_low_ratio": 0.0145,
+        "spectral_decay_slope": 0.0556,
+        "spectral_azimuthal_anisotropy": 0.0,
+        "context_rgb_shannon_entropy": 0.107,
+        "context_lab_delta_e_mean": 0.0232,
+        "context_hsv_saturation_mean": 0.0735,
+        "context_hsv_saturation_std": 0.0055,
+        "context_color_temperature_proxy": 0.0,
+        "border_to_global_color_divergence": 0.1111,
+        "shi_tomasi_corner_count": 0.0136,
+        "fast_keypoint_density": 0.0478,
+        "contour_curvature_mean": 0.0479,
+        "contour_curvature_extrema": 0.0,
+        "boundary_tortuosity": 0.0,
+        "skeleton_branch_points": 0.0
+      },
+      "latency_ms": {
+        "mask_area_ratio_rho": 0.0,
+        "mask_perimeter": 0.049,
+        "compactness_isoperimetric": 0.0,
+        "max_inscribed_radius_rmax": 0.0277,
+        "mean_hole_depth": 0.0,
+        "std_hole_depth": 0.0016,
+        "max_to_mean_depth_ratio": 0.0078,
+        "convex_hull_solidity": 0.0317,
+        "mask_aspect_ratio": 0.0,
+        "mask_extent": 0.0048,
+        "connected_components_count": 0.0,
+        "euler_number": 0.0,
+        "centroid_offset_x": 0.0468,
+        "centroid_offset_y": 0.0,
+        "radial_eccentricity": 0.0,
+        "rule_of_thirds_proximity": 0.0,
+        "boundary_edge_density_sobel": 0.0017,
+        "boundary_edge_std_sobel": 0.1181,
+        "boundary_edge_max_sobel": 0.1269,
+        "boundary_scharr_energy": 0.0156,
+        "boundary_canny_density": 0.0,
+        "gradient_direction_entropy": 0.0177,
+        "boundary_laplacian_var": 0.0644,
+        "boundary_laplacian_mean": 0.0623,
+        "glcm_contrast": 0.0885,
+        "glcm_dissimilarity": 0.0696,
+        "glcm_homogeneity": 0.0001,
+        "glcm_energy": 0.0961,
+        "glcm_correlation": 0.0345,
+        "lbp_entropy": 0.0438,
+        "lbp_uniformity": 0.0992,
+        "multi_scale_laplacian_ratio": 0.0695,
+        "fft_low_freq_energy": 0.1632,
+        "fft_mid_freq_energy": 0.1663,
+        "fft_high_freq_energy": 0.1254,
+        "fft_high_to_low_ratio": 0.0992,
+        "spectral_decay_slope": 0.1122,
+        "spectral_azimuthal_anisotropy": 0.167,
+        "context_rgb_shannon_entropy": 0.1021,
+        "context_lab_delta_e_mean": 0.074,
+        "context_hsv_saturation_mean": 0.0566,
+        "context_hsv_saturation_std": 0.062,
+        "context_color_temperature_proxy": 0.276,
+        "border_to_global_color_divergence": 0.0615,
+        "shi_tomasi_corner_count": 0.0,
+        "fast_keypoint_density": 0.0569,
+        "contour_curvature_mean": 0.0,
+        "contour_curvature_extrema": 0.0313,
+        "boundary_tortuosity": 0.0032,
+        "skeleton_branch_points": 0.0
+      }
+    },
+    "lama_npu": {
+      "lpips": {
+        "mask_area_ratio_rho": 1.5821,
+        "mask_perimeter": 0.2152,
+        "compactness_isoperimetric": 0.0036,
+        "max_inscribed_radius_rmax": 0.345,
+        "mean_hole_depth": 0.301,
+        "std_hole_depth": 0.2792,
+        "max_to_mean_depth_ratio": 0.0,
+        "convex_hull_solidity": 0.0336,
+        "mask_aspect_ratio": 0.0039,
+        "mask_extent": 0.2968,
+        "connected_components_count": 0.0,
+        "euler_number": 0.0,
+        "centroid_offset_x": 0.0739,
+        "centroid_offset_y": 0.0222,
+        "radial_eccentricity": 0.0545,
+        "rule_of_thirds_proximity": 0.0598,
+        "boundary_edge_density_sobel": 0.0,
+        "boundary_edge_std_sobel": 0.0867,
+        "boundary_edge_max_sobel": 0.0112,
+        "boundary_scharr_energy": 0.0141,
+        "boundary_canny_density": 0.0474,
+        "gradient_direction_entropy": 0.0021,
+        "boundary_laplacian_var": 0.0295,
+        "boundary_laplacian_mean": 0.0196,
+        "glcm_contrast": 0.0342,
+        "glcm_dissimilarity": 0.0272,
+        "glcm_homogeneity": 0.0307,
+        "glcm_energy": 0.0,
+        "glcm_correlation": 0.0248,
+        "lbp_entropy": 0.0,
+        "lbp_uniformity": 0.0,
+        "multi_scale_laplacian_ratio": 0.0,
+        "fft_low_freq_energy": 0.0,
+        "fft_mid_freq_energy": 0.0,
+        "fft_high_freq_energy": 0.0,
+        "fft_high_to_low_ratio": 0.0,
+        "spectral_decay_slope": 0.031,
+        "spectral_azimuthal_anisotropy": 0.0,
+        "context_rgb_shannon_entropy": 0.0528,
+        "context_lab_delta_e_mean": 0.0081,
+        "context_hsv_saturation_mean": 0.0,
+        "context_hsv_saturation_std": 0.0014,
+        "context_color_temperature_proxy": 0.0,
+        "border_to_global_color_divergence": 0.1028,
+        "shi_tomasi_corner_count": 0.0013,
+        "fast_keypoint_density": 0.1117,
+        "contour_curvature_mean": 0.0844,
+        "contour_curvature_extrema": 0.0677,
+        "boundary_tortuosity": 0.0289,
+        "skeleton_branch_points": 0.0
+      },
+      "psnr_hole": {
+        "mask_area_ratio_rho": 0.058,
+        "mask_perimeter": 0.0657,
+        "compactness_isoperimetric": 0.1396,
+        "max_inscribed_radius_rmax": 0.1728,
+        "mean_hole_depth": 0.196,
+        "std_hole_depth": 0.2318,
+        "max_to_mean_depth_ratio": 0.0314,
+        "convex_hull_solidity": 0.0352,
+        "mask_aspect_ratio": 0.028,
+        "mask_extent": 0.1408,
+        "connected_components_count": 0.0893,
+        "euler_number": 0.0908,
+        "centroid_offset_x": 0.0381,
+        "centroid_offset_y": 0.0716,
+        "radial_eccentricity": 0.0802,
+        "rule_of_thirds_proximity": 0.0318,
+        "boundary_edge_density_sobel": 0.1349,
+        "boundary_edge_std_sobel": 0.0579,
+        "boundary_edge_max_sobel": 0.0364,
+        "boundary_scharr_energy": 0.1438,
+        "boundary_canny_density": 0.1591,
+        "gradient_direction_entropy": 0.0406,
+        "boundary_laplacian_var": 0.1702,
+        "boundary_laplacian_mean": 0.1935,
+        "glcm_contrast": 0.0828,
+        "glcm_dissimilarity": 0.0828,
+        "glcm_homogeneity": 0.0332,
+        "glcm_energy": 0.0569,
+        "glcm_correlation": 0.0,
+        "lbp_entropy": 0.0,
+        "lbp_uniformity": 0.0432,
+        "multi_scale_laplacian_ratio": 0.0311,
+        "fft_low_freq_energy": 0.0401,
+        "fft_mid_freq_energy": 0.0614,
+        "fft_high_freq_energy": 0.0107,
+        "fft_high_to_low_ratio": 0.0257,
+        "spectral_decay_slope": 0.0088,
+        "spectral_azimuthal_anisotropy": 0.047,
+        "context_rgb_shannon_entropy": 0.1222,
+        "context_lab_delta_e_mean": 0.1404,
+        "context_hsv_saturation_mean": 0.0124,
+        "context_hsv_saturation_std": 0.0509,
+        "context_color_temperature_proxy": 0.0304,
+        "border_to_global_color_divergence": 0.1144,
+        "shi_tomasi_corner_count": 0.0254,
+        "fast_keypoint_density": 0.0601,
+        "contour_curvature_mean": 0.0699,
+        "contour_curvature_extrema": 0.0275,
+        "boundary_tortuosity": 0.0089,
+        "skeleton_branch_points": 0.0944
+      },
+      "ssim": {
+        "mask_area_ratio_rho": 0.6221,
+        "mask_perimeter": 0.0887,
+        "compactness_isoperimetric": 0.0301,
+        "max_inscribed_radius_rmax": 0.4065,
+        "mean_hole_depth": 0.4027,
+        "std_hole_depth": 0.3927,
+        "max_to_mean_depth_ratio": 0.0174,
+        "convex_hull_solidity": 0.0618,
+        "mask_aspect_ratio": 0.0294,
+        "mask_extent": 0.292,
+        "connected_components_count": 0.0,
+        "euler_number": 0.0062,
+        "centroid_offset_x": 0.0,
+        "centroid_offset_y": 0.0,
+        "radial_eccentricity": 0.0324,
+        "rule_of_thirds_proximity": 0.0304,
+        "boundary_edge_density_sobel": 0.0369,
+        "boundary_edge_std_sobel": 0.0365,
+        "boundary_edge_max_sobel": 0.0469,
+        "boundary_scharr_energy": 0.0343,
+        "boundary_canny_density": 0.1761,
+        "gradient_direction_entropy": 0.0416,
+        "boundary_laplacian_var": 0.029,
+        "boundary_laplacian_mean": 0.1189,
+        "glcm_contrast": 0.0,
+        "glcm_dissimilarity": 0.1053,
+        "glcm_homogeneity": 0.0625,
+        "glcm_energy": 0.0337,
+        "glcm_correlation": 0.0376,
+        "lbp_entropy": 0.0,
+        "lbp_uniformity": 0.0,
+        "multi_scale_laplacian_ratio": 0.0045,
+        "fft_low_freq_energy": 0.0702,
+        "fft_mid_freq_energy": 0.0425,
+        "fft_high_freq_energy": 0.0268,
+        "fft_high_to_low_ratio": 0.0198,
+        "spectral_decay_slope": 0.0,
+        "spectral_azimuthal_anisotropy": 0.0173,
+        "context_rgb_shannon_entropy": 0.0859,
+        "context_lab_delta_e_mean": 0.0933,
+        "context_hsv_saturation_mean": 0.0,
+        "context_hsv_saturation_std": 0.062,
+        "context_color_temperature_proxy": 0.0,
+        "border_to_global_color_divergence": 0.092,
+        "shi_tomasi_corner_count": 0.0899,
+        "fast_keypoint_density": 0.047,
+        "contour_curvature_mean": 0.0167,
+        "contour_curvature_extrema": 0.0272,
+        "boundary_tortuosity": 0.0,
+        "skeleton_branch_points": 0.0
+      },
+      "latency_ms": {
+        "mask_area_ratio_rho": 0.0,
+        "mask_perimeter": 0.0,
+        "compactness_isoperimetric": 0.0,
+        "max_inscribed_radius_rmax": 0.0203,
+        "mean_hole_depth": 0.0,
+        "std_hole_depth": 0.0,
+        "max_to_mean_depth_ratio": 0.0411,
+        "convex_hull_solidity": 0.0498,
+        "mask_aspect_ratio": 0.0,
+        "mask_extent": 0.0317,
+        "connected_components_count": 0.0,
+        "euler_number": 0.0,
+        "centroid_offset_x": 0.0555,
+        "centroid_offset_y": 0.0,
+        "radial_eccentricity": 0.0,
+        "rule_of_thirds_proximity": 0.0,
+        "boundary_edge_density_sobel": 0.0354,
+        "boundary_edge_std_sobel": 0.0881,
+        "boundary_edge_max_sobel": 0.0665,
+        "boundary_scharr_energy": 0.0432,
+        "boundary_canny_density": 0.0046,
+        "gradient_direction_entropy": 0.0724,
+        "boundary_laplacian_var": 0.0217,
+        "boundary_laplacian_mean": 0.1117,
+        "glcm_contrast": 0.0632,
+        "glcm_dissimilarity": 0.0542,
+        "glcm_homogeneity": 0.0,
+        "glcm_energy": 0.0796,
+        "glcm_correlation": 0.0172,
+        "lbp_entropy": 0.0,
+        "lbp_uniformity": 0.0569,
+        "multi_scale_laplacian_ratio": 0.008,
+        "fft_low_freq_energy": 0.1424,
+        "fft_mid_freq_energy": 0.1142,
+        "fft_high_freq_energy": 0.0621,
+        "fft_high_to_low_ratio": 0.0344,
+        "spectral_decay_slope": 0.0479,
+        "spectral_azimuthal_anisotropy": 0.0925,
+        "context_rgb_shannon_entropy": 0.0702,
+        "context_lab_delta_e_mean": 0.0899,
+        "context_hsv_saturation_mean": 0.0645,
+        "context_hsv_saturation_std": 0.1377,
+        "context_color_temperature_proxy": 0.255,
+        "border_to_global_color_divergence": 0.0,
+        "shi_tomasi_corner_count": 0.0127,
+        "fast_keypoint_density": 0.0399,
+        "contour_curvature_mean": 0.0194,
+        "contour_curvature_extrema": 0.0228,
+        "boundary_tortuosity": 0.014,
+        "skeleton_branch_points": 0.0
+      }
+    },
+    "migan_npu": {
+      "lpips": {
+        "mask_area_ratio_rho": 1.5855,
+        "mask_perimeter": 0.2626,
+        "compactness_isoperimetric": 0.0012,
+        "max_inscribed_radius_rmax": 0.3517,
+        "mean_hole_depth": 0.261,
+        "std_hole_depth": 0.2639,
+        "max_to_mean_depth_ratio": 0.0317,
+        "convex_hull_solidity": 0.0791,
+        "mask_aspect_ratio": 0.0,
+        "mask_extent": 0.3503,
+        "connected_components_count": 0.0119,
+        "euler_number": 0.0,
+        "centroid_offset_x": 0.0094,
+        "centroid_offset_y": 0.0733,
+        "radial_eccentricity": 0.0784,
+        "rule_of_thirds_proximity": 0.0351,
+        "boundary_edge_density_sobel": 0.0292,
+        "boundary_edge_std_sobel": 0.0,
+        "boundary_edge_max_sobel": 0.0416,
+        "boundary_scharr_energy": 0.0363,
+        "boundary_canny_density": 0.0856,
+        "gradient_direction_entropy": 0.017,
+        "boundary_laplacian_var": 0.0572,
+        "boundary_laplacian_mean": 0.0445,
+        "glcm_contrast": 0.0081,
+        "glcm_dissimilarity": 0.0586,
+        "glcm_homogeneity": 0.0037,
+        "glcm_energy": 0.0227,
+        "glcm_correlation": 0.0,
+        "lbp_entropy": 0.0384,
+        "lbp_uniformity": 0.0113,
+        "multi_scale_laplacian_ratio": 0.0184,
+        "fft_low_freq_energy": 0.0283,
+        "fft_mid_freq_energy": 0.035,
+        "fft_high_freq_energy": 0.0,
+        "fft_high_to_low_ratio": 0.0,
+        "spectral_decay_slope": 0.0,
+        "spectral_azimuthal_anisotropy": 0.0007,
+        "context_rgb_shannon_entropy": 0.0356,
+        "context_lab_delta_e_mean": 0.0134,
+        "context_hsv_saturation_mean": 0.0,
+        "context_hsv_saturation_std": 0.0,
+        "context_color_temperature_proxy": 0.0186,
+        "border_to_global_color_divergence": 0.1244,
+        "shi_tomasi_corner_count": 0.0133,
+        "fast_keypoint_density": 0.0752,
+        "contour_curvature_mean": 0.0515,
+        "contour_curvature_extrema": 0.0,
+        "boundary_tortuosity": 0.0233,
+        "skeleton_branch_points": 0.0152
+      },
+      "psnr_hole": {
+        "mask_area_ratio_rho": 0.0886,
+        "mask_perimeter": 0.032,
+        "compactness_isoperimetric": 0.0918,
+        "max_inscribed_radius_rmax": 0.135,
+        "mean_hole_depth": 0.1484,
+        "std_hole_depth": 0.1605,
+        "max_to_mean_depth_ratio": 0.0039,
+        "convex_hull_solidity": 0.0406,
+        "mask_aspect_ratio": 0.0194,
+        "mask_extent": 0.1637,
+        "connected_components_count": 0.0721,
+        "euler_number": 0.0421,
+        "centroid_offset_x": 0.0,
+        "centroid_offset_y": 0.0224,
+        "radial_eccentricity": 0.021,
+        "rule_of_thirds_proximity": 0.004,
+        "boundary_edge_density_sobel": 0.158,
+        "boundary_edge_std_sobel": 0.1078,
+        "boundary_edge_max_sobel": 0.0601,
+        "boundary_scharr_energy": 0.1758,
+        "boundary_canny_density": 0.1699,
+        "gradient_direction_entropy": 0.0293,
+        "boundary_laplacian_var": 0.2168,
+        "boundary_laplacian_mean": 0.1493,
+        "glcm_contrast": 0.0866,
+        "glcm_dissimilarity": 0.0649,
+        "glcm_homogeneity": 0.0816,
+        "glcm_energy": 0.0478,
+        "glcm_correlation": 0.0257,
+        "lbp_entropy": 0.0057,
+        "lbp_uniformity": 0.0071,
+        "multi_scale_laplacian_ratio": 0.0,
+        "fft_low_freq_energy": 0.0731,
+        "fft_mid_freq_energy": 0.0779,
+        "fft_high_freq_energy": 0.035,
+        "fft_high_to_low_ratio": 0.0216,
+        "spectral_decay_slope": 0.0245,
+        "spectral_azimuthal_anisotropy": 0.1125,
+        "context_rgb_shannon_entropy": 0.1354,
+        "context_lab_delta_e_mean": 0.1712,
+        "context_hsv_saturation_mean": 0.0,
+        "context_hsv_saturation_std": 0.0514,
+        "context_color_temperature_proxy": 0.0372,
+        "border_to_global_color_divergence": 0.0327,
+        "shi_tomasi_corner_count": 0.0181,
+        "fast_keypoint_density": 0.1037,
+        "contour_curvature_mean": 0.0105,
+        "contour_curvature_extrema": 0.0756,
+        "boundary_tortuosity": 0.0,
+        "skeleton_branch_points": 0.0504
+      },
+      "ssim": {
+        "mask_area_ratio_rho": 0.9975,
+        "mask_perimeter": 0.1163,
+        "compactness_isoperimetric": 0.0169,
+        "max_inscribed_radius_rmax": 0.4857,
+        "mean_hole_depth": 0.4192,
+        "std_hole_depth": 0.3854,
+        "max_to_mean_depth_ratio": 0.0199,
+        "convex_hull_solidity": 0.024,
+        "mask_aspect_ratio": 0.0,
+        "mask_extent": 0.4363,
+        "connected_components_count": 0.0,
+        "euler_number": 0.0235,
+        "centroid_offset_x": 0.0422,
+        "centroid_offset_y": 0.0,
+        "radial_eccentricity": 0.0142,
+        "rule_of_thirds_proximity": 0.0015,
+        "boundary_edge_density_sobel": 0.0829,
+        "boundary_edge_std_sobel": 0.0,
+        "boundary_edge_max_sobel": 0.0,
+        "boundary_scharr_energy": 0.0884,
+        "boundary_canny_density": 0.0709,
+        "gradient_direction_entropy": 0.002,
+        "boundary_laplacian_var": 0.0655,
+        "boundary_laplacian_mean": 0.0719,
+        "glcm_contrast": 0.0443,
+        "glcm_dissimilarity": 0.0403,
+        "glcm_homogeneity": 0.0185,
+        "glcm_energy": 0.0363,
+        "glcm_correlation": 0.0057,
+        "lbp_entropy": 0.0078,
+        "lbp_uniformity": 0.0773,
+        "multi_scale_laplacian_ratio": 0.0034,
+        "fft_low_freq_energy": 0.0389,
+        "fft_mid_freq_energy": 0.0376,
+        "fft_high_freq_energy": 0.0,
+        "fft_high_to_low_ratio": 0.0,
+        "spectral_decay_slope": 0.0163,
+        "spectral_azimuthal_anisotropy": 0.0,
+        "context_rgb_shannon_entropy": 0.0561,
+        "context_lab_delta_e_mean": 0.0815,
+        "context_hsv_saturation_mean": 0.0,
+        "context_hsv_saturation_std": 0.0472,
+        "context_color_temperature_proxy": 0.0,
+        "border_to_global_color_divergence": 0.0575,
+        "shi_tomasi_corner_count": 0.0,
+        "fast_keypoint_density": 0.0365,
+        "contour_curvature_mean": 0.0021,
+        "contour_curvature_extrema": 0.0,
+        "boundary_tortuosity": 0.0,
+        "skeleton_branch_points": 0.0006
+      },
+      "latency_ms": {
+        "mask_area_ratio_rho": 0.0,
+        "mask_perimeter": 0.0621,
+        "compactness_isoperimetric": 0.0,
+        "max_inscribed_radius_rmax": 0.0064,
+        "mean_hole_depth": 0.0157,
+        "std_hole_depth": 0.0054,
+        "max_to_mean_depth_ratio": 0.0068,
+        "convex_hull_solidity": 0.0878,
+        "mask_aspect_ratio": 0.0,
+        "mask_extent": 0.0142,
+        "connected_components_count": 0.0,
+        "euler_number": 0.0,
+        "centroid_offset_x": 0.0481,
+        "centroid_offset_y": 0.0,
+        "radial_eccentricity": 0.0,
+        "rule_of_thirds_proximity": 0.0,
+        "boundary_edge_density_sobel": 0.0353,
+        "boundary_edge_std_sobel": 0.1207,
+        "boundary_edge_max_sobel": 0.1041,
+        "boundary_scharr_energy": 0.0437,
+        "boundary_canny_density": 0.0,
+        "gradient_direction_entropy": 0.036,
+        "boundary_laplacian_var": 0.0645,
+        "boundary_laplacian_mean": 0.0798,
+        "glcm_contrast": 0.059,
+        "glcm_dissimilarity": 0.0196,
+        "glcm_homogeneity": 0.0,
+        "glcm_energy": 0.0472,
+        "glcm_correlation": 0.0068,
+        "lbp_entropy": 0.0,
+        "lbp_uniformity": 0.0297,
+        "multi_scale_laplacian_ratio": 0.0,
+        "fft_low_freq_energy": 0.1555,
+        "fft_mid_freq_energy": 0.1384,
+        "fft_high_freq_energy": 0.1087,
+        "fft_high_to_low_ratio": 0.1124,
+        "spectral_decay_slope": 0.0199,
+        "spectral_azimuthal_anisotropy": 0.1213,
+        "context_rgb_shannon_entropy": 0.0509,
+        "context_lab_delta_e_mean": 0.1026,
+        "context_hsv_saturation_mean": 0.0959,
+        "context_hsv_saturation_std": 0.1089,
+        "context_color_temperature_proxy": 0.2559,
+        "border_to_global_color_divergence": 0.0398,
+        "shi_tomasi_corner_count": 0.0,
+        "fast_keypoint_density": 0.0032,
+        "contour_curvature_mean": 0.0,
+        "contour_curvature_extrema": 0.0233,
+        "boundary_tortuosity": 0.0,
+        "skeleton_branch_points": 0.0
+      }
+    }
+  },
+  "random_forest_importance": {
+    "aotgan_npu": {
+      "lpips": {
+        "r2_train": 0.9942,
+        "feature_importance": {
+          "mask_area_ratio_rho": 0.9345,
+          "mean_hole_depth": 0.0096,
+          "mask_extent": 0.0088,
+          "max_inscribed_radius_rmax": 0.0042,
+          "std_hole_depth": 0.0036,
+          "fast_keypoint_density": 0.0029,
+          "compactness_isoperimetric": 0.0025,
+          "gradient_direction_entropy": 0.0018,
+          "context_color_temperature_proxy": 0.0013,
+          "contour_curvature_extrema": 0.0013,
+          "context_rgb_shannon_entropy": 0.0012,
+          "lbp_entropy": 0.0012,
+          "max_to_mean_depth_ratio": 0.0012,
+          "context_hsv_saturation_std": 0.0011,
+          "mask_perimeter": 0.0011,
+          "context_lab_delta_e_mean": 0.001,
+          "glcm_energy": 0.001,
+          "contour_curvature_mean": 0.0009,
+          "spectral_azimuthal_anisotropy": 0.0009,
+          "context_hsv_saturation_mean": 0.0009,
+          "glcm_correlation": 0.0008,
+          "centroid_offset_x": 0.0008,
+          "spectral_decay_slope": 0.0008,
+          "mask_aspect_ratio": 0.0008,
+          "multi_scale_laplacian_ratio": 0.0008,
+          "boundary_edge_density_sobel": 0.0008,
+          "glcm_homogeneity": 0.0007,
+          "border_to_global_color_divergence": 0.0007,
+          "fft_mid_freq_energy": 0.0007,
+          "boundary_canny_density": 0.0007,
+          "glcm_contrast": 0.0007,
+          "centroid_offset_y": 0.0007,
+          "lbp_uniformity": 0.0007,
+          "rule_of_thirds_proximity": 0.0007,
+          "shi_tomasi_corner_count": 0.0007,
+          "boundary_edge_max_sobel": 0.0007,
+          "boundary_tortuosity": 0.0006,
+          "convex_hull_solidity": 0.0006,
+          "boundary_scharr_energy": 0.0006,
+          "boundary_edge_std_sobel": 0.0006,
+          "glcm_dissimilarity": 0.0006,
+          "radial_eccentricity": 0.0006,
+          "fft_high_freq_energy": 0.0006,
+          "fft_high_to_low_ratio": 0.0005,
+          "boundary_laplacian_mean": 0.0005,
+          "connected_components_count": 0.0005,
+          "euler_number": 0.0005,
+          "fft_low_freq_energy": 0.0005,
+          "skeleton_branch_points": 0.0004,
+          "boundary_laplacian_var": 0.0004
+        }
+      },
+      "psnr_hole": {
+        "r2_train": 0.9332,
+        "feature_importance": {
+          "mean_hole_depth": 0.1219,
+          "mask_extent": 0.0983,
+          "boundary_laplacian_mean": 0.096,
+          "context_lab_delta_e_mean": 0.0877,
+          "std_hole_depth": 0.0849,
+          "boundary_laplacian_var": 0.0432,
+          "max_inscribed_radius_rmax": 0.0423,
+          "boundary_edge_density_sobel": 0.0374,
+          "boundary_scharr_energy": 0.0346,
+          "boundary_canny_density": 0.0335,
+          "mask_area_ratio_rho": 0.0234,
+          "context_rgb_shannon_entropy": 0.0194,
+          "centroid_offset_y": 0.0132,
+          "glcm_contrast": 0.0118,
+          "convex_hull_solidity": 0.0113,
+          "boundary_edge_std_sobel": 0.0107,
+          "gradient_direction_entropy": 0.0106,
+          "context_hsv_saturation_mean": 0.0105,
+          "compactness_isoperimetric": 0.0101,
+          "border_to_global_color_divergence": 0.0098,
+          "glcm_dissimilarity": 0.0089,
+          "fast_keypoint_density": 0.0088,
+          "mask_perimeter": 0.0088,
+          "boundary_edge_max_sobel": 0.0087,
+          "spectral_azimuthal_anisotropy": 0.0086,
+          "boundary_tortuosity": 0.0086,
+          "contour_curvature_mean": 0.0086,
+          "rule_of_thirds_proximity": 0.0082,
+          "centroid_offset_x": 0.0081,
+          "glcm_homogeneity": 0.0077,
+          "multi_scale_laplacian_ratio": 0.0076,
+          "max_to_mean_depth_ratio": 0.0075,
+          "contour_curvature_extrema": 0.007,
+          "mask_aspect_ratio": 0.0067,
+          "context_hsv_saturation_std": 0.0065,
+          "context_color_temperature_proxy": 0.0064,
+          "radial_eccentricity": 0.0063,
+          "spectral_decay_slope": 0.0062,
+          "glcm_correlation": 0.006,
+          "glcm_energy": 0.006,
+          "lbp_entropy": 0.0054,
+          "lbp_uniformity": 0.0052,
+          "euler_number": 0.0051,
+          "shi_tomasi_corner_count": 0.0047,
+          "fft_high_to_low_ratio": 0.004,
+          "fft_mid_freq_energy": 0.0039,
+          "fft_low_freq_energy": 0.0029,
+          "connected_components_count": 0.0026,
+          "fft_high_freq_energy": 0.0026,
+          "skeleton_branch_points": 0.0017
+        }
+      }
+    },
+    "lama_npu": {
+      "lpips": {
+        "r2_train": 0.9947,
+        "feature_importance": {
+          "mask_area_ratio_rho": 0.9637,
+          "context_rgb_shannon_entropy": 0.0033,
+          "boundary_canny_density": 0.0018,
+          "glcm_energy": 0.0017,
+          "context_color_temperature_proxy": 0.0013,
+          "centroid_offset_x": 0.0011,
+          "gradient_direction_entropy": 0.001,
+          "max_inscribed_radius_rmax": 0.001,
+          "fft_mid_freq_energy": 0.001,
+          "multi_scale_laplacian_ratio": 0.001,
+          "boundary_laplacian_mean": 0.0009,
+          "border_to_global_color_divergence": 0.0009,
+          "fast_keypoint_density": 0.0009,
+          "mean_hole_depth": 0.0008,
+          "context_hsv_saturation_std": 0.0008,
+          "spectral_azimuthal_anisotropy": 0.0008,
+          "boundary_tortuosity": 0.0008,
+          "centroid_offset_y": 0.0008,
+          "glcm_correlation": 0.0008,
+          "std_hole_depth": 0.0008,
+          "contour_curvature_mean": 0.0007,
+          "boundary_edge_max_sobel": 0.0007,
+          "context_hsv_saturation_mean": 0.0007,
+          "mask_perimeter": 0.0007,
+          "boundary_laplacian_var": 0.0007,
+          "boundary_scharr_energy": 0.0006,
+          "spectral_decay_slope": 0.0006,
+          "boundary_edge_density_sobel": 0.0006,
+          "context_lab_delta_e_mean": 0.0006,
+          "mask_aspect_ratio": 0.0005,
+          "convex_hull_solidity": 0.0005,
+          "rule_of_thirds_proximity": 0.0005,
+          "glcm_homogeneity": 0.0005,
+          "mask_extent": 0.0005,
+          "max_to_mean_depth_ratio": 0.0005,
+          "boundary_edge_std_sobel": 0.0005,
+          "lbp_uniformity": 0.0005,
+          "shi_tomasi_corner_count": 0.0005,
+          "radial_eccentricity": 0.0004,
+          "lbp_entropy": 0.0004,
+          "contour_curvature_extrema": 0.0004,
+          "fft_low_freq_energy": 0.0004,
+          "glcm_contrast": 0.0004,
+          "euler_number": 0.0004,
+          "compactness_isoperimetric": 0.0004,
+          "glcm_dissimilarity": 0.0003,
+          "fft_high_freq_energy": 0.0003,
+          "fft_high_to_low_ratio": 0.0003,
+          "skeleton_branch_points": 0.0002,
+          "connected_components_count": 0.0001
+        }
+      },
+      "psnr_hole": {
+        "r2_train": 0.9286,
+        "feature_importance": {
+          "boundary_laplacian_mean": 0.1319,
+          "std_hole_depth": 0.0946,
+          "boundary_canny_density": 0.0831,
+          "max_inscribed_radius_rmax": 0.0782,
+          "mask_area_ratio_rho": 0.0712,
+          "mean_hole_depth": 0.0581,
+          "context_lab_delta_e_mean": 0.0445,
+          "boundary_laplacian_var": 0.0424,
+          "boundary_edge_density_sobel": 0.0317,
+          "boundary_scharr_energy": 0.0265,
+          "mask_extent": 0.0239,
+          "context_rgb_shannon_entropy": 0.0227,
+          "glcm_contrast": 0.0176,
+          "gradient_direction_entropy": 0.0169,
+          "spectral_azimuthal_anisotropy": 0.0128,
+          "centroid_offset_y": 0.0124,
+          "border_to_global_color_divergence": 0.0118,
+          "boundary_edge_max_sobel": 0.0107,
+          "spectral_decay_slope": 0.0105,
+          "context_hsv_saturation_std": 0.0104,
+          "boundary_edge_std_sobel": 0.0103,
+          "context_hsv_saturation_mean": 0.0098,
+          "context_color_temperature_proxy": 0.0086,
+          "mask_perimeter": 0.0085,
+          "compactness_isoperimetric": 0.0076,
+          "mask_aspect_ratio": 0.0075,
+          "glcm_correlation": 0.0075,
+          "rule_of_thirds_proximity": 0.0075,
+          "centroid_offset_x": 0.0074,
+          "shi_tomasi_corner_count": 0.0072,
+          "lbp_uniformity": 0.0072,
+          "glcm_energy": 0.0067,
+          "lbp_entropy": 0.0066,
+          "contour_curvature_extrema": 0.0064,
+          "convex_hull_solidity": 0.0064,
+          "fast_keypoint_density": 0.0063,
+          "radial_eccentricity": 0.0062,
+          "multi_scale_laplacian_ratio": 0.0061,
+          "boundary_tortuosity": 0.006,
+          "contour_curvature_mean": 0.006,
+          "max_to_mean_depth_ratio": 0.0058,
+          "glcm_dissimilarity": 0.0057,
+          "fft_mid_freq_energy": 0.0046,
+          "fft_low_freq_energy": 0.0046,
+          "fft_high_to_low_ratio": 0.0044,
+          "fft_high_freq_energy": 0.0041,
+          "glcm_homogeneity": 0.0041,
+          "connected_components_count": 0.004,
+          "euler_number": 0.0036,
+          "skeleton_branch_points": 0.0011
+        }
+      }
+    },
+    "migan_npu": {
+      "lpips": {
+        "r2_train": 0.9953,
+        "feature_importance": {
+          "mask_area_ratio_rho": 0.9624,
+          "boundary_canny_density": 0.0031,
+          "boundary_laplacian_mean": 0.0027,
+          "context_rgb_shannon_entropy": 0.0022,
+          "fast_keypoint_density": 0.0015,
+          "glcm_energy": 0.0015,
+          "boundary_edge_density_sobel": 0.0012,
+          "multi_scale_laplacian_ratio": 0.0012,
+          "boundary_scharr_energy": 0.0012,
+          "gradient_direction_entropy": 0.001,
+          "context_hsv_saturation_mean": 0.001,
+          "glcm_homogeneity": 0.001,
+          "centroid_offset_y": 0.0009,
+          "context_color_temperature_proxy": 0.0009,
+          "fft_high_to_low_ratio": 0.0008,
+          "spectral_decay_slope": 0.0008,
+          "mask_aspect_ratio": 0.0007,
+          "fft_high_freq_energy": 0.0007,
+          "contour_curvature_mean": 0.0007,
+          "context_lab_delta_e_mean": 0.0007,
+          "border_to_global_color_divergence": 0.0007,
+          "fft_low_freq_energy": 0.0006,
+          "lbp_entropy": 0.0006,
+          "boundary_laplacian_var": 0.0006,
+          "mask_perimeter": 0.0006,
+          "mask_extent": 0.0006,
+          "context_hsv_saturation_std": 0.0006,
+          "centroid_offset_x": 0.0006,
+          "glcm_correlation": 0.0006,
+          "fft_mid_freq_energy": 0.0005,
+          "rule_of_thirds_proximity": 0.0005,
+          "convex_hull_solidity": 0.0005,
+          "contour_curvature_extrema": 0.0005,
+          "spectral_azimuthal_anisotropy": 0.0005,
+          "radial_eccentricity": 0.0005,
+          "boundary_tortuosity": 0.0005,
+          "max_to_mean_depth_ratio": 0.0005,
+          "glcm_dissimilarity": 0.0004,
+          "mean_hole_depth": 0.0004,
+          "max_inscribed_radius_rmax": 0.0004,
+          "boundary_edge_std_sobel": 0.0004,
+          "boundary_edge_max_sobel": 0.0004,
+          "glcm_contrast": 0.0004,
+          "lbp_uniformity": 0.0004,
+          "std_hole_depth": 0.0004,
+          "euler_number": 0.0003,
+          "compactness_isoperimetric": 0.0002,
+          "skeleton_branch_points": 0.0002,
+          "shi_tomasi_corner_count": 0.0002,
+          "connected_components_count": 0.0001
+        }
+      },
+      "psnr_hole": {
+        "r2_train": 0.93,
+        "feature_importance": {
+          "context_lab_delta_e_mean": 0.119,
+          "boundary_laplacian_mean": 0.0879,
+          "mask_area_ratio_rho": 0.0677,
+          "mean_hole_depth": 0.0614,
+          "boundary_canny_density": 0.0593,
+          "std_hole_depth": 0.0478,
+          "mask_extent": 0.0466,
+          "boundary_edge_density_sobel": 0.0456,
+          "boundary_laplacian_var": 0.0436,
+          "max_inscribed_radius_rmax": 0.0435,
+          "boundary_scharr_energy": 0.0346,
+          "gradient_direction_entropy": 0.0298,
+          "boundary_edge_std_sobel": 0.0191,
+          "glcm_contrast": 0.0186,
+          "boundary_edge_max_sobel": 0.015,
+          "compactness_isoperimetric": 0.013,
+          "context_rgb_shannon_entropy": 0.0125,
+          "contour_curvature_mean": 0.0123,
+          "border_to_global_color_divergence": 0.0119,
+          "context_hsv_saturation_std": 0.0113,
+          "centroid_offset_y": 0.011,
+          "convex_hull_solidity": 0.0102,
+          "glcm_correlation": 0.01,
+          "mask_aspect_ratio": 0.0098,
+          "glcm_dissimilarity": 0.0097,
+          "fast_keypoint_density": 0.0096,
+          "spectral_azimuthal_anisotropy": 0.0091,
+          "context_hsv_saturation_mean": 0.008,
+          "boundary_tortuosity": 0.0076,
+          "mask_perimeter": 0.0075,
+          "radial_eccentricity": 0.0073,
+          "shi_tomasi_corner_count": 0.0071,
+          "rule_of_thirds_proximity": 0.007,
+          "max_to_mean_depth_ratio": 0.007,
+          "centroid_offset_x": 0.0067,
+          "spectral_decay_slope": 0.0067,
+          "contour_curvature_extrema": 0.0063,
+          "context_color_temperature_proxy": 0.0063,
+          "glcm_homogeneity": 0.0062,
+          "lbp_entropy": 0.006,
+          "multi_scale_laplacian_ratio": 0.0058,
+          "lbp_uniformity": 0.0058,
+          "fft_low_freq_energy": 0.0056,
+          "fft_mid_freq_energy": 0.0046,
+          "glcm_energy": 0.0044,
+          "euler_number": 0.0038,
+          "fft_high_to_low_ratio": 0.003,
+          "skeleton_branch_points": 0.0027,
+          "fft_high_freq_energy": 0.0025,
+          "connected_components_count": 0.0024
+        }
+      }
+    }
+  }
+}

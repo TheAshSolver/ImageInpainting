@@ -6,6 +6,7 @@ plugins {
 android {
     namespace = "com.qualcomm.qidk.inpaint"
     compileSdk = 34
+    ndkVersion = "26.2.11394342"
 
     defaultConfig {
         applicationId = "com.qualcomm.qidk.inpaint.v5"
@@ -15,6 +16,13 @@ android {
         versionName = "5.0-MagicTouch"
         ndk {
             abiFilters.addAll(setOf("arm64-v8a"))
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
         }
     }
 
@@ -47,7 +55,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("com.github.jenly1314.WeChatQRCode:opencv:2.2.0")
-    implementation("com.github.jenly1314.WeChatQRCode:opencv-armv64:2.2.0")
+    implementation("com.quickbirdstudios:opencv:4.5.3")
     implementation("com.google.mediapipe:tasks-vision:0.10.14")
+    testImplementation("junit:junit:4.13.2")
 }

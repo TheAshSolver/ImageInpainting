@@ -148,24 +148,25 @@
             android:layout_marginBottom="6dp">
 
             <Button
-                android:id="@+id/btnModeCircle"
+                android:id="@+id/btnModeSmart"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.2"
-                android:text="⭕ Circle"
+                android:layout_weight="1.4"
+                android:text="✨ Smart AI Touch"
                 android:textAllCaps="false"
                 android:textSize="12sp"
                 android:minHeight="38dp"
-                android:paddingHorizontal="3dp"
+                android:paddingHorizontal="4dp"
+                android:layout_marginStart="2dp"
                 android:layout_marginEnd="2dp"
-                android:backgroundTint="#7C3AED" />
+                android:backgroundTint="#0E7490" />
 
             <Button
                 android:id="@+id/btnModeBrush"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="🖌️ Brush"
+                android:layout_weight="1.3"
+                android:text="🖌️ Manual Precision"
                 android:textAllCaps="false"
                 android:textSize="12sp"
                 android:minHeight="38dp"
@@ -454,6 +455,14 @@
                 android:inputType="textCapSentences|textMultiLine"
                 android:maxLines="3"
                 android:layout_marginBottom="4dp" />
+
+            <Switch
+                android:id="@+id/swSmartPrompt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Smart SD: build prompt from surrounding scene"
+                android:textColor="#E5E7EB"
+                android:layout_marginTop="6dp" />
         </LinearLayout>
 
         <!-- Model Choice & Run Button -->
@@ -475,7 +484,7 @@
                 android:layout_marginEnd="8dp" />
 
             <Spinner
-                android:id="@+id/runtimeSpinner"
+                android:id="@+id/backendSpinner"
                 android:layout_width="0dp"
                 android:layout_height="42dp"
                 android:layout_weight="1"

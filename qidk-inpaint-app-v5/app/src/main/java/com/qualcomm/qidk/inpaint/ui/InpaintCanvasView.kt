@@ -3,6 +3,7 @@ package com.qualcomm.qidk.inpaint.ui
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
@@ -10,6 +11,9 @@ import android.view.View
 import com.qualcomm.qidk.inpaint.segmentation.AutoGrabCutEngine
 import com.qualcomm.qidk.inpaint.segmentation.MediaPipeSegmenter
 import com.qualcomm.qidk.inpaint.utils.MagicTouchEngine
+import qidk.fix.ViewportMapper
+import qidk.fix.SmartGestureController
+import qidk.fix.SmartTouchSegmenter
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -21,9 +25,10 @@ class InpaintCanvasView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     enum class Mode {
-        CIRCLE_SELECT,
         BRUSH,
-        BOUNDING_BOX
+        BOUNDING_BOX,
+        SMART,
+        CIRCLE_SELECT
     }
 
     enum class SegmentationEngine {
@@ -32,9 +37,30 @@ class InpaintCanvasView @JvmOverloads constructor(
         EXACT_SELECT      // Exact Area: Strictly masks precisely the drawn circle/lasso interior (no expansion)
     }
 
-    private var currentMode = Mode.CIRCLE_SELECT
+    private var currentMode = Mode.SMART
     private var activeSegmentationEngine = SegmentationEngine.AUTO_GRABCUT
     private var sourceBitmap: Bitmap? = null
+
+    val mapper = ViewportMapper(stretch = false)
+    private val smart = SmartGestureController(
+        mapper = mapper,
+        sourceProvider = { sourceBitmap },
+        invalidate = { invalidate() },
+        postToMain = { post(it) },
+        onResult = { res -> applySmartResult(res) },
+        onIgnored = { msg -> onSmartMessage?.invoke(msg) },
+        brushBitmapPx = { maskPaint.strokeWidth }
+    )
+    var onSmartMessage: ((String) -> Unit)? = null
+
+    fun logGeometry() {
+        Log.i("QIDK.Touch", "geom $mapper")
+    }
+
+    private fun applySmartResult(res: SmartTouchSegmenter.Result) {
+        applyGrabCutMask(res.toBitmap())
+        if (!res.snapped) onSmartMessage?.invoke("Could not snap to the object (${res.reason}) - kept your outline")
+    }
 
     // 512x512 Internal Canonical Resolution Mask
     private val canonicalSize = 512
@@ -298,10 +324,23 @@ class InpaintCanvasView @JvmOverloads constructor(
         maskPaint.strokeWidth = radius * 2f
     }
 
+    override fun onSizeChanged(w: Int, h: Int, ow: Int, oh: Int) {
+        super.onSizeChanged(w, h, ow, oh)
+        mapper.setView(w, h)
+        logGeometry()
+    }
+
+    override fun onDetachedFromWindow() {
+        smart.shutdown()
+        super.onDetachedFromWindow()
+    }
+
     fun setSourceBitmap(bitmap: Bitmap) {
         sourceBitmap = Bitmap.createScaledBitmap(bitmap, canonicalSize, canonicalSize, true)
+        mapper.setBitmap(canonicalSize, canonicalSize)
         clearMask(saveUndo = false)
         resetZoom()
+        logGeometry()
         invalidate()
     }
 
@@ -455,7 +494,7 @@ class InpaintCanvasView @JvmOverloads constructor(
     }
 
     private fun screenToCanonical(screenX: Float, screenY: Float): PointF {
-        return mapTouchToBitmap(screenX, screenY)
+        return PointF(mapper.viewToBitmapX(screenX), mapper.viewToBitmapY(screenY))
     }
 
     /**
@@ -512,10 +551,16 @@ class InpaintCanvasView @JvmOverloads constructor(
             return true
         }
 
+        if (currentMode == Mode.SMART) return smart.onTouch(event)
+
         // 2. Single-finger Brush and Box creation
         val pt = screenToCanonical(event.x, event.y)
         val cx = pt.x
         val cy = pt.y
+
+        if (event.actionMasked == MotionEvent.ACTION_UP) {
+            Log.i("QIDK.Touch", "up view=(${event.x.toInt()},${event.y.toInt()}) bmp=(${cx.toInt()},${cy.toInt()})")
+        }
 
         // Add to visual glowing feedback trail
         touchTrail.add(TrailPoint(event.x, event.y, System.currentTimeMillis()))
@@ -767,6 +812,7 @@ class InpaintCanvasView @JvmOverloads constructor(
                     }
                 }
             }
+            Mode.SMART -> return smart.onTouch(event)
         }
         return super.onTouchEvent(event)
     }
@@ -888,6 +934,7 @@ class InpaintCanvasView @JvmOverloads constructor(
                 drawBanner(canvas, "🔲 Box Mode: Tap 2 corners or drag to create square mask")
             }
         }
+        smart.draw(canvas)
     }
 
     private fun drawBanner(canvas: Canvas, text: String) {
