@@ -75,13 +75,20 @@ class PureLogicTest {
     // ---------------------------------------------------------------- BackendMatrix
     @Test fun backendFeasibility() {
         assertEquals(listOf(Backend.NPU), BackendMatrix.allowed(ModelFamily.SD15))
+        assertEquals(listOf(Backend.NPU), BackendMatrix.allowed(ModelFamily.SR_SD))
         assertEquals(listOf(Backend.NPU, Backend.GPU, Backend.CPU), BackendMatrix.allowed(ModelFamily.MIGAN))
+        assertEquals(listOf(Backend.NPU, Backend.GPU, Backend.CPU), BackendMatrix.allowed(ModelFamily.SR_MIGAN))
+        assertEquals(listOf(Backend.NPU, Backend.GPU, Backend.CPU), BackendMatrix.allowed(ModelFamily.SR_AOT_GAN))
         assertTrue(Backend.GPU in BackendMatrix.allowed(ModelFamily.LAMA))
         assertTrue(Backend.GPU in BackendMatrix.allowed(ModelFamily.AOT_GAN))
         assertEquals(listOf(Backend.CPU), BackendMatrix.allowed(ModelFamily.CLASSICAL))
+        assertEquals(listOf(Backend.CPU), BackendMatrix.allowed(ModelFamily.SR_BICUBIC))
+        assertEquals(listOf(Backend.CPU), BackendMatrix.allowed(ModelFamily.SR_TARSH))
         assertEquals(Backend.NPU, BackendMatrix.coerce(ModelFamily.SD15, Backend.GPU))
+        assertEquals(Backend.NPU, BackendMatrix.coerce(ModelFamily.SR_SD, Backend.CPU))
         assertEquals(Backend.GPU, BackendMatrix.coerce(ModelFamily.MIGAN, Backend.GPU))
         try { BackendMatrix.require(ModelFamily.SD15, Backend.CPU); fail("SD on CPU must be refused") } catch (_: IllegalArgumentException) {}
+        try { BackendMatrix.require(ModelFamily.SR_SD, Backend.GPU); fail("SR_SD on GPU must be refused") } catch (_: IllegalArgumentException) {}
     }
 
     @Test fun spinnerTextToFamily() {
@@ -162,5 +169,24 @@ class PureLogicTest {
         val us = (System.nanoTime() - t0) / 1000.0 / n
         println("LinUCB d=$d K=$k: %.2f us per decision".format(us))
         assertTrue("decision took $us us", us < 100.0)
+    }
+
+    // ---------------------------------------------------------------- NeuralSrEngine
+    @Test fun neuralSrHannWindowMath() {
+        val w0 = NeuralSrEngine.hannWeight(0, 32)
+        val w31 = NeuralSrEngine.hannWeight(31, 32)
+        val wMid = NeuralSrEngine.hannWeight(15, 32)
+
+        assertTrue("w0 should be near 0: $w0", w0 < 0.01f)
+        assertTrue("w31 should be near 1: $w31", w31 > 0.99f)
+        assertEquals(0.5f, wMid, 0.05f)
+
+        // Monotonic ramp verification
+        var prev = -1.0f
+        for (d in 0 until 32) {
+            val curr = NeuralSrEngine.hannWeight(d, 32)
+            assertTrue("Ramp must be non-decreasing at $d: $curr >= $prev", curr >= prev)
+            prev = curr
+        }
     }
 }

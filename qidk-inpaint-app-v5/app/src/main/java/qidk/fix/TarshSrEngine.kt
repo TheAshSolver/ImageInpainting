@@ -17,8 +17,29 @@ class TarshSrEngine : SrEngine {
     override val family: ModelFamily = ModelFamily.SR_TARSH
     override val unavailableReason: String? = null
 
-    override fun run(src: Bitmap, backend: Backend): Bitmap {
+    override fun run(src: Bitmap, backend: Backend): Bitmap = run(src, backend, 2)
+
+    override fun run(src: Bitmap, backend: Backend, scale: Int): Bitmap {
         BackendMatrix.require(family, backend)
+        require(scale in listOf(2, 4, 8)) { "Scale factor must be 2, 4, or 8 (got $scale)" }
+
+        val passes = when (scale) {
+            2 -> 1
+            4 -> 2
+            8 -> 3
+            else -> 1
+        }
+
+        var current = src
+        for (p in 1..passes) {
+            val next = runSingle2xPass(current)
+            if (current !== src) current.recycle()
+            current = next
+        }
+        return current
+    }
+
+    private fun runSingle2xPass(src: Bitmap): Bitmap {
         val w = src.width
         val h = src.height
 

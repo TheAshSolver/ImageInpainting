@@ -91,10 +91,12 @@ class MainActivity : AppCompatActivity() {
         triggerModelPreload()
 
         srEngines = listOf(
-            BicubicSrEngine(),
+            NeuralSrEngine("migan_sr", "MIGAN Neural SR (Sub-Pixel Tiled)", ModelFamily.SR_MIGAN, daemonKey = "migan"),
+            NeuralSrEngine("lama_sr", "LaMa Dilated SR (Fourier Tiled)", ModelFamily.SR_LAMA, daemonKey = "lama"),
+            NeuralSrEngine("aotgan_sr", "AOT-GAN SR (Contextual Tiled)", ModelFamily.SR_AOT_GAN, daemonKey = "aotgan"),
+            NeuralSrEngine("sd_sr", "Stable Diffusion Latent SR", ModelFamily.SR_SD, isSd = true),
             TarshSrEngine(),
-            UnavailableSrEngine("migan_sr", "MIGAN 2x Checkerboard Inpainting", ModelFamily.SR_MIGAN, "benchmark recipe not ported (Phase 5.3)"),
-            UnavailableSrEngine("lama_sr", "LaMa 2x Inpainting", ModelFamily.SR_LAMA, "benchmark recipe not ported (Phase 5.3)")
+            BicubicSrEngine()
         )
         val srPage = SuperResolutionView(this, srEngines) { canvasView.getSourceBitmap() }
         SuperResolutionTab.install(this, srPage)
@@ -171,36 +173,20 @@ class MainActivity : AppCompatActivity() {
         val btnModeSmart = findViewById<Button>(R.id.btnModeSmart)
         val btnModeBrush = findViewById<Button>(R.id.btnModeBrush)
         val btnModeBox = findViewById<Button>(R.id.btnModeBox)
-        val btnSegGrabCut = findViewById<Button>(R.id.btnSegGrabCut)
-        val btnSegAiSam = findViewById<Button>(R.id.btnSegAiSam)
-        val btnSegExact = findViewById<Button>(R.id.btnSegExact)
 
         fun updateModeButtons(activeMode: InpaintCanvasView.Mode) {
-            btnModeSmart?.backgroundTintList = ColorStateList.valueOf(
-                if (activeMode == InpaintCanvasView.Mode.SMART) Color.parseColor("#0E7490") else Color.parseColor("#4B5563")
-            )
             btnModeBrush?.backgroundTintList = ColorStateList.valueOf(
-                if (activeMode == InpaintCanvasView.Mode.BRUSH) Color.parseColor("#2563EB") else Color.parseColor("#4B5563")
+                if (activeMode == InpaintCanvasView.Mode.BRUSH) Color.parseColor("#2563EB") else Color.parseColor("#374151")
+            )
+            btnModeSmart?.backgroundTintList = ColorStateList.valueOf(
+                if (activeMode == InpaintCanvasView.Mode.SMART) Color.parseColor("#2563EB") else Color.parseColor("#374151")
             )
             btnModeBox?.backgroundTintList = ColorStateList.valueOf(
-                if (activeMode == InpaintCanvasView.Mode.BOUNDING_BOX) Color.parseColor("#0891B2") else Color.parseColor("#4B5563")
+                if (activeMode == InpaintCanvasView.Mode.BOUNDING_BOX) Color.parseColor("#2563EB") else Color.parseColor("#374151")
             )
         }
 
-        fun updateEngineButtons(activeEngine: InpaintCanvasView.SegmentationEngine) {
-            btnSegGrabCut?.backgroundTintList = ColorStateList.valueOf(
-                if (activeEngine == InpaintCanvasView.SegmentationEngine.AUTO_GRABCUT) Color.parseColor("#2563EB") else Color.parseColor("#374151")
-            )
-            btnSegAiSam?.backgroundTintList = ColorStateList.valueOf(
-                if (activeEngine == InpaintCanvasView.SegmentationEngine.AI_MAGIC_TOUCH) Color.parseColor("#7C3AED") else Color.parseColor("#374151")
-            )
-            btnSegExact?.backgroundTintList = ColorStateList.valueOf(
-                if (activeEngine == InpaintCanvasView.SegmentationEngine.EXACT_SELECT) Color.parseColor("#059669") else Color.parseColor("#374151")
-            )
-        }
-
-        updateModeButtons(InpaintCanvasView.Mode.SMART)
-        updateEngineButtons(InpaintCanvasView.SegmentationEngine.AUTO_GRABCUT)
+        updateModeButtons(InpaintCanvasView.Mode.BRUSH)
 
         findViewById<Button>(R.id.btnGallery).setOnClickListener {
             pickImageLauncher.launch("image/*")
@@ -226,46 +212,22 @@ class MainActivity : AppCompatActivity() {
             takePhotoLauncher.launch(null)
         }
 
-        btnModeSmart?.setOnClickListener {
-            canvasView.setMode(InpaintCanvasView.Mode.SMART)
-            updateModeButtons(InpaintCanvasView.Mode.SMART)
-            Toast.makeText(this, "Smart AI Touch: circle an object or scribble over it", Toast.LENGTH_SHORT).show()
-        }
-
         btnModeBrush?.setOnClickListener {
             canvasView.setMode(InpaintCanvasView.Mode.BRUSH)
             updateModeButtons(InpaintCanvasView.Mode.BRUSH)
             Toast.makeText(this, "🖌️ Manual Precision: Finger draw mask", Toast.LENGTH_SHORT).show()
         }
 
+        btnModeSmart?.setOnClickListener {
+            canvasView.setMode(InpaintCanvasView.Mode.SMART)
+            updateModeButtons(InpaintCanvasView.Mode.SMART)
+            Toast.makeText(this, "✨ Smart AI Touch: Circle an object or scribble over it", Toast.LENGTH_SHORT).show()
+        }
+
         btnModeBox?.setOnClickListener {
             canvasView.setMode(InpaintCanvasView.Mode.BOUNDING_BOX)
             updateModeButtons(InpaintCanvasView.Mode.BOUNDING_BOX)
             Toast.makeText(this, "🔲 Box Mode: Tap 1st corner, then opposite corner", Toast.LENGTH_SHORT).show()
-        }
-
-        btnSegGrabCut?.setOnClickListener {
-            canvasView.setSegmentationEngine(InpaintCanvasView.SegmentationEngine.AUTO_GRABCUT)
-            canvasView.setMode(InpaintCanvasView.Mode.CIRCLE_SELECT)
-            updateModeButtons(InpaintCanvasView.Mode.CIRCLE_SELECT)
-            updateEngineButtons(InpaintCanvasView.SegmentationEngine.AUTO_GRABCUT)
-            Toast.makeText(this, "⚡ Auto-GrabCut: 4-State Energy Minimization Graph-Cut (<50ms)", Toast.LENGTH_SHORT).show()
-        }
-
-        btnSegAiSam?.setOnClickListener {
-            canvasView.setSegmentationEngine(InpaintCanvasView.SegmentationEngine.AI_MAGIC_TOUCH)
-            canvasView.setMode(InpaintCanvasView.Mode.CIRCLE_SELECT)
-            updateModeButtons(InpaintCanvasView.Mode.CIRCLE_SELECT)
-            updateEngineButtons(InpaintCanvasView.SegmentationEngine.AI_MAGIC_TOUCH)
-            Toast.makeText(this, "🤖 AI Magic Touch: Promptable Vision AI Segmentation", Toast.LENGTH_SHORT).show()
-        }
-
-        btnSegExact?.setOnClickListener {
-            canvasView.setSegmentationEngine(InpaintCanvasView.SegmentationEngine.EXACT_SELECT)
-            canvasView.setMode(InpaintCanvasView.Mode.CIRCLE_SELECT)
-            updateModeButtons(InpaintCanvasView.Mode.CIRCLE_SELECT)
-            updateEngineButtons(InpaintCanvasView.SegmentationEngine.EXACT_SELECT)
-            Toast.makeText(this, "🎯 Exact Area: Mask covers precisely what you circle", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.btnClear).setOnClickListener {
@@ -651,6 +613,7 @@ class MainActivity : AppCompatActivity() {
                 DebugHooks.async("qidk.debug.SR") {
                     val id = i.getStringExtra("engine") ?: "bicubic"
                     val backend = Backend.values().firstOrNull { it.name == (i.getStringExtra("backend") ?: "CPU") } ?: Backend.CPU
+                    val scale = i.getIntExtra("scale", 2)
                     val srcPath = i.getStringExtra("src")
                     val src = if (srcPath != null) BitmapFactory.decodeFile(srcPath) else canvasView.getSourceBitmap()
                     val engine = srEngines.firstOrNull { it.id == id }
@@ -659,13 +622,13 @@ class MainActivity : AppCompatActivity() {
                     else {
                         BackendMatrix.require(engine.family, backend)
                         val t0 = System.nanoTime()
-                        val out = engine.run(src, backend)
+                        val out = engine.run(src, backend, scale)
                         val ms = (System.nanoTime() - t0) / 1_000_000
                         i.getStringExtra("out")?.let { p ->
                             File(p).apply { parentFile?.mkdirs() }.outputStream().use { out.compress(Bitmap.CompressFormat.PNG, 100, it) }
                         }
-                        Log.i("QIDK.SR", "engine=$id backend=$backend out=${out.width}x${out.height} ms=$ms")
-                        "engine=$id backend=$backend out=${out.width}x${out.height} ms=$ms"
+                        Log.i("QIDK.SR", "engine=$id backend=$backend scale=${scale}x out=${out.width}x${out.height} ms=$ms")
+                        "engine=$id backend=$backend scale=${scale}x out=${out.width}x${out.height} ms=$ms"
                     }
                 }
             },

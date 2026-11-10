@@ -26,7 +26,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hexagon HTP v79 NPU Acceleration • v5.0 (Magic Touch)"
+            android:text="Hexagon HTP v79 NPU Acceleration • Mobile Studio"
             android:textColor="#C084FC"
             android:textSize="13sp"
             android:layout_marginBottom="12dp" />
@@ -124,23 +124,10 @@
                     android:textSize="12sp"
                     android:layout_marginStart="3dp"
                     android:backgroundTint="#334155" />
-
-                <Button
-                    android:id="@+id/btnZoomReset"
-                    android:layout_width="44dp"
-                    android:layout_height="36dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="0dp"
-                    android:text="1:1"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:layout_marginStart="3dp"
-                    android:backgroundTint="#2563EB" />
             </LinearLayout>
         </FrameLayout>
 
-        <!-- Canvas Manual Tool Buttons (Row 1) -->
+        <!-- Unified 3-Way Tool Segment Toggle -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -148,77 +135,44 @@
             android:layout_marginBottom="6dp">
 
             <Button
-                android:id="@+id/btnModeSmart"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.4"
-                android:text="✨ Smart AI Touch"
-                android:textAllCaps="false"
-                android:textSize="12sp"
-                android:minHeight="38dp"
-                android:paddingHorizontal="4dp"
-                android:layout_marginStart="2dp"
-                android:layout_marginEnd="2dp"
-                android:backgroundTint="#0E7490" />
-
-            <Button
                 android:id="@+id/btnModeBrush"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.3"
-                android:text="🖌️ Manual Precision"
+                android:layout_weight="1"
+                android:text="🖌️ Manual Brush"
                 android:textAllCaps="false"
                 android:textSize="12sp"
-                android:minHeight="38dp"
-                android:paddingHorizontal="3dp"
-                android:layout_marginStart="2dp"
-                android:layout_marginEnd="2dp"
-                android:backgroundTint="#4B5563" />
+                android:minHeight="40dp"
+                android:layout_marginEnd="3dp"
+                android:backgroundTint="#2563EB" />
+
+            <Button
+                android:id="@+id/btnModeSmart"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.2"
+                android:text="✨ Smart AI Touch"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:minHeight="40dp"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
+                android:backgroundTint="#374151" />
 
             <Button
                 android:id="@+id/btnModeBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="0.9"
                 android:text="🔲 Box"
                 android:textAllCaps="false"
                 android:textSize="12sp"
-                android:minHeight="38dp"
-                android:paddingHorizontal="3dp"
-                android:layout_marginStart="2dp"
-                android:layout_marginEnd="2dp"
-                android:backgroundTint="#4B5563" />
-
-            <Button
-                android:id="@+id/btnUndo"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.9"
-                android:text="↩️ Undo"
-                android:textAllCaps="false"
-                android:textSize="12sp"
-                android:minHeight="38dp"
-                android:paddingHorizontal="2dp"
-                android:layout_marginStart="2dp"
-                android:layout_marginEnd="2dp"
-                android:backgroundTint="#4B5563" />
-
-            <Button
-                android:id="@+id/btnClear"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.9"
-                android:text="🗑️ Clear"
-                android:textAllCaps="false"
-                android:textSize="12sp"
-                android:minHeight="38dp"
-                android:paddingHorizontal="2dp"
-                android:layout_marginStart="2dp"
-                android:backgroundTint="#DC2626" />
+                android:minHeight="40dp"
+                android:layout_marginStart="3dp"
+                android:backgroundTint="#374151" />
         </LinearLayout>
 
-        <!-- Smart Mask AI Tools (Row 2) -->
-        <!-- Circle / Mask AI Engine Selector (Row 2) -->
+        <!-- Secondary Actions Toolbar (Undo, Clear Mask, Reset Zoom) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -226,41 +180,41 @@
             android:layout_marginBottom="10dp">
 
             <Button
-                android:id="@+id/btnSegGrabCut"
+                android:id="@+id/btnUndo"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.1"
-                android:text="⚡ Auto-GrabCut"
+                android:layout_weight="1"
+                android:text="↩️ Undo"
                 android:textAllCaps="false"
-                android:textSize="11sp"
-                android:minHeight="40dp"
-                android:layout_marginEnd="2dp"
-                android:backgroundTint="#2563EB" />
-
-            <Button
-                android:id="@+id/btnSegAiSam"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.1"
-                android:text="🤖 AI Magic Touch"
-                android:textAllCaps="false"
-                android:textSize="11sp"
-                android:minHeight="40dp"
-                android:layout_marginStart="2dp"
-                android:layout_marginEnd="2dp"
+                android:textSize="12sp"
+                android:minHeight="38dp"
+                android:layout_marginEnd="3dp"
                 android:backgroundTint="#4B5563" />
 
             <Button
-                android:id="@+id/btnSegExact"
+                android:id="@+id/btnClear"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.9"
-                android:text="🎯 Exact Area"
+                android:layout_weight="1.2"
+                android:text="🗑️ Clear Mask"
                 android:textAllCaps="false"
-                android:textSize="11sp"
-                android:minHeight="40dp"
-                android:layout_marginStart="2dp"
-                android:backgroundTint="#374151" />
+                android:textSize="12sp"
+                android:minHeight="38dp"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
+                android:backgroundTint="#DC2626" />
+
+            <Button
+                android:id="@+id/btnZoomReset"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="🔍 Reset 1:1"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:minHeight="38dp"
+                android:layout_marginStart="3dp"
+                android:backgroundTint="#4B5563" />
         </LinearLayout>
 
         <!-- Router Recommendation Card -->
@@ -465,52 +419,54 @@
                 android:layout_marginTop="6dp" />
         </LinearLayout>
 
-        <!-- Model Choice & Run Button -->
-        <!-- Silicon Hardware Runtime Selector -->
+        <!-- Consolidated Hardware Execution Target Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
+            android:orientation="vertical"
+            android:background="#1F2937"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Silicon Runtime:"
-                android:textColor="#9CA3AF"
-                android:textSize="13sp"
+                android:text="⚙️ Execution Target"
+                android:textColor="#F8FAFC"
                 android:textStyle="bold"
-                android:layout_marginEnd="8dp" />
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
 
-            <Spinner
-                android:id="@+id/backendSpinner"
-                android:layout_width="0dp"
-                android:layout_height="42dp"
-                android:layout_weight="1"
-                android:background="#374151" />
-        </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="10dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
+                <Spinner
+                    android:id="@+id/modelSpinner"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1.3"
+                    android:background="#374151"
+                    android:layout_marginEnd="6dp" />
 
-            <Spinner
-                android:id="@+id/modelSpinner"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:background="#374151"
-                android:layout_marginEnd="8dp" />
+                <Spinner
+                    android:id="@+id/backendSpinner"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="#374151" />
+            </LinearLayout>
 
             <Button
                 android:id="@+id/btnRunInpaint"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:text="🚀 Inpaint"
+                android:text="🚀 Run Inpaint"
+                android:textColor="#FFFFFF"
                 android:textStyle="bold"
+                android:textSize="15sp"
                 android:backgroundTint="#10B981" />
         </LinearLayout>
 

@@ -8,7 +8,8 @@ enum class Backend(val label: String) {
 
 enum class ModelFamily {
     SD15, MIGAN, LAMA, AOT_GAN, CLASSICAL,
-    SR_BICUBIC, SR_TARSH, SR_MIGAN, SR_LAMA
+    SR_BICUBIC, SR_TARSH, SR_MIGAN, SR_LAMA,
+    SR_AOT_GAN, SR_SD
 }
 
 /**
@@ -19,11 +20,11 @@ object BackendMatrix {
     private val GAN = listOf(Backend.NPU, Backend.GPU, Backend.CPU)
 
     fun allowed(model: ModelFamily): List<Backend> = when (model) {
-        ModelFamily.SD15 -> listOf(Backend.NPU)                    // UNet/VAE/text-encoder are HTP context binaries
+        ModelFamily.SD15, ModelFamily.SR_SD -> listOf(Backend.NPU)                    // UNet/VAE/text-encoder are HTP context binaries
         ModelFamily.MIGAN, ModelFamily.LAMA, ModelFamily.AOT_GAN -> GAN
         ModelFamily.CLASSICAL -> listOf(Backend.CPU)
         ModelFamily.SR_BICUBIC, ModelFamily.SR_TARSH -> listOf(Backend.CPU)
-        ModelFamily.SR_MIGAN, ModelFamily.SR_LAMA -> GAN
+        ModelFamily.SR_MIGAN, ModelFamily.SR_LAMA, ModelFamily.SR_AOT_GAN -> GAN
     }
 
     fun isAllowed(model: ModelFamily, backend: Backend) = backend in allowed(model)
