@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 1. Deep Midnight Cyber Background -->
+    <path
+        android:fillColor="#050811"
+        android:pathData="M0,0h108v108h-108z" />
+
+    <!-- 2. Circular Outer Cyber Shield with Electric Cyan Border -->
+    <path
+        android:fillColor="#0B1120"
+        android:strokeColor="#38BDF8"
+        android:strokeWidth="3.0"
+        android:pathData="M54,54m-48,0a48,48 0 1,0 96,0a48,48 0 1,0 -96,0" />
+
+    <!-- 3. Inner Slate Indigo Circle with Violet Accent Outline -->
+    <path
+        android:fillColor="#111827"
+        android:strokeColor="#6366F1"
+        android:strokeWidth="1.5"
+        android:pathData="M54,54m-42,0a42,42 0 1,0 84,0a42,42 0 1,0 -84,0" />
+
+    <!-- 4. Corner Viewfinder Zoom Reticles (QoL Zoom Feature) -->
+    <!-- Top-Left -->
+    <path
+        android:strokeColor="#38BDF8"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M24,30 L24,24 L30,24" />
+    <!-- Top-Right -->
+    <path
+        android:strokeColor="#38BDF8"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M78,24 L84,24 L84,30" />
+    <!-- Bottom-Left -->
+    <path
+        android:strokeColor="#38BDF8"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M24,78 L24,84 L30,84" />
+    <!-- Bottom-Right -->
+    <path
+        android:strokeColor="#38BDF8"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M78,84 L84,84 L84,78" />
+
+    <!-- 5. Neural Diffusion AI Sparkle (Gold / Amber) -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M54,16 L56,21 L61,23 L56,25 L54,30 L52,25 L47,23 L52,21 Z" />
+
+    <!-- 6. Bold High-Contrast "V" Glyph (White stroke, Electric Cyan fill) -->
+    <path
+        android:fillColor="#00F0FF"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.2"
+        android:strokeLineJoin="miter"
+        android:pathData="M14,35 L28,75 H38 L52,35 H42 L33,59 L24,35 Z" />
+
+    <!-- 7. Bold High-Contrast "4" Glyph Body (White stroke, Electric Cyan fill) -->
+    <path
+        android:fillColor="#00F0FF"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.2"
+        android:strokeLineJoin="miter"
+        android:pathData="M72,35 L50,64 H72 V75 H82 V75 H82 V64 H88 V56 H82 V35 Z" />
+
+    <!-- 8. "4" Glyph Inner Cutout (Matching inner plate color) -->
+    <path
+        android:fillColor="#111827"
+        android:pathData="M72,44 L61,56 H72 Z" />
+
+    <!-- 9. Bottom Pill Chip [V4 NPU / Multi-Engine] -->
+    <path
+        android:fillColor="#1E1B4B"
+        android:strokeColor="#818CF8"
+        android:strokeWidth="1.2"
+        android:pathData="M33,83 h42 a5.5,5.5 0 0 1 5.5,5.5 v0 a5.5,5.5 0 0 1 -5.5,5.5 h-42 a5.5,5.5 0 0 1 -5.5,-5.5 v0 a5.5,5.5 0 0 1 5.5,-5.5 z" />
+
+    <!-- Model Status LED Accents -->
+    <!-- Cyan (SD 1.5 20-Step Backup) -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M41,88.5 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+    <!-- Violet (LaMa Dilated) -->
+    <path
+        android:fillColor="#A855F7"
+        android:pathData="M50,88.5 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+    <!-- Amber (MIGAN) -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M58,88.5 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+    <!-- Emerald (AOT-GAN) -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M67,88.5 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+
+</vector>

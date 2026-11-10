@@ -314,6 +314,16 @@ HARDWARE_AND_ENVIRONMENT_QUIRKS: Dict[str, str] = {
         "the shell context and keeps MIGAN, LaMa, and AOT-GAN graphs permanently resident in FastRPC CDSP memory. "
         "The app communicates via loopback socket 127.0.0.1:55555 (< 1ms IPC), achieving 43ms steady-state "
         "MIGAN inference, 131ms LaMa inference, and 199ms AOT-GAN inference directly on the Hexagon NPU."
+    ),
+    "KERNEL_THERMAL_GOVERNOR_TRIP_POINTS": (
+        "Qualcomm Snapdragon 8 Elite kernel device tree trip points: "
+        "1. Board Governor (sys-therm-0, thermal_zone66): Trip 2 at 78.0°C directly throttles "
+        "cooling_device38 (cdsp / NPU, 8 states) and cooling_device35 (kgsl / GPU, 13 states). "
+        "2. Silicon junction sensors (nsphvx-*, nsphmx-*, gpuss-*): Passive throttling at 105.0°C, "
+        "hot mitigation at 125.0°C, and critical emergency shutdown at 135.0°C. "
+        "3. Steady-state below 78.0°C: NPU inference experiences 0% thermal throttling (latency flat within ±1 ms). "
+        "Above 78.0°C, cooling_device35 down-bins Adreno 830 GPU from 1100 MHz to 950, 800, 660 MHz, "
+        "and cooling_device38 down-bins Hexagon HTP v79 clock frequencies."
     )
 }
 
@@ -383,7 +393,31 @@ FILE_REGISTRY: Dict[str, str] = {
     "Presentation/ESW_Image_Inpainting_Progress.pptx": "Master technical progress presentation slide deck",
     "Presentation/Image_Inpainting_QIDK_Progress.pdf": "Exported presentation slides in PDF format",
     "Presentation/smart_object_detection_benchmark.pptx": "Presentation deck covering smart object detection and mask refinement",
-    "Presentation/test_slide_8.pptx": "Executive summary slide with high-resolution visual proof"
+    "Presentation/test_slide_8.pptx": "Executive summary slide with high-resolution visual proof",
+
+    # High-Temperature (80°C) Stress Benchmark Suite
+    "scripts/bench_high_temp_stress.cpp": "Native C++ 7-Oryon-worker thermal stress harness pushing silicon die to 82°C",
+    "scripts/bench_high_temp_stress": "Compiled ARM64-v8a binary with isolated SNPE C-API execution & hardware down-binning telemetry",
+    "scripts/run_thermal_throttling_test.py": "Python orchestrator for high-temperature throttling test, governor state logging, and publication figure rendering",
+    "Benchmark/output/thermal_stress_npu_80c.csv": "Empirical thermal stress dataset for Hexagon HTP v79 NPU (34°C - 82°C)",
+    "Benchmark/output/thermal_stress_gpu_80c.csv": "Empirical thermal stress dataset for Adreno 830 GPU (34°C - 82°C)",
+    "Benchmark/output/thermal_stress_figures/": "Publication-quality 300 DPI figures quantifying latency throttling, cooling states, and GPU clock down-binning",
+
+    # Comprehensive Research Pipeline Deliverables (November 2026)
+    "scripts/benchmarks/enhanced_criminisi_and_biharmonic.py": "Enhanced Criminisi isophote boundary propagation and Biharmonic Poisson inpainting suite",
+    "src/smart_sd_engine.py": "Two-stage Smart Stable Diffusion contextual prompt synthesis engine (context ring extraction + camera/texture prompt generation)",
+    "scripts/benchmarks/test_sd_negative_prompt_support.py": "Empirical CFG and dual conditioned/unconditioned UNet graph verification on Hexagon HTP v79",
+    "scripts/benchmarks/benchmark_super_resolution_upscaling.py": "Interleaved checkerboard 2x super-resolution benchmark comparing Tarsh's handbuilt 4-quadrant engine vs. MIGAN, LaMa, and SD 1.5",
+    "scripts/benchmarks/extract_100_unbiased_features.py": "100-feature unbiased extraction engine (80 intrinsic + 20 topological) across all 6,000 dataset images",
+    "scripts/benchmarks/bench_concurrent_load_contention.py": "Hardware contention profiler modeling CPU, GPU, and LPDDR5x memory thrashing impact on NPU latency & jitter",
+    "scripts/benchmarks/train_production_ccb_router.py": "Constrained Contextual Bandit (CCB) production router training with 20D context state vector and 3 operating profiles",
+    "scripts/benchmarks/generate_paper_figures_suite.py": "Publication-grade 300 DPI IEEE/ACM figure suite generator (Figures 1-5 in artifacts/figures/)",
+    "artifacts/COMPREHENSIVE_RESEARCH_PAPER_FINDINGS.md": "Master research paper findings and presentation deck formatted with exact empirical tables and citations",
+    "artifacts/dataset_100_features_6000.csv": "Full 6,000-sample raw dataset of 100 orthogonal intrinsic and mask topological features",
+    "artifacts/unbiased_100_features_correlation.json": "Pearson, Spearman, and Mutual Information correlation matrices against LPIPS and CMMD",
+    "artifacts/concurrent_load_telemetry.csv": "Hardware contention dataset recording NPU latency slowdown and jitter under multi-core stress",
+    "artifacts/production_ccb_router.json": "Trained production CCB router policy, ridge regression weights, and operating profiles",
+    "artifacts/upscaling_super_resolution_benchmark.csv": "Head-to-head 100-sample empirical evaluation of 2x super-resolution algorithms"
 }
 
 
@@ -424,11 +458,61 @@ def print_summary():
     for k, text in HARDWARE_AND_ENVIRONMENT_QUIRKS.items():
         print(f"  • {k}: {text[:100]}...")
 
+    print("\n[AUTONOMOUS SESSION STATE]")
+    sess = AUTONOMOUS_SESSION_STATE
+    print(f"  • Mission       : {sess['mission']}")
+    print(f"  • Current Phase : {sess['current_phase']}")
+    print(f"  • Status        : {sess['status']}")
+    print(f"  • Last Updated  : {sess['last_updated']}")
+    print(f"  • Checkpoint CSV: {sess['checkpoint_csv']}")
+    print(f"  • Next Step     : {sess['next_action']}")
+
     print("\n[PRIMARY ENTRYPOINTS]")
     print("  • python main.py [gui | benchmark | visuals | route]")
     print("  • python benchmark.py [interactive menu or --fresh, --sd, --figures]")
-    print("  • python context.py [--summary | --json | --models | --quirks | --file-map]")
+    print("  • python context.py [--summary | --json | --models | --quirks | --file-map | --session]")
     print("=" * 80)
+
+
+# ==============================================================================
+# AUTONOMOUS SESSION STATE & PERSISTENT CHECKPOINTING
+# ==============================================================================
+AUTONOMOUS_SESSION_STATE: Dict[str, Any] = {
+    "session_id": "comprehensive_research_pipeline_nov2026",
+    "mission": "Comprehensive Multi-Phase Engineering, Selection Overhaul, Classical Algorithms, Smart SD, 2x Super-Resolution, 100 Unbiased Features, Hardware Contention & CCB Router",
+    "started_at": "2026-11-10T03:58:00+05:30",
+    "allocated_time_window_hours": 6.0,
+    "current_phase": "All 8 Phases Completed & Empirically Verified",
+    "status": "COMPLETED_SUCCESSFULLY",
+    "active_task_id": None,
+    "last_updated": "2026-11-10T09:36:30+05:30",
+    "checkpoint_csv": "artifacts/dataset_100_features_6000.csv",
+    "priors_json": "artifacts/production_ccb_router.json",
+    "presentation_deck": "artifacts/COMPREHENSIVE_RESEARCH_PAPER_FINDINGS.md",
+    "milestones": {
+        "phase_1_mobile_ui_backend_compatibility": "COMPLETED (Strict NPU/GPU/CPU feasibility, viewport affine matrix inverted, glowing trail & thinking pulse added in qidk-inpaint-app-v5)",
+        "phase_2_enhanced_classical_suite": "COMPLETED (Criminisi exemplar isophote synthesis & Biharmonic Poisson gradient solver in scripts/benchmarks/enhanced_criminisi_and_biharmonic.py)",
+        "phase_3_smart_sd_context_engine": "COMPLETED (Two-stage context ring vision extractor + photographic prompt synthesizer in src/smart_sd_engine.py & empirical CFG graph verification in scripts/benchmarks/test_sd_negative_prompt_support.py)",
+        "phase_4_super_resolution_upscaling": "COMPLETED (Interleaved checkerboard 75% void inpainting vs. Tarsh 4-quadrant handbuilt reconstructor in artifacts/upscaling_super_resolution_benchmark.csv)",
+        "phase_5_100_unbiased_features": "COMPLETED (80 intrinsic + 20 topological features extracted across all 6,000 images in artifacts/dataset_100_features_6000.csv and correlation matrices in artifacts/unbiased_100_features_correlation.json)",
+        "phase_6_concurrent_load_contention": "COMPLETED (Empirical CPU, GPU, and LPDDR5x memory thrashing telemetry on Snapdragon 8 Elite hardware in artifacts/concurrent_load_telemetry.csv)",
+        "phase_7_contextual_bandit_router": "COMPLETED (Constrained Contextual Bandit trained on 20D state vector with 3 operating profiles in artifacts/production_ccb_router.json)",
+        "phase_8_publication_figures_and_paper": "COMPLETED (5 master 300-DPI IEEE/ACM plots in artifacts/figures/ and research paper presentation deck in artifacts/COMPREHENSIVE_RESEARCH_PAPER_FINDINGS.md)"
+    },
+    "completed_points": 6000,
+    "total_target_points": 6000,
+    "next_action": "Pipeline fully executed and synchronized for AI handover."
+}
+
+
+def update_session_state(phase: str, status: str, next_action: str, completed_points: int = 0) -> None:
+    """Updates and saves autonomous session state to context.py."""
+    import datetime
+    AUTONOMOUS_SESSION_STATE["current_phase"] = phase
+    AUTONOMOUS_SESSION_STATE["status"] = status
+    AUTONOMOUS_SESSION_STATE["next_action"] = next_action
+    AUTONOMOUS_SESSION_STATE["completed_points"] = completed_points
+    AUTONOMOUS_SESSION_STATE["last_updated"] = datetime.datetime.now().isoformat()
 
 
 def main():
@@ -452,7 +536,11 @@ def main():
         print(json.dumps(FILE_REGISTRY, indent=2))
         return
 
-    print("Unrecognized flag. Options: --summary, --json, --models, --quirks, --file-map")
+    if "--session" in sys.argv:
+        print(json.dumps(AUTONOMOUS_SESSION_STATE, indent=2))
+        return
+
+    print("Unrecognized flag. Options: --summary, --json, --models, --quirks, --file-map, --session")
 
 
 if __name__ == "__main__":

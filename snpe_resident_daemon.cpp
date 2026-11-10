@@ -109,8 +109,6 @@ bool initSNPEModel(const std::string& key, const std::string& dlcPath) {
     SNPEBuilder_SetRuntimeProcessorOrder(builder, rList);
     RuntimeList_Delete(rList);
 
-    Handle_t pConfig = PlatformConfig_Create ? PlatformConfig_Create() : nullptr;
-    if (pConfig && SNPEBuilder_SetPlatformConfig) SNPEBuilder_SetPlatformConfig(builder, pConfig);
     SNPEBuilder_SetPerformanceProfile(builder, 6); // BURST
     SNPEBuilder_SetProfilingLevel(builder, 0); // OFF
 

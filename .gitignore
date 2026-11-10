@@ -43,7 +43,16 @@ qidk-inpaint-app/build/
 qidk-inpaint-app/app/build/
 qidk-inpaint-app/local.properties
 qidk-inpaint-app/decompiled/
+qidk-inpaint-app-v5/.gradle/
+qidk-inpaint-app-v5/build/
+qidk-inpaint-app-v5/app/build/
+qidk-inpaint-app-v5/local.properties
+qidk-inpaint-app-v5/app/.cxx/
 *.apk
+todays presentation.zip
+todays presentation/
+todays_presentation/
+Benchmark/output/6000_benchmark/
 
 # Virtual environments and Python caches
 .venv/
@@ -65,3 +74,10 @@ snpe_resident_daemon
 test_snpe_shell
 
 phone_*.png
+
+# 6000-sample dataset: ignore image and mask binaries but whitelist metadata manifests
+Benchmark/6000_images/compiled/images/
+Benchmark/6000_images/compiled/masks/
+!Benchmark/6000_images/*.csv
+!Benchmark/6000_images/**/*.csv
+

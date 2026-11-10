@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#111827"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:descendantFocusability="beforeDescendants">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⚡ Snapdragon 8 Elite Inpainting"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hexagon HTP v79 NPU Acceleration • v5.0 (Magic Touch)"
+            android:textColor="#C084FC"
+            android:textSize="13sp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Source Image Controls -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/btnGallery"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="🖼️ Gallery"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:layout_marginEnd="3dp"
+                android:backgroundTint="#374151" />
+
+            <Button
+                android:id="@+id/btnCamera"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="📷 Camera"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
+                android:backgroundTint="#374151" />
+
+            <Button
+                android:id="@+id/btnLoadSample"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.3"
+                android:text="🧪 Samples (102)"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:layout_marginStart="3dp"
+                android:backgroundTint="#1E3A8A" />
+        </LinearLayout>
+
+        <!-- Interactive Canvas View -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="320dp"
+            android:background="#1F2937"
+            android:layout_marginBottom="8dp">
+
+            <com.qualcomm.qidk.inpaint.ui.InpaintCanvasView
+                android:id="@+id/inpaintCanvasView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <!-- Floating Viewport Zoom Controls -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_margin="10dp"
+                android:orientation="horizontal"
+                android:background="#D91E293B"
+                android:padding="2dp">
+
+                <Button
+                    android:id="@+id/btnZoomIn"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="0dp"
+                    android:text="➕"
+                    android:textSize="12sp"
+                    android:backgroundTint="#334155" />
+
+                <Button
+                    android:id="@+id/btnZoomOut"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="0dp"
+                    android:text="➖"
+                    android:textSize="12sp"
+                    android:layout_marginStart="3dp"
+                    android:backgroundTint="#334155" />
+
+                <Button
+                    android:id="@+id/btnZoomReset"
+                    android:layout_width="44dp"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="0dp"
+                    android:text="1:1"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="3dp"
+                    android:backgroundTint="#2563EB" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Canvas Manual Tool Buttons (Row 1) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="6dp">
+
+            <Button
+                android:id="@+id/btnModeCircle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.2"
+                android:text="⭕ Circle"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:minHeight="38dp"
+                android:paddingHorizontal="3dp"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="#7C3AED" />
+
+            <Button
+                android:id="@+id/btnModeBrush"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="🖌️ Brush"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:minHeight="38dp"
+                android:paddingHorizontal="3dp"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="#4B5563" />
+
+            <Button
+                android:id="@+id/btnModeBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="🔲 Box"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:minHeight="38dp"
+                android:paddingHorizontal="3dp"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="#4B5563" />
+
+            <Button
+                android:id="@+id/btnUndo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.9"
+                android:text="↩️ Undo"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:minHeight="38dp"
+                android:paddingHorizontal="2dp"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="#4B5563" />
+
+            <Button
+                android:id="@+id/btnClear"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.9"
+                android:text="🗑️ Clear"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:minHeight="38dp"
+                android:paddingHorizontal="2dp"
+                android:layout_marginStart="2dp"
+                android:backgroundTint="#DC2626" />
+        </LinearLayout>
+
+        <!-- Smart Mask AI Tools (Row 2) -->
+        <!-- Circle / Mask AI Engine Selector (Row 2) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="10dp">
+
+            <Button
+                android:id="@+id/btnSegGrabCut"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.1"
+                android:text="⚡ Auto-GrabCut"
+                android:textAllCaps="false"
+                android:textSize="11sp"
+                android:minHeight="40dp"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="#2563EB" />
+
+            <Button
+                android:id="@+id/btnSegAiSam"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.1"
+                android:text="🤖 AI Magic Touch"
+                android:textAllCaps="false"
+                android:textSize="11sp"
+                android:minHeight="40dp"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="#4B5563" />
+
+            <Button
+                android:id="@+id/btnSegExact"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.9"
+                android:text="🎯 Exact Area"
+                android:textAllCaps="false"
+                android:textSize="11sp"
+                android:minHeight="40dp"
+                android:layout_marginStart="2dp"
+                android:backgroundTint="#374151" />
+        </LinearLayout>
+
+        <!-- Router Recommendation Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1F2937"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:id="@+id/routerBadgeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🎯 RECOMMENDED: MIGAN"
+                android:textColor="#10B981"
+                android:textStyle="bold"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/routerJustificationText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Router heuristic analysis ready."
+                android:textColor="#D1D5DB"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:id="@+id/preloadStatusBadge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="⚡ Preloading NPU models..."
+                android:textColor="#38BDF8"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:layout_marginTop="6dp" />
+        </LinearLayout>
+
+        <!-- Stable Diffusion Prompt Container (VISIBLE ONLY WHEN SD IS SELECTED) -->
+        <LinearLayout
+            android:id="@+id/promptCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1F2937"
+            android:padding="12dp"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="✨ Dual Text Guidance (SD NPU)"
+                    android:textColor="#38BDF8"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/promptBadgeHint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CLIP Guided"
+                    android:textColor="#9CA3AF"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <!-- Positive Prompt -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Positive Prompt (What to generate in hole):"
+                android:textColor="#93C5FD"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp" />
+
+            <EditText
+                android:id="@+id/etPromptPositive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:background="#374151"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#9CA3AF"
+                android:hint="e.g. photograph of a beautiful empty scene"
+                android:textSize="13sp"
+                android:padding="10dp"
+                android:inputType="textCapSentences|textMultiLine"
+                android:maxLines="3"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Prompt Quick Preset Chips -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginBottom="10dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/chipClean"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="🧹 Seamless Fill"
+                        android:textAllCaps="false"
+                        android:textSize="11sp"
+                        android:paddingHorizontal="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:backgroundTint="#4B5563" />
+
+                    <Button
+                        android:id="@+id/chipWood"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="🪵 Wood Table"
+                        android:textAllCaps="false"
+                        android:textSize="11sp"
+                        android:paddingHorizontal="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:backgroundTint="#4B5563" />
+
+                    <Button
+                        android:id="@+id/chipNature"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="🌿 Green Leaves"
+                        android:textAllCaps="false"
+                        android:textSize="11sp"
+                        android:paddingHorizontal="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:backgroundTint="#4B5563" />
+
+                    <Button
+                        android:id="@+id/chipWater"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="🌊 Calm Water"
+                        android:textAllCaps="false"
+                        android:textSize="11sp"
+                        android:paddingHorizontal="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:backgroundTint="#4B5563" />
+
+                    <Button
+                        android:id="@+id/chipApple"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="🍎 Red Apple"
+                        android:textAllCaps="false"
+                        android:textSize="11sp"
+                        android:paddingHorizontal="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:backgroundTint="#4B5563" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Negative Prompt -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Negative Prompt (What to avoid):"
+                android:textColor="#FCA5A5"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp" />
+
+            <EditText
+                android:id="@+id/etPromptNegative"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:background="#374151"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#9CA3AF"
+                android:hint="e.g. painting, drawing, glitch, deformed, ugly"
+                android:textSize="13sp"
+                android:padding="10dp"
+                android:inputType="textCapSentences|textMultiLine"
+                android:maxLines="3"
+                android:layout_marginBottom="4dp" />
+        </LinearLayout>
+
+        <!-- Model Choice & Run Button -->
+        <!-- Silicon Hardware Runtime Selector -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Silicon Runtime:"
+                android:textColor="#9CA3AF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="8dp" />
+
+            <Spinner
+                android:id="@+id/runtimeSpinner"
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:layout_weight="1"
+                android:background="#374151" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <Spinner
+                android:id="@+id/modelSpinner"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="#374151"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btnRunInpaint"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="🚀 Inpaint"
+                android:textStyle="bold"
+                android:backgroundTint="#10B981" />
+        </LinearLayout>
+
+        <!-- Results & Telemetry -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Inpainted Output"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <ImageView
+            android:id="@+id/resultImageView"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:background="#1F2937"
+            android:scaleType="fitCenter"
+            android:layout_marginBottom="12dp" />
+
+        <LinearLayout
+            android:id="@+id/telemetryCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1E3A8A"
+            android:padding="12dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📊 FastRPC Hardware Telemetry"
+                android:textColor="#93C5FD"
+                android:textStyle="bold"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/telemetryText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
