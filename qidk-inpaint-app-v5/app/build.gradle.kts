@@ -32,6 +32,7 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         debug {
+            isDebuggable = true
             isMinifyEnabled = false
         }
     }

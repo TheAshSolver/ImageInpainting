@@ -134,9 +134,23 @@ object SmartPrompt {
     fun build(userPrompt: String, d: Descriptor): String {
         val user = userPrompt.trim().trimEnd(',', '.', ' ')
         val parts = ArrayList<String>()
-        parts.add(if (user.isEmpty()) "a photograph of ${d.surface}" else user)
-        if (user.isNotEmpty()) parts.add(d.surface)
-        parts.addAll(listOf(d.texture, d.light, d.tone, "photorealistic photograph", d.lens, "seamless continuation of the surrounding scene"))
+        if (user.isNotEmpty()) {
+            // Prioritize User Prompt Intent over Background Continuation:
+            // Suppress background tokens like "no objects", "smooth surface", or "empty landscape".
+            parts.add(user)
+            parts.add("a photorealistic photograph of $user")
+            parts.add("high resolution")
+            parts.add("detailed texture")
+            parts.add("matching the ${d.light} and skin tone of the subject")
+            parts.add("natural shadows")
+            parts.add("sharp focus")
+            parts.add(d.tone)
+            parts.add(d.lens)
+        } else {
+            // Fallback to background surface continuation matching ambient lighting and texture
+            parts.add("a photograph of ${d.surface}")
+            parts.addAll(listOf(d.texture, d.light, d.tone, "photorealistic photograph", d.lens, "seamless continuation of the surrounding scene"))
+        }
         var text = parts.joinToString(", ")
         val words = text.split(Regex("\\s+"))
         if (words.size > MAX_WORDS) text = words.take(MAX_WORDS).joinToString(" ").trimEnd(',')

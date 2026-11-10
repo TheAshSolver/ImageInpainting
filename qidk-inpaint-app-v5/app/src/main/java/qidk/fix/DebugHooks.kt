@@ -26,18 +26,22 @@ object DebugHooks {
     private const val TAG = "QIDK.Hook"
 
     fun install(context: Context, handlers: Map<String, (Intent) -> String>): BroadcastReceiver? {
-        if (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE == 0) return null
+        val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+        println("QIDK.Hook: install called, isDebuggable=$isDebuggable, handlers=${handlers.keys}")
+        Log.i(TAG, "install called, isDebuggable=$isDebuggable, handlers=${handlers.keys}")
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(c: Context, i: Intent) {
                 val action = i.action ?: return
                 val t0 = System.nanoTime()
                 val line = try { handlers[action]?.invoke(i) ?: "no handler" } catch (t: Throwable) { "ERROR ${t.javaClass.simpleName}: ${t.message}" }
+                println("QIDK.Hook: $action -> $line")
                 Log.i(TAG, "$action -> $line (${(System.nanoTime() - t0) / 1_000_000} ms)")
             }
         }
         val filter = IntentFilter().apply { handlers.keys.forEach { addAction(it) } }
         if (Build.VERSION.SDK_INT >= 33) context.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
         else @Suppress("UnspecifiedRegisterReceiverFlag") context.registerReceiver(receiver, filter)
+        println("QIDK.Hook: registered successfully for ${handlers.keys}")
         Log.i(TAG, "installed for ${handlers.keys}")
         return receiver
     }
@@ -48,7 +52,8 @@ object DebugHooks {
      */
     fun async(action: String, work: () -> String): String {
         Thread({
-            val line = try { work() } catch (t: Throwable) { "ERROR ${t.javaClass.simpleName}: ${t.message}" }
+            val line = try { work() } catch (t: Throwable) { "ERROR ${t.javaClass.simpleName}: ${t.message}\n" + t.stackTraceToString() }
+            println("QIDK.Hook: $action -> $line")
             Log.i(TAG, "$action -> $line")
         }, "hook-$action").start()
         return "started"

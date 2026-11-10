@@ -53,7 +53,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appTitleText: TextView
     private lateinit var appSubtitleText: TextView
     private lateinit var btnThemeToggle: Button
-    private lateinit var telemetryBar: TelemetryBarView
     private lateinit var canvasContainer: View
     private lateinit var routerCard: View
     private lateinit var executionTargetCard: View
@@ -100,7 +99,6 @@ class MainActivity : AppCompatActivity() {
         appTitleText = findViewById(R.id.appTitleText)
         appSubtitleText = findViewById(R.id.appSubtitleText)
         btnThemeToggle = findViewById(R.id.btnThemeToggle)
-        telemetryBar = findViewById(R.id.telemetryBar)
         canvasContainer = findViewById(R.id.canvasContainer)
         routerCard = findViewById(R.id.routerCard)
         executionTargetCard = findViewById(R.id.executionTargetCard)
@@ -358,8 +356,6 @@ class MainActivity : AppCompatActivity() {
         mainRootLayout.setBackgroundColor(bgCol)
         appTitleText.setTextColor(primaryText)
         tvResultsHeader.setTextColor(primaryText)
-
-        telemetryBar.setThemeColors(cardCol, cardBorder, primaryText)
 
         fun styleCard(v: View) {
             v.background = android.graphics.drawable.GradientDrawable().apply {
@@ -762,14 +758,14 @@ class MainActivity : AppCompatActivity() {
                     else if (engine.unavailableReason != null) "engine disabled: ${engine.unavailableReason}"
                     else {
                         BackendMatrix.require(engine.family, backend)
-                        val t0 = System.nanoTime()
-                        val out = engine.run(src, backend, scale)
-                        val ms = (System.nanoTime() - t0) / 1_000_000
+                        val res = engine.runWithTelemetry(src, backend, scale)
+                        val out = res.bitmap
+                        val telem = res.telemetry
                         i.getStringExtra("out")?.let { p ->
                             File(p).apply { parentFile?.mkdirs() }.outputStream().use { out.compress(Bitmap.CompressFormat.PNG, 100, it) }
                         }
-                        Log.i("QIDK.SR", "engine=$id backend=$backend scale=${scale}x out=${out.width}x${out.height} ms=$ms")
-                        "engine=$id backend=$backend scale=${scale}x out=${out.width}x${out.height} ms=$ms"
+                        Log.i("QIDK.SR", "engine=$id backend=$backend scale=${scale}x out=${out.width}x${out.height} ms=${telem.totalMs} prep=${telem.prepMs} infer=${telem.inferMs} post=${telem.postMs}")
+                        "engine=$id backend=$backend scale=${scale}x out=${out.width}x${out.height} ms=${telem.totalMs} prep=${telem.prepMs} infer=${telem.inferMs} post=${telem.postMs}"
                     }
                 }
             },

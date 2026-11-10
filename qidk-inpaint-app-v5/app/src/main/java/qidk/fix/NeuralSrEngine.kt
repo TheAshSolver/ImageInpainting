@@ -19,20 +19,21 @@ import kotlin.math.sqrt
  * Supports MIGAN, LaMa Dilated, AOT-GAN, and Stable Diffusion.
  *
  * Implements:
- * 1. 75% sub-pixel structural hole interleaving: source pixel (x, y) maps to (2x, 2y),
- *    with remaining 3 positions marked as hole pixels.
+ * 1. 75% sub-pixel structural hole interleaving: source pixel (x, y) maps to (2x, 2y) as strict anchor,
+ *    with missing 3 positions pre-filled with bicubic interpolation to eliminate 1-pixel screen-door lattice noise.
  * 2. 4-quadrant decomposition into 512x512 tiles matching static NPU DLC shapes.
  * 3. Resident FastRPC daemon dispatch (INFER migan ..., INFER lama ..., INFER aotgan ...)
  *    on port 55555 via pure RAM-disk tmpfs (/tmp/sr_shm) bypassing flash storage I/O.
- * 4. Model Mask Polarity Auto-Correction:
- *    - LaMa expects Mask = 1.0 (255) for HOLE, 0.0 for context.
- *    - MIGAN & AOT-GAN expect Mask = 0.0 for HOLE, 1.0 (255) for context.
- * 5. Feathered seam blending: 32px Hann cosine ramp window ([496..527]) across quadrant boundaries.
- * 6. Stable Diffusion Latent SR: 512x512 tiled latent diffusion with 64px overlap margin and
- *    spherical linear interpolation (Slerp) on noise/pixel boundaries.
- * 7. Bit-exact ground-truth anchor preservation: all (2x, 2y) coordinates strictly retained.
- * 8. Progressive multi-scale cascading for 2x (1024²), 4x (2048²), and 8x (4096²) with
- *    bitmap recycling and System.gc() to guarantee device stability.
+ * 4. Model Mask Polarity & Tensor Normalization:
+ *    - LaMa: Hole = 1.0f, Context = 0.0f; Image normalized to [-1.0, 1.0].
+ *    - MIGAN: Hole = 0.0f, Context = 1.0f; Image normalized to [-1.0, 1.0].
+ *    - AOT-GAN: Hole = 0.0f, Context = 1.0f; Image normalized to [0.0, 1.0].
+ * 5. Feathered seam blending: 32px Hann cosine ramp window across quadrant boundaries.
+ * 6. Stable Diffusion Latent SR: 512x512 latent img2img super-resolution with low denoising strength
+ *    (sigma = 0.35) and 64px overlap margin with Slerp blending, preserving global subject geometry.
+ * 7. Active sub-pixel update from Float32 tensor output and bit-exact ground-truth anchor preservation.
+ * 8. Progressive multi-scale cascading for 2x (1024²), 4x (2048²), and 8x (4096²) with bitmap recycling.
+ * 9. Comprehensive latency & hardware telemetry breakdown (t_prep, t_infer, t_post, t_total, power, temp).
  */
 class NeuralSrEngine(
     override val id: String,
@@ -41,6 +42,13 @@ class NeuralSrEngine(
     private val daemonKey: String = "migan",
     private val isSd: Boolean = false
 ) : SrEngine {
+
+    data class PassMetrics(
+        val prepMs: Long,
+        val inferMs: Long,
+        val postMs: Long,
+        val totalMs: Long
+    )
 
     companion object {
         private const val TAG = "QIDK.NeuralSR"
@@ -74,17 +82,17 @@ class NeuralSrEngine(
 
             val dot = ((r1 * r2 + g1 * g2 + b1 * b2) / (norm1 * norm2)).coerceIn(-1f, 1f)
             val theta = acos(dot)
+            val sinTheta = sin(theta)
 
-            if (kotlin.math.abs(theta) < 1e-4f || sin(theta) < 1e-4f) {
+            if (sinTheta < 1e-4f) {
                 val r = ((1f - t) * r1 + t * r2).coerceIn(0f, 1f)
                 val g = ((1f - t) * g1 + t * g2).coerceIn(0f, 1f)
                 val b = ((1f - t) * b1 + t * b2).coerceIn(0f, 1f)
                 return (0xFF shl 24) or ((r * 255f).toInt() shl 16) or ((g * 255f).toInt() shl 8) or (b * 255f).toInt()
             }
 
-            val sinTheta = sin(theta)
-            val w1 = (sin((1f - t) * theta) / sinTheta)
-            val w2 = (sin(t * theta) / sinTheta)
+            val w1 = (sin((1f - t) * theta) / sinTheta).toFloat()
+            val w2 = (sin(t * theta) / sinTheta).toFloat()
 
             val r = (w1 * r1 + w2 * r2).coerceIn(0f, 1f)
             val g = (w1 * g1 + w2 * g2).coerceIn(0f, 1f)
@@ -94,7 +102,9 @@ class NeuralSrEngine(
 
         /**
          * Creates a 2W x 2H target grid with original pixels at (2x, 2y)
-         * and remaining 75% positions initialized as a structural mask with nearest-neighbor fill.
+         * and pre-fills the missing 75% sub-pixels with bicubic interpolated values
+         * to eliminate the 1-pixel screen-door lattice artifact.
+         * Mask marks (2x, 2y) as context (0) and synthesized sub-pixels as holes (255).
          */
         fun createInterleavedSubPixel(src: Bitmap): Pair<Bitmap, Bitmap> {
             val w = src.width
@@ -102,37 +112,32 @@ class NeuralSrEngine(
             val outW = w * 2
             val outH = h * 2
 
+            // Pre-fill missing sub-pixels with bicubic interpolated values
+            val bicubicScaled = Bitmap.createScaledBitmap(src, outW, outH, true)
+            val gridPixels = IntArray(outW * outH)
+            bicubicScaled.getPixels(gridPixels, 0, outW, 0, 0, outW, outH)
+            if (bicubicScaled !== src) {
+                bicubicScaled.recycle()
+            }
+
             val srcPixels = IntArray(w * h)
             src.getPixels(srcPixels, 0, w, 0, 0, w, h)
 
-            val gridPixels = IntArray(outW * outH)
             val maskPixels = IntArray(outW * outH)
+            // By default, mark all sub-pixels as holes (255)
+            java.util.Arrays.fill(maskPixels, Color.WHITE)
 
             for (y in 0 until h) {
                 val srcRow = y * w
                 val outRowEven = (2 * y) * outW
-                val outRowOdd = (2 * y + 1) * outW
 
                 for (x in 0 until w) {
                     val p = srcPixels[srcRow + x]
                     val outXEven = 2 * x
-                    val outXOdd = 2 * x + 1
 
-                    // (2x, 2y): anchor pixel (known context)
+                    // (2x, 2y): anchor pixel (strict ground-truth known context)
                     gridPixels[outRowEven + outXEven] = p
-                    maskPixels[outRowEven + outXEven] = Color.BLACK // 0 = known
-
-                    // (2x+1, 2y): sub-pixel hole to synthesize
-                    gridPixels[outRowEven + outXOdd] = p
-                    maskPixels[outRowEven + outXOdd] = Color.WHITE // 255 = hole
-
-                    // (2x, 2y+1): sub-pixel hole to synthesize
-                    gridPixels[outRowOdd + outXEven] = p
-                    maskPixels[outRowOdd + outXEven] = Color.WHITE
-
-                    // (2x+1, 2y+1): sub-pixel hole to synthesize
-                    gridPixels[outRowOdd + outXOdd] = p
-                    maskPixels[outRowOdd + outXOdd] = Color.WHITE
+                    maskPixels[outRowEven + outXEven] = Color.BLACK // 0 = known context
                 }
             }
 
@@ -162,7 +167,7 @@ class NeuralSrEngine(
             val pixels = IntArray(w * h)
             canvas.getPixels(pixels, 0, w, 0, 0, w, h)
 
-            // 1. Horizontal seam across y = midY ([midY - halfSeam .. midY + halfSeam - 1])
+            // 1. Horizontal seam across y = midY
             val yStart = (midY - halfSeam).coerceAtLeast(0)
             val yEnd = (midY + halfSeam - 1).coerceAtMost(h - 1)
 
@@ -203,7 +208,7 @@ class NeuralSrEngine(
                 }
             }
 
-            // 2. Vertical seam across x = midX ([midX - halfSeam .. midX + halfSeam - 1])
+            // 2. Vertical seam across x = midX
             val xStart = (midX - halfSeam).coerceAtLeast(0)
             val xEnd = (midX + halfSeam - 1).coerceAtMost(w - 1)
 
@@ -267,16 +272,24 @@ class NeuralSrEngine(
             canvas.setPixels(pixels, 0, w, 0, 0, w, h)
         }
 
-        fun bitmapToFloat32Raw(bitmap: Bitmap, w: Int = 512, h: Int = 512): ByteArray {
+        fun bitmapToFloat32Raw(bitmap: Bitmap, w: Int = 512, h: Int = 512, normalizeMinusOneToOne: Boolean = false): ByteArray {
             val scaled = if (bitmap.width == w && bitmap.height == h) bitmap else Bitmap.createScaledBitmap(bitmap, w, h, true)
             val pixels = IntArray(w * h)
             scaled.getPixels(pixels, 0, w, 0, 0, w, h)
 
             val buffer = ByteBuffer.allocate(w * h * 3 * 4).order(ByteOrder.LITTLE_ENDIAN)
-            for (c in pixels) {
-                buffer.putFloat(Color.red(c) / 255.0f)
-                buffer.putFloat(Color.green(c) / 255.0f)
-                buffer.putFloat(Color.blue(c) / 255.0f)
+            if (normalizeMinusOneToOne) {
+                for (c in pixels) {
+                    buffer.putFloat((Color.red(c) / 127.5f) - 1.0f)
+                    buffer.putFloat((Color.green(c) / 127.5f) - 1.0f)
+                    buffer.putFloat((Color.blue(c) / 127.5f) - 1.0f)
+                }
+            } else {
+                for (c in pixels) {
+                    buffer.putFloat(Color.red(c) / 255.0f)
+                    buffer.putFloat(Color.green(c) / 255.0f)
+                    buffer.putFloat(Color.blue(c) / 255.0f)
+                }
             }
             return buffer.array()
         }
@@ -367,8 +380,16 @@ class NeuralSrEngine(
     }
 
     override fun run(src: Bitmap, backend: Backend, scale: Int): Bitmap {
+        return runWithTelemetry(src, backend, scale).bitmap
+    }
+
+    override fun runWithTelemetry(src: Bitmap, backend: Backend, scale: Int): SrExecutionResult {
         BackendMatrix.require(family, backend)
         require(scale in listOf(2, 4, 8)) { "Scale factor must be 2, 4, or 8 (got $scale)" }
+
+        val startTemp = OnDeviceProcessDriver.readPeakTemperatureC()
+        val tracker = OnDeviceProcessDriver.HardwareTelemetryTracker()
+        tracker.start()
 
         val passes = when (scale) {
             2 -> 1
@@ -378,9 +399,17 @@ class NeuralSrEngine(
         }
 
         var current = src
+        var totalPrep = 0L
+        var totalInfer = 0L
+        var totalPost = 0L
+        val t0 = System.currentTimeMillis()
+
         for (pass in 1..passes) {
             Log.i(TAG, "[$id] Executing pass $pass / $passes (input: ${current.width}x${current.height})")
-            val next = execute2xPass(current, backend)
+            val (next, metrics) = execute2xPass(current, backend)
+            totalPrep += metrics.prepMs
+            totalInfer += metrics.inferMs
+            totalPost += metrics.postMs
             if (current !== src) {
                 current.recycle()
             }
@@ -388,7 +417,33 @@ class NeuralSrEngine(
             System.gc()
         }
 
-        return current
+        val totalMs = System.currentTimeMillis() - t0
+        val endTemp = OnDeviceProcessDriver.readPeakTemperatureC()
+        val (realPower, realEnergy, realDelta) = tracker.stop(totalMs, startTemp, endTemp)
+        val rawCurrent = OnDeviceProcessDriver.readActiveCurrentUa()
+        val currentMa = rawCurrent?.let { it / 1000f }
+
+        val core = when (backend) {
+            Backend.NPU -> "Qualcomm Hexagon HTP v79 NPU (Resident FastRPC)"
+            Backend.GPU -> "Qualcomm Adreno 830 GPU (OpenCL)"
+            Backend.CPU -> "Qualcomm Oryon CPU (ARM64)"
+        }
+
+        val telemetry = SrTelemetry(
+            startTempC = startTemp,
+            endTempC = endTemp,
+            thermalDeltaC = realDelta,
+            powerWatts = realPower,
+            currentMa = currentMa,
+            energyJoules = realEnergy,
+            core = core,
+            prepMs = totalPrep,
+            inferMs = totalInfer,
+            postMs = totalPost,
+            totalMs = totalMs
+        )
+
+        return SrExecutionResult(current, telemetry)
     }
 
     /**
@@ -399,17 +454,20 @@ class NeuralSrEngine(
      * 4. Synthesized sub-pixels are actively written from model output.
      * 5. Blends quadrant seams with Hann cosine ramp and anchors ground-truth (2x, 2y).
      */
-    private fun execute2xPass(input: Bitmap, backend: Backend): Bitmap {
+    private fun execute2xPass(input: Bitmap, backend: Backend): Pair<Bitmap, PassMetrics> {
+        val t0 = System.currentTimeMillis()
         val src512 = if (input.width == 512 && input.height == 512) input else Bitmap.createScaledBitmap(input, 512, 512, true)
 
         if (isSd) {
             return executeSdLatentSr(src512)
         }
 
-        // Step 1: Sub-pixel Interleaving
+        // Step 1: Sub-pixel Interleaving with bicubic pre-filling
+        val tPrep0 = System.currentTimeMillis()
         val (canvas, mask) = createInterleavedSubPixel(src512)
         val outCanvas = Bitmap.createBitmap(1024, 1024, Bitmap.Config.ARGB_8888)
         val outPixels = IntArray(1024 * 1024)
+        val tPrep = System.currentTimeMillis() - tPrep0
 
         // Step 2 & 3: Quadrant Tiled Decomposition & Dispatch
         val tileCoords = listOf(
@@ -419,16 +477,14 @@ class NeuralSrEngine(
             Pair(512, 512)  // BR
         )
 
+        var totalInferMs = 0L
+
         for ((tx, ty) in tileCoords) {
             val tileImg = Bitmap.createBitmap(canvas, tx, ty, 512, 512)
             val tileMask = Bitmap.createBitmap(mask, tx, ty, 512, 512)
 
-            val tileResult = try {
-                executeSingleTile(tileImg, tileMask, backend)
-            } catch (t: Throwable) {
-                Log.w(TAG, "Tile at ($tx, $ty) failed via resident daemon: ${t.message}; falling back to reconstructor")
-                fallbackTile(tileImg)
-            }
+            val (tileResult, tileInferMs) = executeSingleTile(tileImg, tileMask, backend)
+            totalInferMs += tileInferMs
 
             // Copy 512x512 tileResult into outPixels at (tx, ty)
             val tilePixels = IntArray(512 * 512)
@@ -447,29 +503,33 @@ class NeuralSrEngine(
         canvas.recycle()
         mask.recycle()
 
+        val tPost0 = System.currentTimeMillis()
         outCanvas.setPixels(outPixels, 0, 1024, 0, 0, 1024, 1024)
 
         // Step 4: Feathered Seam Blending & Ground-Truth Anchor Preservation
         featherSeams(outCanvas, src512, SEAM_SIZE)
+        val tPost = System.currentTimeMillis() - tPost0
 
-        return outCanvas
+        val totalMs = System.currentTimeMillis() - t0
+        return Pair(outCanvas, PassMetrics(tPrep, totalInferMs, tPost, totalMs))
     }
 
     /**
      * Dispatches a single 512x512 tile to the resident FastRPC daemon on 127.0.0.1:55555.
      * Uses RAM-disk tmpfs (/tmp/sr_shm) staging to eliminate flash memory writes.
-     * Enforces model-specific mask polarity auto-correction:
-     * - LaMa: inverted = false (1.0 = hole, 0.0 = context)
-     * - MIGAN & AOT-GAN: inverted = true (0.0 = hole, 1.0 = context)
+     * Enforces model-specific mask polarity auto-correction & tensor normalization:
+     * - LaMa: inverted = false (1.0 = hole, 0.0 = context), image in [-1.0, 1.0]
+     * - MIGAN: inverted = true (0.0 = hole, 1.0 = context), image in [-1.0, 1.0]
+     * - AOT-GAN: inverted = true (0.0 = hole, 1.0 = context), image in [0.0, 1.0]
      */
-    private fun executeSingleTile(tileImg: Bitmap, tileMask: Bitmap, backend: Backend): Bitmap {
+    private fun executeSingleTile(tileImg: Bitmap, tileMask: Bitmap, backend: Backend): Pair<Bitmap, Long> {
         val baseKey = when {
             daemonKey.contains("lama") -> "lama"
             daemonKey.contains("aot") -> "aotgan"
             else -> "migan"
         }
-        // Mask polarity auto-correction
         val isInverted = baseKey.startsWith("migan") || baseKey.startsWith("aotgan")
+        val isMinusOneToOne = baseKey.startsWith("migan") || baseKey.startsWith("lama")
 
         val fullDaemonKey = baseKey + when (backend) {
             Backend.NPU -> ""
@@ -480,6 +540,11 @@ class NeuralSrEngine(
         // Prefer RAM-disk tmpfs (/tmp/sr_shm) for high-speed in-memory buffer streaming
         val shmDir = File("/tmp/sr_shm")
         val stagingDir = if (shmDir.exists() || shmDir.mkdirs()) shmDir else File(DEVICE_LAMA_DIR, "sr_shm").apply { mkdirs() }
+        try {
+            stagingDir.setReadable(true, false)
+            stagingDir.setWritable(true, false)
+            stagingDir.setExecutable(true, false)
+        } catch (_: Throwable) {}
 
         val rawImgFile = File(stagingDir, "sr_tile_img_${id}.raw")
         val rawMaskFile = File(stagingDir, "sr_tile_mask_${id}.raw")
@@ -490,7 +555,7 @@ class NeuralSrEngine(
             if (rawMaskFile.exists()) rawMaskFile.delete()
             if (destOutFile.exists()) destOutFile.delete()
 
-            val imgBytes = bitmapToFloat32Raw(tileImg, 512, 512)
+            val imgBytes = bitmapToFloat32Raw(tileImg, 512, 512, normalizeMinusOneToOne = isMinusOneToOne)
             val maskBytes = maskToFloat32Raw(tileMask, 512, 512, inverted = isInverted)
 
             FileOutputStream(rawImgFile).use { it.write(imgBytes) }
@@ -507,48 +572,66 @@ class NeuralSrEngine(
             if (daemonOk && destOutFile.exists() && destOutFile.length() > 0) {
                 Log.d(TAG, "⚡ Daemon tile $fullDaemonKey executed via RAM-disk in ${dLat}ms")
                 val rawOut = destOutFile.readBytes()
-                return rawFloat32ToBitmap(rawOut, 512, 512)
+                val decoded = rawFloat32ToBitmap(rawOut, 512, 512)
+                return Pair(decoded, dLat)
             }
         } catch (e: Exception) {
             Log.w(TAG, "RAM-disk daemon execution failed: ${e.message}; trying driver fallback")
         }
 
         // Fallback to process driver inference
+        val t0 = System.currentTimeMillis()
         val telemetry = OnDeviceProcessDriver.executeInference(
             image = tileImg,
             mask = tileMask,
             modelKey = baseKey,
             backend = backend
         )
-        return telemetry.resultBitmap
+        val lat = System.currentTimeMillis() - t0
+        return Pair(telemetry.resultBitmap, lat)
     }
 
     /**
      * Stable Diffusion Latent 2x Super-Resolution:
-     * 512x512 tiled latent diffusion pipeline with 64px overlap margin and
-     * Spherical Linear Interpolation (Slerp) on noise/boundary transitions.
+     * 2x upscaling using latent img2img with low denoising strength (sigma = 0.35)
+     * and 12 DPM++ steps on Hexagon NPU, adding high-frequency photorealistic detail
+     * without geometric distortion.
      */
-    private fun executeSdLatentSr(src: Bitmap): Bitmap {
+    private fun executeSdLatentSr(src: Bitmap): Pair<Bitmap, PassMetrics> {
+        val t0 = System.currentTimeMillis()
+
+        // Step 1: Upscale source canvas directly to 1024x1024 using bicubic interpolation
+        val tPrep0 = System.currentTimeMillis()
+        val bicubic1024 = Bitmap.createScaledBitmap(src, 1024, 1024, true)
         val outCanvas = Bitmap.createBitmap(1024, 1024, Bitmap.Config.ARGB_8888)
-        val (canvas, mask) = createInterleavedSubPixel(src)
+        val outPixels = IntArray(1024 * 1024)
+        bicubic1024.getPixels(outPixels, 0, 1024, 0, 0, 1024, 1024)
+
+        // Latent img2img uniform mask with sigma = 0.35 (value ~ 89/255)
+        val img2imgMask = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888)
+        val maskPixels = IntArray(512 * 512)
+        val sigmaVal = (0.35f * 255f).roundToInt().coerceIn(0, 255)
+        java.util.Arrays.fill(maskPixels, (0xFF shl 24) or (sigmaVal shl 16) or (sigmaVal shl 8) or sigmaVal)
+        img2imgMask.setPixels(maskPixels, 0, 512, 0, 0, 512, 512)
+        val tPrep = System.currentTimeMillis() - tPrep0
 
         val tileCoords = listOf(
             Pair(0, 0), Pair(512, 0), Pair(0, 512), Pair(512, 512)
         )
 
-        val outPixels = IntArray(1024 * 1024)
+        val prompt = "ultra-high resolution photograph, fine crisp texture, sharp intricate details, 4k 8k masterwork"
+        val negPrompt = "blur, painting, lowres, artifact, deformation, cartoon"
+
+        var totalInferMs = 0L
 
         for ((tx, ty) in tileCoords) {
-            val tileImg = Bitmap.createBitmap(canvas, tx, ty, 512, 512)
-            val tileMask = Bitmap.createBitmap(mask, tx, ty, 512, 512)
+            val tileImg = Bitmap.createBitmap(bicubic1024, tx, ty, 512, 512)
 
-            val prompt = "ultra-high resolution photograph, fine crisp texture, sharp intricate details, 4k 8k masterwork"
-            val negPrompt = "blur, painting, lowres, artifact, deformation, cartoon"
-
+            val tTile0 = System.currentTimeMillis()
             val tileResult = try {
                 val t = OnDeviceProcessDriver.executeInference(
                     image = tileImg,
-                    mask = tileMask,
+                    mask = img2imgMask,
                     modelKey = "SD",
                     backend = Backend.NPU,
                     positivePrompt = prompt,
@@ -557,9 +640,10 @@ class NeuralSrEngine(
                 )
                 t.resultBitmap
             } catch (e: Throwable) {
-                Log.w(TAG, "SD Latent SR tile at ($tx, $ty) failed: ${e.message}; using fallback")
-                fallbackTile(tileImg)
+                Log.w(TAG, "SD Latent SR tile at ($tx, $ty) failed: ${e.message}; using bicubic tile")
+                tileImg
             }
+            totalInferMs += (System.currentTimeMillis() - tTile0)
 
             val tilePixels = IntArray(512 * 512)
             tileResult.getPixels(tilePixels, 0, 512, 0, 0, 512, 512)
@@ -570,14 +654,14 @@ class NeuralSrEngine(
             }
 
             tileImg.recycle()
-            tileMask.recycle()
             if (tileResult !== tileImg) tileResult.recycle()
         }
 
-        canvas.recycle()
-        mask.recycle()
+        bicubic1024.recycle()
+        img2imgMask.recycle()
 
         // Slerp Seam Blending across 64px overlap margin
+        val tPost0 = System.currentTimeMillis()
         val midX = 512
         val midY = 512
         val halfOverlap = SD_OVERLAP_PX / 2
@@ -623,11 +707,9 @@ class NeuralSrEngine(
         }
 
         outCanvas.setPixels(outPixels, 0, 1024, 0, 0, 1024, 1024)
-        return outCanvas
-    }
+        val tPost = System.currentTimeMillis() - tPost0
 
-    /** High-fidelity algorithmic fallback for host environments without NPU hardware. */
-    private fun fallbackTile(tile: Bitmap): Bitmap {
-        return TarshSrEngine().run(tile, Backend.CPU)
+        val totalMs = System.currentTimeMillis() - t0
+        return Pair(outCanvas, PassMetrics(tPrep, totalInferMs, tPost, totalMs))
     }
 }
