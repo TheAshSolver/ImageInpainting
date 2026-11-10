@@ -176,3 +176,21 @@
 - **Active Registry**: `migan_sr`, `lama_sr`, `aotgan_sr`, `sd_sr`, `tarsh`, and `bicubic` registered as fully functional engines in `SuperResolution.kt` and `MainActivity.kt`.
 - **Architectural Documentation**: Complete design and contrast audit documented in `artifacts/APP_DESIGN_AUDIT.md`.
 
+### 9.3 Application Branding & Visual Identity
+- **Application Label**: Updated to **`Snapdragon Inpaint Studio`** in `strings.xml` and manifest metadata.
+- **Adaptive Vector Launcher Icon**:
+  - Replaced legacy V4 vector shapes with modern high-tech visual identity: Hexagon NPU die core (`#111827` / `#1E3A8A`), generative AI stylus with precision titanium ferrule and emerald/cyan nib (`#10B981` / `#00F0FF`), radiant 4-point golden starburst (`#FBBF24` / `#FFFFFF`), precision corner registration reticles (`#38BDF8`), and silicon runtime status LEDs (`#00F0FF` NPU, `#A855F7` GPU, `#10B981` CPU).
+  - Deployed across `ic_launcher_background.xml`, `ic_launcher_foreground.xml`, `ic_launcher.xml`, and `ic_launcher_round.xml`.
+
+### 9.4 On-Device Verification on Snapdragon 8 Elite (SM8750P, Serial 8f27557f)
+- **Deployment**: APK compiled and streamed to device via `adb install -r -t app-debug.apk` (`Success`).
+- **Resident FastRPC Daemon Execution**:
+  - `migan_sr` (NPU): 4 quadrant tiles dispatched over FastRPC socket to Hexagon HTP v79 DSP (861–878 ms/tile) → Reconstructed output `1024x1024` in **3924 ms**.
+  - `lama_sr` (NPU): 4 quadrant tiles dispatched to Hexagon DSP (2138–2153 ms/tile) → Reconstructed output `1024x1024` in **8941 ms**.
+  - `tarsh` (CPU): Executed 2x (`1024x1024` in **124 ms**) and 4x (`2048x2048` in **207 ms**).
+  - `bicubic` (CPU): Executed 2x (`1024x1024` in **8 ms**) and 8x (`4096x4096` in **39 ms**).
+- **Screenshots Captured**:
+  - `artifacts/figures/redesigned_inpaint_screen.png` (Consolidated Inpaint Studio screen).
+  - `artifacts/figures/redesigned_sr_screen.png` (High-contrast Super-Resolution screen with split CompareView).
+
+
