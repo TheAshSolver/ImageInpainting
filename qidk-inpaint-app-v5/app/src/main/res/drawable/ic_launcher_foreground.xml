@@ -5,81 +5,117 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Corner Viewfinder Zoom Reticles (QoL Zoom Feature) -->
+    <!-- Viewfinder Corner Registration Brackets -->
     <!-- Top-Left -->
     <path
         android:strokeColor="#38BDF8"
         android:strokeWidth="2.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M18,25 L18,18 L25,18" />
+        android:pathData="M24,32 L24,24 L32,24" />
     <!-- Top-Right -->
     <path
         android:strokeColor="#38BDF8"
         android:strokeWidth="2.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M83,18 L90,18 L90,25" />
+        android:pathData="M76,24 L84,24 L84,32" />
     <!-- Bottom-Left -->
     <path
         android:strokeColor="#38BDF8"
         android:strokeWidth="2.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M18,81 L18,88 L25,88" />
+        android:pathData="M24,76 L24,84 L32,84" />
     <!-- Bottom-Right -->
     <path
         android:strokeColor="#38BDF8"
         android:strokeWidth="2.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M83,88 L90,88 L90,81" />
+        android:pathData="M76,84 L84,84 L84,76" />
 
-    <!-- Neural Diffusion AI Sparkle (Gold / Amber) -->
-    <path
-        android:fillColor="#F59E0B"
-        android:pathData="M54,16 L56,21 L61,23 L56,25 L54,30 L52,25 L47,23 L52,21 Z" />
-
-    <!-- Bold High-Contrast "V" Glyph (White stroke, Electric Cyan fill) -->
-    <path
-        android:fillColor="#00F0FF"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="1.2"
-        android:strokeLineJoin="miter"
-        android:pathData="M14,35 L28,75 H38 L52,35 H42 L33,59 L24,35 Z" />
-
-    <!-- Bold High-Contrast "4" Glyph Body (White stroke, Electric Cyan fill) -->
-    <path
-        android:fillColor="#00F0FF"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="1.2"
-        android:strokeLineJoin="miter"
-        android:pathData="M72,35 L50,64 H72 V75 H82 V64 H88 V56 H82 V35 Z" />
-
-    <!-- "4" Glyph Inner Cutout (Matching inner plate color) -->
+    <!-- Hexagon NPU Substrate Core Die -->
     <path
         android:fillColor="#111827"
-        android:pathData="M72,44 L61,56 H72 Z" />
+        android:strokeColor="#1E3A8A"
+        android:strokeWidth="1.5"
+        android:pathData="M54,26 L76,38 L76,68 L54,80 L32,68 L32,38 Z" />
 
-    <!-- Bottom Pill Chip [V4 NPU / Multi-Engine] -->
+    <!-- Circuit Path Interconnect -->
     <path
-        android:fillColor="#1E1B4B"
-        android:strokeColor="#818CF8"
+        android:strokeColor="#0284C7"
         android:strokeWidth="1.2"
-        android:pathData="M33,83 h42 a5.5,5.5 0 0 1 5.5,5.5 v0 a5.5,5.5 0 0 1 -5.5,5.5 h-42 a5.5,5.5 0 0 1 -5.5,-5.5 v0 a5.5,5.5 0 0 1 5.5,-5.5 z" />
+        android:strokeLineCap="round"
+        android:pathData="M32,53 L22,53 M76,53 L86,53 M54,26 L54,16" />
 
-    <!-- Model Status LED Accents -->
+    <!-- Stylus / Brush Handle (Midnight Blue with Indigo Highlight) -->
+    <path
+        android:fillColor="#1E3A8A"
+        android:strokeColor="#3B82F6"
+        android:strokeWidth="1.5"
+        android:pathData="M26,82 L34,90 L53,71 L45,63 Z" />
+
+    <!-- Stylus Grip Segment (Electric Blue) -->
+    <path
+        android:fillColor="#2563EB"
+        android:strokeColor="#60A5FA"
+        android:strokeWidth="1.2"
+        android:pathData="M43,65 L51,73 L58,66 L50,58 Z" />
+
+    <!-- Precision Ferrule Collar (Titanium Silver) -->
+    <path
+        android:fillColor="#E2E8F0"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.0"
+        android:pathData="M49,59 L57,67 L62,62 L54,54 Z" />
+
+    <!-- Generative Inpaint Nib Tip (Electric Emerald / Cyan Glow) -->
     <path
         android:fillColor="#00F0FF"
-        android:pathData="M38,88.5 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
-    <path
-        android:fillColor="#A855F7"
-        android:pathData="M48,88.5 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
-    <path
-        android:fillColor="#F59E0B"
-        android:pathData="M58,88.5 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.2"
+        android:pathData="M53,55 L61,63 L65,49 Z" />
+
     <path
         android:fillColor="#10B981"
-        android:pathData="M68,88.5 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+        android:pathData="M56,52 L61,57 L65,49 Z" />
+
+    <!-- Primary Generative Starburst Core (Golden Sparkle) -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M65,33 L67.5,44.5 L79,47 L67.5,49.5 L65,61 L62.5,49.5 L51,47 L62.5,44.5 Z" />
+
+    <!-- Starburst Inner Brilliant White Core -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M65,39 L66.5,44.5 L72,47 L66.5,49.5 L65,55 L63.5,49.5 L58,47 L63.5,44.5 Z" />
+
+    <!-- Ambient AI Sparkles -->
+    <!-- Cyan Top Sparkle -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M78,28 L79,32 L83,33 L79,34 L78,38 L77,34 L73,33 L77,32 Z" />
+
+    <!-- Violet Right Sparkle -->
+    <path
+        android:fillColor="#C084FC"
+        android:pathData="M78,57 L79,60 L82,61 L79,62 L78,65 L77,62 L74,61 L77,60 Z" />
+
+    <!-- Emerald Left Micro Sparkle -->
+    <path
+        android:fillColor="#34D399"
+        android:pathData="M42,38 L43,41 L46,42 L43,43 L42,46 L41,43 L38,42 L41,41 Z" />
+
+    <!-- Hardware Backend Status Indicators (NPU / GPU / CPU Status LEDs) -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M46,86 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+    <path
+        android:fillColor="#A855F7"
+        android:pathData="M54,86 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M62,86 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
 
 </vector>
