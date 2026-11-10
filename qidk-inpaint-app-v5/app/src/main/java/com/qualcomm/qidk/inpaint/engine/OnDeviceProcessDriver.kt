@@ -15,6 +15,14 @@ import qidk.fix.ModelFamily
 import qidk.fix.SdRunnerCommand
 import qidk.fix.SmartPrompt
 
+data class SmartTraceInfo(
+    val stage1FullImage: String,
+    val stage2MaskedContext: String,
+    val stage3UserInput: String,
+    val stage4FinalPositive: String,
+    val stage5Negative: String
+)
+
 data class InferenceTelemetry(
     val modelName: String,
     val executionMode: String,
@@ -26,7 +34,8 @@ data class InferenceTelemetry(
     val endTempC: Float,
     val rawCurrentUa: Long?,
     val rawVoltageUv: Long?,
-    val resultBitmap: Bitmap
+    val resultBitmap: Bitmap,
+    val smartTrace: SmartTraceInfo? = null
 )
 
 object OnDeviceProcessDriver {
@@ -294,6 +303,45 @@ object OnDeviceProcessDriver {
         return outBmp
     }
 
+    fun analyzeSmartPipeline(
+        image: Bitmap,
+        mask: Bitmap,
+        userPrompt: String,
+        userNeg: String
+    ): SmartTraceInfo {
+        val w = 512
+        val h = 512
+        val img512 = if (image.width == w && image.height == h) image else Bitmap.createScaledBitmap(image, w, h, true)
+        val msk512 = if (mask.width == w && mask.height == h) mask else Bitmap.createScaledBitmap(mask, w, h, false)
+        val argb = IntArray(w * h).also { img512.getPixels(it, 0, w, 0, 0, w, h) }
+        val holeBytes = ClassicalInpainter.holeBytes(msk512)
+        val d = SmartPrompt.analyse(argb, holeBytes, w, h)
+
+        var holePx = 0
+        for (b in holeBytes) if (b.toInt() != 0) holePx++
+        val holePct = (holePx * 100.0f) / (w * h)
+
+        val s1 = if (d != null) {
+            "Resolution: 512x512 | RGB: (%.0f, %.0f, %.0f) | Ambient Luma: %.1f | Lighting: %s".format(d.meanR, d.meanG, d.meanB, d.luma, d.light)
+        } else {
+            "Resolution: ${image.width}x${image.height} ARGB_8888 | Standard Photographic Context"
+        }
+
+        val s2 = if (d != null) {
+            "Void: %d px (%.1f%%) | Surface: %s | Texture: %s | Edge Grad: %.1f | Lens: %s".format(holePx, holePct, d.surface, d.texture, d.grad, d.lens)
+        } else {
+            "Void: %d px (%.1f%%) | Boundary Context Analysis Active".format(holePx, holePct)
+        }
+
+        val uPrompt = userPrompt.trim()
+        val s3 = if (uPrompt.isEmpty()) "[None - Empty User Prompt (Context Infill)]" else uPrompt
+
+        val s4 = if (d != null) SmartPrompt.build(uPrompt, d) else if (uPrompt.isEmpty()) "seamless natural background infill, high resolution photo" else uPrompt
+        val s5 = SmartPrompt.negative(userNeg)
+
+        return SmartTraceInfo(s1, s2, s3, s4, s5)
+    }
+
     fun executeInference(
         image: Bitmap,
         mask: Bitmap,
@@ -364,16 +412,30 @@ object OnDeviceProcessDriver {
             val steps = if (is20Step || isInefficientSd) 20 else 12
             var pos = positivePrompt.trim()
             var neg = negativePrompt.trim()
+            var smartTraceInfo: SmartTraceInfo? = null
             val isSmart = smartPrompt || targetModel.contains("SMART")
             if (isSmart) {
                 val img512 = if (image.width == 512 && image.height == 512) image else Bitmap.createScaledBitmap(image, 512, 512, true)
                 val msk512 = if (mask.width == 512 && mask.height == 512) mask else Bitmap.createScaledBitmap(mask, 512, 512, false)
                 val argb = IntArray(512 * 512).also { img512.getPixels(it, 0, 512, 0, 0, 512, 512) }
-                val d = SmartPrompt.analyse(argb, ClassicalInpainter.holeBytes(msk512), 512, 512)
+                val holeBytes = ClassicalInpainter.holeBytes(msk512)
+                val d = SmartPrompt.analyse(argb, holeBytes, 512, 512)
                 if (d != null) {
                     Log.i("QIDK.SD", "context: $d")
-                    pos = SmartPrompt.build(pos, d)
-                    neg = SmartPrompt.negative(neg)
+                    val synPos = SmartPrompt.build(pos, d)
+                    val synNeg = SmartPrompt.negative(neg)
+                    var holePx = 0
+                    for (b in holeBytes) if (b.toInt() != 0) holePx++
+                    val holePct = (holePx * 100.0f) / (512 * 512)
+                    smartTraceInfo = SmartTraceInfo(
+                        stage1FullImage = "Resolution: 512x512 | RGB: (%.0f, %.0f, %.0f) | Ambient Luma: %.1f | Lighting: %s".format(d.meanR, d.meanG, d.meanB, d.luma, d.light),
+                        stage2MaskedContext = "Void: %d px (%.1f%%) | Surface: %s | Texture: %s | Edge Grad: %.1f | Lens: %s".format(holePx, holePct, d.surface, d.texture, d.grad, d.lens),
+                        stage3UserInput = if (pos.isEmpty()) "[Empty - Auto Inferred Context]" else pos,
+                        stage4FinalPositive = synPos,
+                        stage5Negative = synNeg
+                    )
+                    pos = synPos
+                    neg = synNeg
                 } else {
                     Log.w("QIDK.SD", "smart prompt: no usable context ring, using the user's text unchanged")
                 }
@@ -440,7 +502,8 @@ object OnDeviceProcessDriver {
                     endTempC = endTemp,
                     rawCurrentUa = rawCurrent,
                     rawVoltageUv = rawVoltage,
-                    resultBitmap = resultBmp
+                    resultBitmap = resultBmp,
+                    smartTrace = smartTraceInfo
                 )
             } else {
                 throw RuntimeException("$runnerName failed on NPU (exit $exitCode):\n$logText")

@@ -209,6 +209,10 @@ class SuperResolutionView(
 ) : LinearLayout(context) {
     private val tag = "QIDK.SR"
 
+    private val telemetryBar = TelemetryBarView(context)
+    private val controlCard: LinearLayout
+    private val statusCard: LinearLayout
+    private val cardHeader: TextView
     private val engineSpinner = Spinner(context)
     private val backendSpinner = Spinner(context)
     private val scaleSpinner = Spinner(context)
@@ -223,28 +227,34 @@ class SuperResolutionView(
 
     init {
         orientation = VERTICAL
-        setBackgroundColor(Color.parseColor("#121216"))
+        setBackgroundColor(Color.parseColor("#0B0F19"))
         val density = resources.displayMetrics.density
         val pad = (12 * density).toInt()
         val cornerRadius = 8 * density
 
+        // Persistent Telemetry HUD Bar
+        val lpTelemetry = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply {
+            setMargins(pad, (8 * density).toInt(), pad, (4 * density).toInt())
+        }
+        addView(telemetryBar, lpTelemetry)
+
         // Card Container for Execution Controls
-        val controlCard = LinearLayout(context).apply {
+        controlCard = LinearLayout(context).apply {
             orientation = VERTICAL
             setPadding(pad, pad, pad, pad)
             val gd = GradientDrawable().apply {
-                setColor(Color.parseColor("#1E1E26"))
+                setColor(Color.parseColor("#161F30"))
                 this.cornerRadius = cornerRadius
             }
             background = gd
             val lp = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply {
-                setMargins(pad, pad, pad, (6 * density).toInt())
+                setMargins(pad, (4 * density).toInt(), pad, (6 * density).toInt())
             }
             layoutParams = lp
         }
 
         // Header label
-        val cardHeader = TextView(context).apply {
+        cardHeader = TextView(context).apply {
             text = "⚡ Neural Super-Resolution Engine"
             setTextColor(Color.parseColor("#F8FAFC"))
             textSize = 15f
@@ -340,11 +350,11 @@ class SuperResolutionView(
         addView(compare, LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
 
         // Status / Telemetry Footer Card
-        val statusCard = LinearLayout(context).apply {
+        statusCard = LinearLayout(context).apply {
             orientation = VERTICAL
             setPadding(pad, (8 * density).toInt(), pad, (8 * density).toInt())
             val gd = GradientDrawable().apply {
-                setColor(Color.parseColor("#1E1E26"))
+                setColor(Color.parseColor("#161F30"))
                 this.cornerRadius = cornerRadius
             }
             background = gd
@@ -488,12 +498,74 @@ class SuperResolutionView(
         val out = e.run(src, backend, scale)
         return "engine=$engineId backend=$backend scale=${scale}x out=${out.width}x${out.height} ms=${(System.nanoTime() - t0) / 1_000_000}"
     }
+
+    fun setThemeMode(isDark: Boolean) {
+        val density = resources.displayMetrics.density
+        val cornerRadius = 8 * density
+        val bgCol = if (isDark) Color.parseColor("#0B0F19") else Color.parseColor("#F8FAFC")
+        val cardCol = if (isDark) Color.parseColor("#161F30") else Color.parseColor("#FFFFFF")
+        val textCol = if (isDark) Color.parseColor("#F8FAFC") else Color.parseColor("#0F172A")
+        val borderCol = if (isDark) Color.parseColor("#1E293B") else Color.parseColor("#CBD5E1")
+        val subtextCol = if (isDark) Color.parseColor("#94A3B8") else Color.parseColor("#64748B")
+
+        setBackgroundColor(bgCol)
+        telemetryBar.setThemeColors(cardCol, borderCol, textCol)
+
+        controlCard.background = GradientDrawable().apply {
+            setColor(cardCol)
+            this.cornerRadius = cornerRadius
+            if (!isDark) setStroke((1 * density).toInt(), borderCol)
+        }
+        statusCard.background = GradientDrawable().apply {
+            setColor(cardCol)
+            this.cornerRadius = cornerRadius
+            if (!isDark) setStroke((1 * density).toInt(), borderCol)
+        }
+        cardHeader.setTextColor(textCol)
+        previewBadge.setTextColor(subtextCol)
+        info.setTextColor(textCol)
+    }
 }
 
 /**
  * Tab bar navigation installer: "Inpaint" and "Super Resolution" with sleek dark theme styling.
  */
 object SuperResolutionTab {
+    private var rootLayout: LinearLayout? = null
+    private var barLayout: LinearLayout? = null
+    private var btnInpaintRef: Button? = null
+    private var btnSrRef: Button? = null
+    private var isDarkState: Boolean = true
+    private var isSrActive: Boolean = false
+
+    fun setThemeMode(isDark: Boolean) {
+        isDarkState = isDark
+        val density = rootLayout?.resources?.displayMetrics?.density ?: 2f
+        val bgCol = if (isDark) Color.parseColor("#0B0F19") else Color.parseColor("#F8FAFC")
+        val inactiveCol = if (isDark) Color.parseColor("#161F30") else Color.parseColor("#E2E8F0")
+        val activeCol = Color.parseColor("#2563EB")
+        val inactiveText = if (isDark) Color.parseColor("#94A3B8") else Color.parseColor("#475569")
+        val activeText = Color.WHITE
+
+        rootLayout?.setBackgroundColor(bgCol)
+        barLayout?.setBackgroundColor(bgCol)
+
+        btnInpaintRef?.let { btn ->
+            btn.setTextColor(if (!isSrActive) activeText else inactiveText)
+            btn.background = GradientDrawable().apply {
+                setColor(if (!isSrActive) activeCol else inactiveCol)
+                cornerRadius = 8 * density
+            }
+        }
+        btnSrRef?.let { btn ->
+            btn.setTextColor(if (isSrActive) activeText else inactiveText)
+            btn.background = GradientDrawable().apply {
+                setColor(if (isSrActive) activeCol else inactiveCol)
+                cornerRadius = 8 * density
+            }
+        }
+    }
+
     fun install(activity: Activity, page: View) {
         val content = activity.findViewById<ViewGroup>(android.R.id.content)
         val original = content.getChildAt(0) ?: error("setContentView must be called before SuperResolutionTab.install")
@@ -504,14 +576,16 @@ object SuperResolutionTab {
 
         val root = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.parseColor("#121216"))
+            setBackgroundColor(Color.parseColor("#0B0F19"))
         }
+        rootLayout = root
 
         val bar = LinearLayout(activity).apply {
             orientation = LinearLayout.HORIZONTAL
-            setBackgroundColor(Color.parseColor("#121216"))
+            setBackgroundColor(Color.parseColor("#0B0F19"))
             setPadding((8 * density).toInt(), (6 * density).toInt(), (8 * density).toInt(), (6 * density).toInt())
         }
+        barLayout = bar
 
         fun createTabBtn(label: String, active: Boolean) = Button(activity).apply {
             text = label
@@ -519,7 +593,7 @@ object SuperResolutionTab {
             setTypeface(typeface, android.graphics.Typeface.BOLD)
             textSize = 13f
             val gd = GradientDrawable().apply {
-                setColor(if (active) Color.parseColor("#2563EB") else Color.parseColor("#1E1E26"))
+                setColor(if (active) Color.parseColor("#2563EB") else Color.parseColor("#161F30"))
                 cornerRadius = 8 * density
             }
             background = gd
@@ -527,6 +601,8 @@ object SuperResolutionTab {
 
         val inpaint = createTabBtn("🎨 Inpaint", true)
         val sr = createTabBtn("⚡ Super Resolution", false)
+        btnInpaintRef = inpaint
+        btnSrRef = sr
 
         val btnLp1 = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply {
             marginEnd = (4 * density).toInt()
@@ -544,17 +620,17 @@ object SuperResolutionTab {
         page.visibility = View.GONE
 
         inpaint.setOnClickListener {
+            isSrActive = false
             original.visibility = View.VISIBLE
             page.visibility = View.GONE
-            (inpaint.background as? GradientDrawable)?.setColor(Color.parseColor("#2563EB"))
-            (sr.background as? GradientDrawable)?.setColor(Color.parseColor("#1E1E26"))
+            setThemeMode(isDarkState)
         }
 
         sr.setOnClickListener {
+            isSrActive = true
             original.visibility = View.GONE
             page.visibility = View.VISIBLE
-            (inpaint.background as? GradientDrawable)?.setColor(Color.parseColor("#1E1E26"))
-            (sr.background as? GradientDrawable)?.setColor(Color.parseColor("#2563EB"))
+            setThemeMode(isDarkState)
             (page as? SuperResolutionView)?.refreshSource()
         }
 

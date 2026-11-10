@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mainScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#111827"
+    android:background="#0B0F19"
     android:fillViewport="true">
 
     <LinearLayout
+        android:id="@+id/mainRootLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -15,20 +17,55 @@
         android:focusableInTouchMode="true"
         android:descendantFocusability="beforeDescendants">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Top Header Bar with Theme Toggle -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="⚡ Snapdragon 8 Elite Inpainting"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="6dp">
 
-        <TextView
-            android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/appTitleText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⚡ Snapdragon Inpaint Studio"
+                    android:textColor="#F8FAFC"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/appSubtitleText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hexagon HTP v79 NPU Acceleration • Mobile Studio"
+                    android:textColor="#C084FC"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnThemeToggle"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:text="🌙"
+                android:textSize="18sp"
+                android:backgroundTint="#161F30" />
+        </LinearLayout>
+
+        <!-- Live Hardware Telemetry HUD Bar -->
+        <qidk.fix.TelemetryBarView
+            android:id="@+id/telemetryBar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Hexagon HTP v79 NPU Acceleration • Mobile Studio"
-            android:textColor="#C084FC"
-            android:textSize="13sp"
             android:layout_marginBottom="12dp" />
 
         <!-- Source Image Controls -->
@@ -47,7 +84,7 @@
                 android:textAllCaps="false"
                 android:textSize="12sp"
                 android:layout_marginEnd="3dp"
-                android:backgroundTint="#374151" />
+                android:backgroundTint="#1E293B" />
 
             <Button
                 android:id="@+id/btnCamera"
@@ -59,7 +96,7 @@
                 android:textSize="12sp"
                 android:layout_marginStart="3dp"
                 android:layout_marginEnd="3dp"
-                android:backgroundTint="#374151" />
+                android:backgroundTint="#1E293B" />
 
             <Button
                 android:id="@+id/btnLoadSample"
@@ -75,9 +112,10 @@
 
         <!-- Interactive Canvas View -->
         <FrameLayout
+            android:id="@+id/canvasContainer"
             android:layout_width="match_parent"
             android:layout_height="320dp"
-            android:background="#1F2937"
+            android:background="#161F30"
             android:layout_marginBottom="8dp">
 
             <com.qualcomm.qidk.inpaint.ui.InpaintCanvasView
@@ -99,7 +137,7 @@
                 android:layout_gravity="top|end"
                 android:layout_margin="10dp"
                 android:orientation="horizontal"
-                android:background="#D91E293B"
+                android:background="#D9161F30"
                 android:padding="2dp">
 
                 <Button
@@ -111,7 +149,7 @@
                     android:padding="0dp"
                     android:text="➕"
                     android:textSize="12sp"
-                    android:backgroundTint="#334155" />
+                    android:backgroundTint="#1E293B" />
 
                 <Button
                     android:id="@+id/btnZoomOut"
@@ -123,7 +161,7 @@
                     android:text="➖"
                     android:textSize="12sp"
                     android:layout_marginStart="3dp"
-                    android:backgroundTint="#334155" />
+                    android:backgroundTint="#1E293B" />
             </LinearLayout>
         </FrameLayout>
 
@@ -142,7 +180,7 @@
                 android:text="🖌️ Manual Brush"
                 android:textAllCaps="false"
                 android:textSize="12sp"
-                android:minHeight="40dp"
+                android:minHeight="42dp"
                 android:layout_marginEnd="3dp"
                 android:backgroundTint="#2563EB" />
 
@@ -154,10 +192,10 @@
                 android:text="✨ Smart AI Touch"
                 android:textAllCaps="false"
                 android:textSize="12sp"
-                android:minHeight="40dp"
+                android:minHeight="42dp"
                 android:layout_marginStart="3dp"
                 android:layout_marginEnd="3dp"
-                android:backgroundTint="#374151" />
+                android:backgroundTint="#1E293B" />
 
             <Button
                 android:id="@+id/btnModeBox"
@@ -167,9 +205,9 @@
                 android:text="🔲 Box"
                 android:textAllCaps="false"
                 android:textSize="12sp"
-                android:minHeight="40dp"
+                android:minHeight="42dp"
                 android:layout_marginStart="3dp"
-                android:backgroundTint="#374151" />
+                android:backgroundTint="#1E293B" />
         </LinearLayout>
 
         <!-- Secondary Actions Toolbar (Undo, Clear Mask, Reset Zoom) -->
@@ -189,7 +227,7 @@
                 android:textSize="12sp"
                 android:minHeight="38dp"
                 android:layout_marginEnd="3dp"
-                android:backgroundTint="#4B5563" />
+                android:backgroundTint="#334155" />
 
             <Button
                 android:id="@+id/btnClear"
@@ -214,15 +252,16 @@
                 android:textSize="12sp"
                 android:minHeight="38dp"
                 android:layout_marginStart="3dp"
-                android:backgroundTint="#4B5563" />
+                android:backgroundTint="#334155" />
         </LinearLayout>
 
         <!-- Router Recommendation Card -->
         <LinearLayout
+            android:id="@+id/routerCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#1F2937"
+            android:background="#161F30"
             android:padding="12dp"
             android:layout_marginBottom="12dp">
 
@@ -240,7 +279,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Router heuristic analysis ready."
-                android:textColor="#D1D5DB"
+                android:textColor="#94A3B8"
                 android:textSize="12sp"
                 android:layout_marginTop="4dp" />
 
@@ -261,10 +300,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#1F2937"
+            android:background="#161F30"
             android:padding="12dp"
             android:visibility="gone"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -274,6 +313,7 @@
                 android:layout_marginBottom="8dp">
 
                 <TextView
+                    android:id="@+id/tvSdGuidanceTitle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -287,12 +327,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="CLIP Guided"
-                    android:textColor="#9CA3AF"
+                    android:textColor="#94A3B8"
                     android:textSize="11sp" />
             </LinearLayout>
 
             <!-- Positive Prompt -->
             <TextView
+                android:id="@+id/tvPositivePromptLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Positive Prompt (What to generate in hole):"
@@ -306,9 +347,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="44dp"
-                android:background="#374151"
+                android:background="#1E293B"
                 android:textColor="#FFFFFF"
-                android:textColorHint="#9CA3AF"
+                android:textColorHint="#94A3B8"
                 android:hint="e.g. photograph of a beautiful empty scene"
                 android:textSize="13sp"
                 android:padding="10dp"
@@ -337,7 +378,7 @@
                         android:textSize="11sp"
                         android:paddingHorizontal="8dp"
                         android:layout_marginEnd="6dp"
-                        android:backgroundTint="#4B5563" />
+                        android:backgroundTint="#334155" />
 
                     <Button
                         android:id="@+id/chipWood"
@@ -348,7 +389,7 @@
                         android:textSize="11sp"
                         android:paddingHorizontal="8dp"
                         android:layout_marginEnd="6dp"
-                        android:backgroundTint="#4B5563" />
+                        android:backgroundTint="#334155" />
 
                     <Button
                         android:id="@+id/chipNature"
@@ -359,7 +400,7 @@
                         android:textSize="11sp"
                         android:paddingHorizontal="8dp"
                         android:layout_marginEnd="6dp"
-                        android:backgroundTint="#4B5563" />
+                        android:backgroundTint="#334155" />
 
                     <Button
                         android:id="@+id/chipWater"
@@ -370,7 +411,7 @@
                         android:textSize="11sp"
                         android:paddingHorizontal="8dp"
                         android:layout_marginEnd="6dp"
-                        android:backgroundTint="#4B5563" />
+                        android:backgroundTint="#334155" />
 
                     <Button
                         android:id="@+id/chipApple"
@@ -381,12 +422,13 @@
                         android:textSize="11sp"
                         android:paddingHorizontal="8dp"
                         android:layout_marginEnd="6dp"
-                        android:backgroundTint="#4B5563" />
+                        android:backgroundTint="#334155" />
                 </LinearLayout>
             </HorizontalScrollView>
 
             <!-- Negative Prompt -->
             <TextView
+                android:id="@+id/tvNegativePromptLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Negative Prompt (What to avoid):"
@@ -400,9 +442,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="44dp"
-                android:background="#374151"
+                android:background="#1E293B"
                 android:textColor="#FFFFFF"
-                android:textColorHint="#9CA3AF"
+                android:textColorHint="#94A3B8"
                 android:hint="e.g. painting, drawing, glitch, deformed, ugly"
                 android:textSize="13sp"
                 android:padding="10dp"
@@ -415,20 +457,158 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Smart SD: build prompt from surrounding scene"
-                android:textColor="#E5E7EB"
+                android:textColor="#F8FAFC"
                 android:layout_marginTop="6dp" />
+        </LinearLayout>
+
+        <!-- Smart SD Pipeline Trace & Inspector Drawer -->
+        <LinearLayout
+            android:id="@+id/pipelineTraceCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#161F30"
+            android:padding="12dp"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
+                android:id="@+id/pipelineTraceHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:id="@+id/tvTraceHeaderTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="🔍 Pipeline Trace &amp; Prompt Inspector"
+                    android:textColor="#38BDF8"
+                    android:textStyle="bold"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvTraceExpandIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="▼"
+                    android:textColor="#94A3B8"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- Collapsible Body -->
+            <LinearLayout
+                android:id="@+id/pipelineTraceContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp"
+                android:visibility="gone">
+
+                <!-- Stage 1 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Stage 1: Full Image Context"
+                    android:textColor="#10B981"
+                    android:textStyle="bold"
+                    android:textSize="11sp" />
+                <TextView
+                    android:id="@+id/tvTraceStage1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ambient light: natural daylight • Environment: outdoor landscape • Tone: neutral"
+                    android:textColor="#E2E8F0"
+                    android:textSize="11sp"
+                    android:layout_marginBottom="6dp" />
+
+                <!-- Stage 2 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Stage 2: Masked Target Context"
+                    android:textColor="#10B981"
+                    android:textStyle="bold"
+                    android:textSize="11sp" />
+                <TextView
+                    android:id="@+id/tvTraceStage2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Detected void: foreground object • Boundary texture: smooth • Edge gradient: 18.4"
+                    android:textColor="#E2E8F0"
+                    android:textSize="11sp"
+                    android:layout_marginBottom="6dp" />
+
+                <!-- Stage 3 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Stage 3: Raw User Input"
+                    android:textColor="#10B981"
+                    android:textStyle="bold"
+                    android:textSize="11sp" />
+                <TextView
+                    android:id="@+id/tvTraceStage3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="[None - Empty User Prompt]"
+                    android:textColor="#E2E8F0"
+                    android:textSize="11sp"
+                    android:layout_marginBottom="6dp" />
+
+                <!-- Stage 4 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Stage 4: Final Synthesized Positive Prompt"
+                    android:textColor="#38BDF8"
+                    android:textStyle="bold"
+                    android:textSize="11sp" />
+                <TextView
+                    android:id="@+id/tvTraceStage4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="photograph of empty calm water, natural daylight, sharp focus, 8k"
+                    android:textColor="#F8FAFC"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="6dp" />
+
+                <!-- Stage 5 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Stage 5: Active Negative Prompt Conditioning"
+                    android:textColor="#F87171"
+                    android:textStyle="bold"
+                    android:textSize="11sp" />
+                <TextView
+                    android:id="@+id/tvTraceStage5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="painting, drawing, illustration, glitch, deformed, ugly, disfigured, blur"
+                    android:textColor="#FCA5A5"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace" />
+            </LinearLayout>
         </LinearLayout>
 
         <!-- Consolidated Hardware Execution Target Card -->
         <LinearLayout
+            android:id="@+id/executionTargetCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#1F2937"
+            android:background="#161F30"
             android:padding="12dp"
             android:layout_marginBottom="12dp">
 
             <TextView
+                android:id="@+id/tvExecutionTargetTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="⚙️ Execution Target"
@@ -448,7 +628,7 @@
                     android:layout_width="0dp"
                     android:layout_height="48dp"
                     android:layout_weight="1.3"
-                    android:background="#374151"
+                    android:background="#1E293B"
                     android:layout_marginEnd="6dp" />
 
                 <Spinner
@@ -456,7 +636,7 @@
                     android:layout_width="0dp"
                     android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:background="#374151" />
+                    android:background="#1E293B" />
             </LinearLayout>
 
             <Button
@@ -467,15 +647,16 @@
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:textSize="15sp"
-                android:backgroundTint="#10B981" />
+                android:backgroundTint="#E11D48" />
         </LinearLayout>
 
         <!-- Results & Telemetry -->
         <TextView
+            android:id="@+id/tvResultsHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Inpainted Output"
-            android:textColor="#FFFFFF"
+            android:textColor="#F8FAFC"
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
@@ -484,7 +665,7 @@
             android:id="@+id/resultImageView"
             android:layout_width="match_parent"
             android:layout_height="260dp"
-            android:background="#1F2937"
+            android:background="#161F30"
             android:scaleType="fitCenter"
             android:layout_marginBottom="12dp" />
 

@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var backendSpinner: Spinner
     val runtimeSpinner: Spinner get() = backendSpinner
     private lateinit var srEngines: List<SrEngine>
+    private lateinit var srPage: SuperResolutionView
     private lateinit var routerBadgeText: TextView
     private lateinit var routerJustificationText: TextView
     private lateinit var preloadStatusBadge: TextView
@@ -45,6 +46,27 @@ class MainActivity : AppCompatActivity() {
     private lateinit var telemetryCard: View
     private lateinit var telemetryText: TextView
     private lateinit var progressBar: ProgressBar
+
+    // Theme & Inspector HUD Views
+    private lateinit var mainScrollView: View
+    private lateinit var mainRootLayout: View
+    private lateinit var appTitleText: TextView
+    private lateinit var appSubtitleText: TextView
+    private lateinit var btnThemeToggle: Button
+    private lateinit var telemetryBar: TelemetryBarView
+    private lateinit var canvasContainer: View
+    private lateinit var routerCard: View
+    private lateinit var executionTargetCard: View
+    private lateinit var pipelineTraceCard: View
+    private lateinit var pipelineTraceContent: View
+    private lateinit var tvTraceExpandIcon: TextView
+    private lateinit var tvTraceStage1: TextView
+    private lateinit var tvTraceStage2: TextView
+    private lateinit var tvTraceStage3: TextView
+    private lateinit var tvTraceStage4: TextView
+    private lateinit var tvTraceStage5: TextView
+    private lateinit var tvResultsHeader: TextView
+    private var isDarkMode: Boolean = true
 
     private var currentBitmap: Bitmap? = null
 
@@ -72,6 +94,26 @@ class MainActivity : AppCompatActivity() {
         }
         setContentView(R.layout.activity_main)
 
+        // View Binding
+        mainScrollView = findViewById(R.id.mainScrollView)
+        mainRootLayout = findViewById(R.id.mainRootLayout)
+        appTitleText = findViewById(R.id.appTitleText)
+        appSubtitleText = findViewById(R.id.appSubtitleText)
+        btnThemeToggle = findViewById(R.id.btnThemeToggle)
+        telemetryBar = findViewById(R.id.telemetryBar)
+        canvasContainer = findViewById(R.id.canvasContainer)
+        routerCard = findViewById(R.id.routerCard)
+        executionTargetCard = findViewById(R.id.executionTargetCard)
+        pipelineTraceCard = findViewById(R.id.pipelineTraceCard)
+        pipelineTraceContent = findViewById(R.id.pipelineTraceContent)
+        tvTraceExpandIcon = findViewById(R.id.tvTraceExpandIcon)
+        tvTraceStage1 = findViewById(R.id.tvTraceStage1)
+        tvTraceStage2 = findViewById(R.id.tvTraceStage2)
+        tvTraceStage3 = findViewById(R.id.tvTraceStage3)
+        tvTraceStage4 = findViewById(R.id.tvTraceStage4)
+        tvTraceStage5 = findViewById(R.id.tvTraceStage5)
+        tvResultsHeader = findViewById(R.id.tvResultsHeader)
+
         canvasView = findViewById(R.id.inpaintCanvasView)
         resultImageView = findViewById(R.id.resultImageView)
         modelSpinner = findViewById(R.id.modelSpinner)
@@ -98,11 +140,13 @@ class MainActivity : AppCompatActivity() {
             TarshSrEngine(),
             BicubicSrEngine()
         )
-        val srPage = SuperResolutionView(this, srEngines) { canvasView.getSourceBitmap() }
+        srPage = SuperResolutionView(this, srEngines) { canvasView.getSourceBitmap() }
         SuperResolutionTab.install(this, srPage)
 
         RouterRuntime.init(applicationContext)
         registerDebugHooks()
+
+        applyThemeMode(true)
 
         if (savedInstanceState == null) {
             loadDefaultSample()
@@ -142,10 +186,13 @@ class MainActivity : AppCompatActivity() {
                 refreshBackends(selected)
                 val isSd = selected.contains("Stable Diffusion") || selected.contains("Diffusion") || selected.contains("Smart SD")
                 promptCard.visibility = if (isSd) View.VISIBLE else View.GONE
+                pipelineTraceCard.visibility = if (isSd) View.VISIBLE else View.GONE
+                if (isSd) updatePipelineTrace()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 promptCard.visibility = View.GONE
+                pipelineTraceCard.visibility = View.GONE
             }
         }
         refreshBackends(models[0])
@@ -187,6 +234,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         updateModeButtons(InpaintCanvasView.Mode.BRUSH)
+
+        btnThemeToggle.setOnClickListener {
+            applyThemeMode(!isDarkMode)
+        }
+
+        findViewById<View>(R.id.pipelineTraceHeader).setOnClickListener {
+            val willShow = pipelineTraceContent.visibility != View.VISIBLE
+            pipelineTraceContent.visibility = if (willShow) View.VISIBLE else View.GONE
+            tvTraceExpandIcon.text = if (willShow) "▲" else "▼"
+        }
 
         findViewById<Button>(R.id.btnGallery).setOnClickListener {
             pickImageLauncher.launch("image/*")
@@ -251,21 +308,25 @@ class MainActivity : AppCompatActivity() {
             canvasView.resetZoom()
         }
 
-
         findViewById<Button>(R.id.chipClean)?.setOnClickListener {
             etPromptPositive.setText("seamless clean background, natural texture, highly realistic")
+            updatePipelineTrace()
         }
         findViewById<Button>(R.id.chipWood)?.setOnClickListener {
             etPromptPositive.setText("smooth polished wood surface, warm natural indoor lighting")
+            updatePipelineTrace()
         }
         findViewById<Button>(R.id.chipNature)?.setOnClickListener {
             etPromptPositive.setText("lush green foliage and leaves, sharp natural texture")
+            updatePipelineTrace()
         }
         findViewById<Button>(R.id.chipWater)?.setOnClickListener {
             etPromptPositive.setText("crystal clear water surface with gentle ripples")
+            updatePipelineTrace()
         }
         findViewById<Button>(R.id.chipApple)?.setOnClickListener {
             etPromptPositive.setText("fresh crisp red apple, highly detailed, studio lighting")
+            updatePipelineTrace()
         }
 
         findViewById<Button>(R.id.btnLoadSample)?.setOnClickListener {
@@ -275,6 +336,60 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnRunInpaint).setOnClickListener {
             runInpainting()
         }
+    }
+
+    private fun applyThemeMode(dark: Boolean) {
+        isDarkMode = dark
+        val density = resources.displayMetrics.density
+        val cornerRadius = 12 * density
+
+        val bgCol = if (dark) Color.parseColor("#0B0F19") else Color.parseColor("#F8FAFC")
+        val cardCol = if (dark) Color.parseColor("#161F30") else Color.parseColor("#FFFFFF")
+        val cardBorder = if (dark) Color.parseColor("#1E293B") else Color.parseColor("#CBD5E1")
+        val primaryText = if (dark) Color.parseColor("#F8FAFC") else Color.parseColor("#0F172A")
+        val secondaryText = if (dark) Color.parseColor("#94A3B8") else Color.parseColor("#64748B")
+        val inputBg = if (dark) Color.parseColor("#1E293B") else Color.parseColor("#F1F5F9")
+        val toggleBg = if (dark) Color.parseColor("#161F30") else Color.parseColor("#E2E8F0")
+
+        btnThemeToggle.text = if (dark) "🌙" else "☀️"
+        btnThemeToggle.backgroundTintList = ColorStateList.valueOf(toggleBg)
+
+        mainScrollView.setBackgroundColor(bgCol)
+        mainRootLayout.setBackgroundColor(bgCol)
+        appTitleText.setTextColor(primaryText)
+        tvResultsHeader.setTextColor(primaryText)
+
+        telemetryBar.setThemeColors(cardCol, cardBorder, primaryText)
+
+        fun styleCard(v: View) {
+            v.background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(cardCol)
+                this.cornerRadius = cornerRadius
+                if (!dark) setStroke((1 * density).toInt(), cardBorder)
+            }
+        }
+
+        styleCard(canvasContainer)
+        styleCard(routerCard)
+        styleCard(promptCard)
+        styleCard(pipelineTraceCard)
+        styleCard(executionTargetCard)
+        styleCard(telemetryCard)
+
+        etPromptPositive.setBackgroundColor(inputBg)
+        etPromptPositive.setTextColor(primaryText)
+        etPromptPositive.setHintTextColor(secondaryText)
+
+        etPromptNegative.setBackgroundColor(inputBg)
+        etPromptNegative.setTextColor(primaryText)
+        etPromptNegative.setHintTextColor(secondaryText)
+
+        modelSpinner.setBackgroundColor(inputBg)
+        backendSpinner.setBackgroundColor(inputBg)
+        resultImageView.setBackgroundColor(cardCol)
+
+        srPage.setThemeMode(dark)
+        SuperResolutionTab.setThemeMode(dark)
     }
 
     private fun showSamplePickerDialog() {
@@ -429,6 +544,21 @@ class MainActivity : AppCompatActivity() {
         routerBadgeText.setTextColor(color)
         routerBadgeText.text = "🎯 RECOMMENDED: ${decision.recommendedModel} (${decision.ruleTriggered})"
         routerJustificationText.text = decision.justification
+
+        updatePipelineTrace()
+    }
+
+    private fun updatePipelineTrace() {
+        val src = canvasView.getSourceBitmap() ?: return
+        val mask = canvasView.getMaskBitmap()
+        val pos = etPromptPositive.text.toString()
+        val neg = etPromptNegative.text.toString()
+        val trace = OnDeviceProcessDriver.analyzeSmartPipeline(src, mask, pos, neg)
+        tvTraceStage1.text = trace.stage1FullImage
+        tvTraceStage2.text = trace.stage2MaskedContext
+        tvTraceStage3.text = trace.stage3UserInput
+        tvTraceStage4.text = trace.stage4FinalPositive
+        tvTraceStage5.text = trace.stage5Negative
     }
 
     private fun runInpainting() {
@@ -497,6 +627,17 @@ class MainActivity : AppCompatActivity() {
                     backendSpinner.isEnabled = true
                     resultImageView.setImageBitmap(telemetry.resultBitmap)
                     telemetryCard.visibility = View.VISIBLE
+
+                    telemetry.smartTrace?.let { trace ->
+                        tvTraceStage1.text = trace.stage1FullImage
+                        tvTraceStage2.text = trace.stage2MaskedContext
+                        tvTraceStage3.text = trace.stage3UserInput
+                        tvTraceStage4.text = trace.stage4FinalPositive
+                        tvTraceStage5.text = trace.stage5Negative
+                        pipelineTraceCard.visibility = View.VISIBLE
+                        pipelineTraceContent.visibility = View.VISIBLE
+                        tvTraceExpandIcon.text = "▲"
+                    }
 
                     val powerStr = if (telemetry.powerWatts != null) "%.2f W".format(telemetry.powerWatts) else "N/A"
                     val energyStr = if (telemetry.energyJoules != null) "%.2f J".format(telemetry.energyJoules) else "N/A"

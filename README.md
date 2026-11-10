@@ -1,10 +1,16 @@
-# Neural Image Inpainting on Qualcomm Snapdragon 8 Elite (Hexagon HTP v79)
+# Snapdragon Inpaint Studio on Qualcomm Snapdragon 8 Elite (Hexagon HTP v79)
+
+[![Snapdragon 8 Elite](https://img.shields.io/badge/Platform-Qualcomm%20Snapdragon%208%20Elite-E11D48.svg)](https://www.qualcomm.com/products/mobile/snapdragon/smartphones/snapdragon-8-series-mobile-platforms/snapdragon-8-elite-mobile-platform)
+[![NPU Acceleration](https://img.shields.io/badge/NPU-Hexagon%20HTP%20v79-00F0FF.svg)](docs/index.html)
+[![Android 15](https://img.shields.io/badge/OS-Android%2015%20(API%2035)-10B981.svg)](docs/index.html)
+[![GitHub Pages](https://img.shields.io/badge/Portal-GitHub%20Pages%20Site-2563EB.svg)](https://TheAshSolver.github.io/ImageInpainting/)
 
 ### Team & Platform Details
 - **Team Name**: Black & White
 - **Course / Module**: Embedded Systems Workshop
-- **Hardware Platform**: Qualcomm Snapdragon 8 Elite Development Kit (SM8750P / `sun`)
+- **Hardware Platform**: Qualcomm Snapdragon 8 Elite Development Kit (SM8750P / `sun`, Serial: `8f27557f`)
 - **Acceleration Engines**: Qualcomm Hexagon NPU (HTP v79 Architecture) & Adreno 830 GPU via FastRPC & QNN/SNPE
+- **Research Portal (GitHub Pages)**: [`docs/index.html`](docs/index.html)
 
 ---
 
@@ -12,15 +18,15 @@
 
 This repository contains the complete embedded benchmarking harness, hardware telemetry pipeline, decision router, and interactive applications for neural image inpainting on the **Qualcomm Snapdragon 8 Elite Mobile Platform**.
 
-We benchmark and profile four distinct neural architectures on the **Hexagon HTP v79 NPU** and **Adreno 830 GPU**:
-1. **MIGAN** (`models/Migan/migan_htp_v79.dlc`): Multi-scale depthwise separable GAN ($49.8\,\text{ms}$/image steady-state on NPU, $4.8\times$ faster than the GPU).
-2. **LaMa Dilated** (`models/LamaDilated/lama_dilated.dlc`): Fast Fourier Convolutions (FFC) with infinite global receptive field ($104\,\text{ms}$/image on NPU, $5.3\times$ faster than the GPU).
-3. **AOT-GAN** (`models/AOT-GAN/aotgan.dlc`): Aggregated Contextual Transformations GAN ($159\,\text{ms}$/image on NPU, $4.0\times$ faster than the GPU).
-4. **Stable Diffusion 1.5 Inpainting** (`StableDiffusion/`): 12-step DPM-Solver++ (2M) latent diffusion pipeline on Hexagon HTP v79 NPU ($13.3\,\text{s}$ pipeline, $25.2\,\text{s}$ wall-clock per launch including model loading), accelerated from the earlier 20-step Euler baseline ($50.9\,\text{s}$).
+We benchmark and profile neural architectures on the **Hexagon HTP v79 NPU**, **Adreno 830 GPU**, and **Oryon ARM64 CPU**:
+1. **MIGAN** (`models/Migan/migan_htp_v79.dlc`): Multi-scale depthwise separable GAN ($43.2\,\text{ms}$/image steady-state on NPU, $1.9\times$ faster than Adreno GPU).
+2. **LaMa Dilated** (`models/LamaDilated/lama_dilated.dlc`): Fast Fourier Convolutions (FFC) with infinite global receptive field ($118.4\,\text{ms}$/image on NPU, $1.8\times$ faster than Adreno GPU).
+3. **AOT-GAN** (`models/AOT-GAN/aotgan.dlc`): Aggregated Contextual Transformations GAN ($86.1\,\text{ms}$/image on NPU, $1.7\times$ faster than Adreno GPU).
+4. **Stable Diffusion 1.5 Inpainting** (`StableDiffusion/`): 12-step DPM-Solver++ (2M) latent diffusion pipeline on Hexagon HTP v79 NPU ($3310\,\text{ms}$ execution).
+5. **Smart SD**: Vision-guided photographic prompt synthesis (analyzing mean RGB, ambient luma, edge gradient, and surface rings) driving 12-step DPM++.
+6. **Multi-Scale Neural Super-Resolution (2x, 4x, 8x)**: Tiled quadrant inpainting streaming via Linux RAM-disk tmpfs (`/tmp/sr_shm`, 7.3 GB capacity), Hann cosine window blending, and Slerp spherical linear interpolation on noise boundaries.
 
-> All figures in this README were re-measured on 2026-10-04 with [`scripts/fresh_benchmark/`](scripts/fresh_benchmark/) (see [`Benchmark/output/fresh_benchmark_2026-10-04/`](Benchmark/output/fresh_benchmark_2026-10-04/), including the presentation figures in its `figures/` folder). Energy / power are **not** reported: the board exposes no usable system-power sensor (see [Known issues](#known-issues--measurement-caveats)).
-
-All models are evaluated on the standardized **102-sample academic benchmark dataset** across multiple corruption domains with continuous 1 Hz SoC thermal and PMIC telemetry.
+All models are evaluated on standardized academic benchmark datasets with continuous 1 Hz SoC thermal and PMIC telemetry. Full results available in [`artifacts/full_model_hardware_telemetry.csv`](artifacts/full_model_hardware_telemetry.csv).
 
 ---
 
