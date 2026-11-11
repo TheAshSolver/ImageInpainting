@@ -1,7 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.QIDKInpaint" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">#10B981</item>
-        <item name="colorSecondary">#2563EB</item>
-        <item name="android:statusBarColor">#111827</item>
+    <!-- Material 3 DayNight. The Light / Dark toggle in the action bar calls AppCompatDelegate.setDefaultNightMode(); the
+         activity is recreated and every colour below is re-resolved from values/ or values-night/. Nothing is painted in code. -->
+    <style name="Theme.QIDKInpaint" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/qidk_cyan</item>
+        <item name="colorOnPrimary">@color/qidk_on_primary</item>
+        <item name="colorPrimaryContainer">@color/qidk_selected</item>
+        <item name="colorSecondaryContainer">@color/qidk_selected</item>
+        <item name="colorOnSecondaryContainer">@color/qidk_info_text</item>
+        <item name="colorOnPrimaryContainer">@color/qidk_info_text</item>
+        <item name="colorSecondary">@color/qidk_emerald</item>
+        <item name="colorOnSecondary">@color/qidk_on_accent</item>
+        <item name="colorTertiary">@color/qidk_purple</item>
+        <item name="colorOnTertiary">@color/qidk_on_accent</item>
+        <item name="colorError">@color/qidk_crimson</item>
+        <item name="colorOnError">@color/qidk_on_accent</item>
+        <item name="android:colorBackground">@color/qidk_canvas</item>
+        <item name="colorSurface">@color/qidk_card</item>
+        <item name="colorOnSurface">@color/qidk_text</item>
+        <item name="colorOnSurfaceVariant">@color/qidk_text_muted</item>
+        <item name="colorSurfaceVariant">@color/qidk_field</item>
+        <item name="colorOutline">@color/qidk_text_muted</item>
+        <item name="colorOutlineVariant">@color/qidk_outline</item>
+        <item name="colorSurfaceContainerLowest">@color/qidk_well</item>
+        <item name="colorSurfaceContainerLow">@color/qidk_card</item>
+        <item name="colorSurfaceContainer">@color/qidk_card</item>
+        <item name="colorSurfaceContainerHigh">@color/qidk_field</item>
+        <item name="colorSurfaceContainerHighest">@color/qidk_field</item>
+        <item name="android:textColorPrimary">@color/qidk_text</item>
+        <item name="android:textColorSecondary">@color/qidk_text_muted</item>
+        <item name="android:textColorHint">@color/qidk_text_muted</item>
+        <item name="android:statusBarColor">@color/qidk_canvas</item>
+        <item name="android:navigationBarColor">@color/qidk_canvas</item>
+        <item name="android:windowLightStatusBar">@bool/qidk_light_bars</item>
+        <item name="android:windowLightNavigationBar">@bool/qidk_light_bars</item>
+        <item name="spinnerStyle">@style/Widget.QIDK.Spinner</item>
     </style>
 </resources>

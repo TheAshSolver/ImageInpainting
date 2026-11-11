@@ -130,7 +130,7 @@ object SmartPrompt {
         return Descriptor(surface, texture, light, tone, lens, ringPx, mr, mg, mb, luma, grad, cyN)
     }
 
-    /** Stage-1 output: the final positive prompt. The user's own text always comes first. */
+    /** Legacy composer kept for the ring unit tests; the dispatcher now uses [SmartSd.plan]. */
     fun build(userPrompt: String, d: Descriptor): String {
         val user = userPrompt.trim().trimEnd(',', '.', ' ')
         val parts = ArrayList<String>()
@@ -157,8 +157,9 @@ object SmartPrompt {
         return text
     }
 
-    private const val BASE_NEGATIVE = "painting, drawing, illustration, cartoon, glitch, deformed, blurry, low quality, " +
-        "artifacts, text, watermark, frame, border, duplicate, oversaturated"
+    // "frame, border, duplicate" used to be in this list. They are exactly the words that describe eyeglass frames and a
+    // second copy of an object, so "sunglasses" was being pushed away by its own negative prompt (see SmartSd).
+    private const val BASE_NEGATIVE = SmartSd.DEFAULT_NEGATIVE_BASE
 
     fun negative(userNegative: String): String {
         val u = userNegative.trim().trimEnd(',', ' ')
@@ -178,14 +179,17 @@ object SdRunnerCommand {
     fun environment(prompt: String, negative: String) = mapOf("SD_PROMPT" to prompt, "SD_NEG" to negative)
 
     /** [runnerBin], [sdDir] and [exports] are fixed constants of the app, never user text. */
-    fun script(runnerBin: String, sdDir: String, exports: List<String>, steps: Int, cfg: Float, seed: Int): String {
+    fun script(runnerBin: String, sdDir: String, exports: List<String>, steps: Int, cfg: Float, seed: Int, extra: List<String> = emptyList()): String {
         require(steps in MIN_STEPS..MAX_STEPS) { "steps $steps outside $MIN_STEPS..$MAX_STEPS" }
+        // extra runner switches (for example "--strength", "0.30", "--no-composite") are fixed constants of the app, never user text
+        require(extra.all { t -> t.isNotEmpty() && t.all { it.isLetterOrDigit() || it in "-_." } }) { "extra runner arguments must be plain tokens" }
         require(cfg in 1f..20f) { "cfg $cfg outside 1..20" }
         require(runnerBin.isNotEmpty() && runnerBin.all { it.isLetterOrDigit() || it in "/_.-" }) { "runner path must be a plain token" }
         require(sdDir.isNotEmpty() && sdDir.all { it.isLetterOrDigit() || it in "/_.-" }) { "sd dir must be a plain path" }
         val pre = (listOf("cd $sdDir || exit 97") + exports + listOf("rm -f sd_output.png 2>/dev/null")).joinToString("; ")
         val cfgText = String.format(java.util.Locale.US, "%.2f", cfg)
-        return "$pre; $runnerBin --prompt \"\$SD_PROMPT\" --neg \"\$SD_NEG\" --steps $steps --cfg $cfgText --seed $seed; " +
+        val more = if (extra.isEmpty()) "" else " " + extra.joinToString(" ")
+        return "$pre; $runnerBin --prompt \"\$SD_PROMPT\" --neg \"\$SD_NEG\" --steps $steps --cfg $cfgText --seed $seed$more; " +
             "RET=\$?; chmod 666 sd_output.png image.raw mask.raw 2>/dev/null; exit \$RET"
     }
 }

@@ -81,3 +81,4 @@ Benchmark/6000_images/compiled/masks/
 !Benchmark/6000_images/*.csv
 !Benchmark/6000_images/**/*.csv
 
+for_ai.zip
