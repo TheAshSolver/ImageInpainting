@@ -22,8 +22,8 @@ class DaemonTileModel(private val daemonKey: String, private val contract: Model
     private val n = SrWindows.WIN
     private val imgBytes = n * n * 3 * 4
     private val maskBytes = n * n * 4
-    private val inDir = File(LAMA_DIR, "input").apply { mkdirs() }
-    private val outDir = File(LAMA_DIR, "app_live_output_v4").apply { mkdirs() }
+    private val inDir = File(LAMA_DIR, "input").apply { mkdirs(); setReadable(true, false); setWritable(true, false); setExecutable(true, false) }
+    private val outDir = File(LAMA_DIR, "app_live_output_v4").apply { mkdirs(); setReadable(true, false); setWritable(true, false); setExecutable(true, false) }
     private val imgFile = File(inDir, "sr_img_$tag.raw")
     private val maskFile = File(inDir, "sr_mask_$tag.raw")
     private val outFile = File(outDir, "sr_out_$tag.raw")

@@ -50,7 +50,7 @@ if [ -f "$HERE/$APK" ] || [ -f "$APK" ]; then
 else fail "APK not found at $APK (run ./gradlew assembleDebug first)"; fi
 $ADB shell pm grant "$PKG" android.permission.READ_MEDIA_IMAGES >/dev/null 2>&1
 $ADB shell "ls /data/local/tmp/lama /data/local/tmp/sd_runtime 2>/dev/null | head -50" > "$OUT/device_dirs.txt"
-$ADB shell "echo ping | nc -w 1 127.0.0.1 55555 2>/dev/null | head -1" | tr -d '\r' | grep -q PONG && pass "resident daemon answers PING on 55555" || warn "resident daemon silent on 55555 (GAN models fall back to snpe-net-run; SR neural engines will fall back to the classical base)"
+$ADB shell "echo PING | nc -w 1 127.0.0.1 55555 2>/dev/null | head -1" | tr -d '\r' | grep -q PONG && pass "resident daemon answers PING on 55555" || warn "resident daemon silent on 55555 (GAN models fall back to snpe-net-run; SR neural engines will fall back to the classical base)"
 logc; $ADB shell am force-stop "$PKG"; $ADB shell am start -n "$PKG/$ACT" >/dev/null; sleep 6
 $ADB logcat -d | grep -E "FATAL EXCEPTION|AndroidRuntime.*$PKG" > "$OUT/crash_at_start.txt"
 [ -s "$OUT/crash_at_start.txt" ] && fail "crash at start (see $OUT/crash_at_start.txt)" || pass "app starts without a crash"

@@ -585,13 +585,22 @@ object OnDeviceProcessDriver {
         val maskBytes = maskToFloat32Raw(mask, inverted = isMigan)
 
         return try {
-            val inputDir = File(DEVICE_LAMA_DIR, "input")
-            if (!inputDir.exists()) inputDir.mkdirs()
+            val inputDir = File(DEVICE_LAMA_DIR, "input").apply {
+                if (!exists()) mkdirs()
+                setReadable(true, false)
+                setWritable(true, false)
+                setExecutable(true, false)
+            }
 
             val rawImgFile = File(inputDir, "live_img_v4.raw")
             val rawMaskFile = File(inputDir, "live_mask_v4.raw")
             val listFile = File(DEVICE_LAMA_DIR, "live_input_v4.txt")
-            val outDir = File(DEVICE_LAMA_DIR, "app_live_output_v4")
+            val outDir = File(DEVICE_LAMA_DIR, "app_live_output_v4").apply {
+                if (!exists()) mkdirs()
+                setReadable(true, false)
+                setWritable(true, false)
+                setExecutable(true, false)
+            }
 
             if (rawImgFile.exists()) rawImgFile.delete()
             if (rawMaskFile.exists()) rawMaskFile.delete()
