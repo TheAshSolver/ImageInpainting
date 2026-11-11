@@ -831,7 +831,7 @@ class InpaintCanvasView @JvmOverloads constructor(
         sourceBitmap?.let {
             canvas.drawBitmap(it, null, canonicalRect, null)
         } ?: run {
-            canvas.drawColor(Color.DKGRAY)
+            canvas.drawColor(com.google.android.material.color.MaterialColors.getColor(this, com.google.android.material.R.attr.colorSurfaceContainerLowest, Color.DKGRAY))
         }
 
         // Translucent red overlay mask

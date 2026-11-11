@@ -1,0 +1,1 @@
+{"input": [512, 512], "output": [4096, 4096], "scale": 8, "lr_psnr": 49.9, "lr_psnr_bicubic": 52.03, "mae_vs_bicubic": 0.4, "nyq_share": 0.187, "lap_gain": 0.948, "periodic_peak": 90.0, "detail_added": true, "verdict": "PASS", "problems": []}

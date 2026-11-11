@@ -1,157 +1,190 @@
 package qidk.fix
 
 import android.graphics.Bitmap
-import android.graphics.Color
+import org.opencv.android.OpenCVLoader
+import org.opencv.android.Utils
+import org.opencv.core.Mat
+import org.opencv.core.Size
+import org.opencv.imgproc.Imgproc
 
 /**
- * Tarsh's Handbuilt 4-Quadrant Sub-Pixel Reconstructor.
- * Port of meow.py (lines 170-220):
- * 1. 4-quadrant edge-padded sub-kernel accumulation (weights 4, 2, 1 / 9.0).
- * 2. 2x interleaved assembly into 1024x1024 float array.
- * 3. 8-neighbor Laplacian sharpening: (16*center - 2*cardinals - 0.25*diagonals) / 7.0.
- * 4. Value clipping to [0, 255] uint8.
+ * Tarsh's hand-built 4-quadrant sub-pixel reconstructor (port of meow.py lines 170-220), numerically identical to the
+ * previous version of this file but evaluated in horizontal bands: the old code allocated three full-size float planes
+ * for the reconstruction plus a full-size IntArray, about 400 MB at the 2048 -> 4096 pass (out of memory on the default
+ * Java heap). Now the peak is the source pixels plus a few hundred output rows.
+ *
+ *   1. every source pixel (x, y) yields four sub-pixels, each (4 * centre + 1 * diagonal + 2 * vertical + 2 * horizontal) / 9
+ *      with the neighbours on the side of the sub-pixel (edge pixels replicate);
+ *   2. the 2x plane is sharpened with (16 * c - 2 * cardinals - 0.25 * diagonals) / 7 and truncated to [0, 255].
  */
+object TarshCore {
+    const val BAND_ROWS = 128
+
+    /** Reconstruction (before sharpening) of output row [r] for one channel; writes outW floats. */
+    private fun reconRow(src: IntArray, w: Int, h: Int, shift: Int, r: Int, out: FloatArray, outOff: Int) {
+        val y = r shr 1
+        val dy = r and 1
+        val yv = if (dy == 0) (if (y > 0) y - 1 else 0) else (if (y < h - 1) y + 1 else h - 1)
+        val rowC = y * w
+        val rowV = yv * w
+        for (x in 0 until w) {
+            val xn = if (x > 0) x - 1 else 0
+            val xp = if (x < w - 1) x + 1 else w - 1
+            val center = ((src[rowC + x] ushr shift) and 0xFF).toFloat()
+            val vert = ((src[rowV + x] ushr shift) and 0xFF).toFloat()
+            val left = ((src[rowC + xn] ushr shift) and 0xFF).toFloat()
+            val right = ((src[rowC + xp] ushr shift) and 0xFF).toFloat()
+            val dl = ((src[rowV + xn] ushr shift) and 0xFF).toFloat()
+            val dr = ((src[rowV + xp] ushr shift) and 0xFF).toFloat()
+            out[outOff + 2 * x] = (4f * center + dl + 2f * vert + 2f * left) / 9.0f
+            out[outOff + 2 * x + 1] = (4f * center + dr + 2f * vert + 2f * right) / 9.0f
+        }
+    }
+
+    /**
+     * Renders output rows [y0, y1) of the 2x result into [out] (outW * (y1 - y0) ARGB ints).
+     * [src] holds w * h ARGB ints.
+     */
+    fun renderRows(src: IntArray, w: Int, h: Int, y0: Int, y1: Int, out: IntArray) {
+        val outW = w * 2
+        val outH = h * 2
+        require(y0 in 0..outH && y1 in y0..outH) { "rows $y0..$y1 outside 0..$outH" }
+        val rows = y1 - y0
+        if (rows == 0) return
+        // reconstruction rows y0-1 .. y1 (inclusive) feed the sharpening of rows y0 .. y1-1
+        val first = maxOf(0, y0 - 1)
+        val last = minOf(outH - 1, y1)
+        val n = last - first + 1
+        val planes = Array(3) { FloatArray(n * outW) }
+        val shifts = intArrayOf(16, 8, 0)
+        for (c in 0 until 3) for (i in 0 until n) reconRow(src, w, h, shifts[c], first + i, planes[c], i * outW)
+
+        for (y in y0 until y1) {
+            val yTop = if (y > 0) y - 1 else 0
+            val yBot = if (y < outH - 1) y + 1 else outH - 1
+            val rc = (y - first) * outW
+            val rt = (yTop - first) * outW
+            val rb = (yBot - first) * outW
+            for (x in 0 until outW) {
+                val xl = if (x > 0) x - 1 else 0
+                val xr = if (x < outW - 1) x + 1 else outW - 1
+                var px = 0xFF shl 24
+                for (c in 0 until 3) {
+                    val p = planes[c]
+                    val center = p[rc + x]
+                    val cardinals = p[rt + x] + p[rb + x] + p[rc + xl] + p[rc + xr]
+                    val diagonals = p[rt + xl] + p[rt + xr] + p[rb + xl] + p[rb + xr]
+                    val v = ((16.0f * center - 2.0f * cardinals - 0.25f * diagonals) / 7.0f).toInt().coerceIn(0, 255)
+                    px = px or (v shl shifts[c])
+                }
+                out[(y - y0) * outW + x] = px
+            }
+        }
+    }
+}
+
 class TarshSrEngine : SrEngine {
+    init {
+        try {
+            if (!OpenCVLoader.initDebug()) System.loadLibrary("opencv_java4")
+        } catch (_: Throwable) {}
+    }
+
     override val id: String = "tarsh"
     override val label: String = "Tarsh 4-Quadrant Sub-Pixel Reconstructor"
     override val family: ModelFamily = ModelFamily.SR_TARSH
     override val unavailableReason: String? = null
 
-    override fun run(src: Bitmap, backend: Backend): Bitmap = run(src, backend, 2)
-
-    override fun run(src: Bitmap, backend: Backend, scale: Int): Bitmap {
+    override fun runWithTelemetry(src: Bitmap, backend: Backend, scale: Int, progress: SrProgress?): SrExecutionResult {
         BackendMatrix.require(family, backend)
-        require(scale in listOf(2, 4, 8)) { "Scale factor must be 2, 4, or 8 (got $scale)" }
-
-        val passes = when (scale) {
-            2 -> 1
-            4 -> 2
-            8 -> 3
-            else -> 1
-        }
+        val passes = SrRun.passesFor(scale)
+        val monitor = PowerMonitor.get().also { it.start() }
+        val token = monitor.begin(ThermalZones.Group.CPU)
+        val clock = PhaseClock()
 
         var current = src
         for (p in 1..passes) {
-            val next = runSingle2xPass(current)
+            if (progress?.cancelled == true) { if (current !== src) current.recycle(); throw SrCancelled() }
+            val next = pass(current, p, passes, progress, clock)
             if (current !== src) current.recycle()
             current = next
         }
-        return current
+        val finalBmp = if (passes > 1) {
+            val alpha = when (scale) {
+                4 -> 0.48f
+                8 -> 0.28f
+                else -> 1.0f
+            }
+            blendWithBicubic(src, current, scale, alpha, clock)
+        } else current
+        return SrExecutionResult(finalBmp, monitor.end(token, clock, SrRun.coreLabel(Backend.CPU)))
     }
 
-    private fun runSingle2xPass(src: Bitmap): Bitmap {
+    private fun blendWithBicubic(src: Bitmap, tarshOut: Bitmap, scale: Int, alpha: Float, clock: PhaseClock): Bitmap {
+        val outW = src.width * scale
+        val outH = src.height * scale
+        val bicBmp = clock.prep {
+            val srcMat = Mat()
+            val dstMat = Mat()
+            try {
+                Utils.bitmapToMat(src, srcMat)
+                Imgproc.resize(srcMat, dstMat, Size(outW.toDouble(), outH.toDouble()), 0.0, 0.0, Imgproc.INTER_CUBIC)
+                val bmp = Bitmap.createBitmap(outW, outH, Bitmap.Config.ARGB_8888)
+                Utils.matToBitmap(dstMat, bmp)
+                bmp
+            } finally {
+                srcMat.release(); dstMat.release()
+            }
+        }
+
+        val res = clock.post {
+            val out = Bitmap.createBitmap(outW, outH, Bitmap.Config.ARGB_8888)
+            val chunk = 128
+            val tBand = IntArray(outW * chunk)
+            val bBand = IntArray(outW * chunk)
+            val oneMinusAlpha = 1.0f - alpha
+            var y = 0
+            while (y < outH) {
+                val rows = minOf(chunk, outH - y)
+                val len = outW * rows
+                tarshOut.getPixels(tBand, 0, outW, 0, y, outW, rows)
+                bicBmp.getPixels(bBand, 0, outW, 0, y, outW, rows)
+                for (i in 0 until len) {
+                    val tc = tBand[i]
+                    val bc = bBand[i]
+                    val r = (alpha * ((tc ushr 16) and 0xFF) + oneMinusAlpha * ((bc ushr 16) and 0xFF)).toInt().coerceIn(0, 255)
+                    val g = (alpha * ((tc ushr 8) and 0xFF) + oneMinusAlpha * ((bc ushr 8) and 0xFF)).toInt().coerceIn(0, 255)
+                    val b = (alpha * (tc and 0xFF) + oneMinusAlpha * (bc and 0xFF)).toInt().coerceIn(0, 255)
+                    tBand[i] = (0xFF shl 24) or (r shl 16) or (g shl 8) or b
+                }
+                out.setPixels(tBand, 0, outW, 0, y, outW, rows)
+                y += rows
+            }
+            bicBmp.recycle()
+            tarshOut.recycle()
+            out
+        }
+        return res
+    }
+
+    private fun pass(src: Bitmap, p: Int, passes: Int, progress: SrProgress?, clock: PhaseClock): Bitmap {
         val w = src.width
         val h = src.height
-
-        // 1. Extract input RGB channels into float planes
-        val srcPixels = IntArray(w * h)
-        src.getPixels(srcPixels, 0, w, 0, 0, w, h)
-
-        val rPlane = FloatArray(w * h)
-        val gPlane = FloatArray(w * h)
-        val bPlane = FloatArray(w * h)
-
-        for (i in srcPixels.indices) {
-            val c = srcPixels[i]
-            rPlane[i] = ((c ushr 16) and 0xFF).toFloat()
-            gPlane[i] = ((c ushr 8) and 0xFF).toFloat()
-            bPlane[i] = (c and 0xFF).toFloat()
-        }
-
-        // 2. Compute 4-Quadrant Sub-Pixel Assembly for each channel
+        val pixels = IntArray(w * h)
+        clock.prep { src.getPixels(pixels, 0, w, 0, 0, w, h) }
         val outW = w * 2
         val outH = h * 2
-
-        val rRecon = FloatArray(outW * outH)
-        val gRecon = FloatArray(outW * outH)
-        val bRecon = FloatArray(outW * outH)
-
-        processChannelRecon(rPlane, w, h, rRecon)
-        processChannelRecon(gPlane, w, h, gRecon)
-        processChannelRecon(bPlane, w, h, bRecon)
-
-        // 3. 8-Neighbor Kernel Sharpening and pack into result Bitmap
-        val outPixels = IntArray(outW * outH)
-        for (y in 0 until outH) {
-            val yTop = if (y > 0) y - 1 else 0
-            val yBot = if (y < outH - 1) y + 1 else outH - 1
-
-            for (x in 0 until outW) {
-                val xLeft = if (x > 0) x - 1 else 0
-                val xRight = if (x < outW - 1) x + 1 else outW - 1
-
-                val rSharp = sharpenPixel(rRecon, outW, x, y, xLeft, xRight, yTop, yBot)
-                val gSharp = sharpenPixel(gRecon, outW, x, y, xLeft, xRight, yTop, yBot)
-                val bSharp = sharpenPixel(bRecon, outW, x, y, xLeft, xRight, yTop, yBot)
-
-                outPixels[y * outW + x] = (0xFF shl 24) or (rSharp shl 16) or (gSharp shl 8) or bSharp
-            }
+        val out = clock.prep { Bitmap.createBitmap(outW, outH, Bitmap.Config.ARGB_8888) }
+        val band = IntArray(outW * TarshCore.BAND_ROWS)
+        var y = 0
+        while (y < outH) {
+            if (progress?.cancelled == true) { out.recycle(); throw SrCancelled() }
+            progress?.report(p, passes, y, outH, "pass $p/$passes row $y/$outH")
+            val y1 = minOf(outH, y + TarshCore.BAND_ROWS)
+            clock.infer { TarshCore.renderRows(pixels, w, h, y, y1, band) }
+            clock.post { out.setPixels(band, 0, outW, 0, y, outW, y1 - y) }
+            y = y1
         }
-
-        val resultBmp = Bitmap.createBitmap(outW, outH, Bitmap.Config.ARGB_8888)
-        resultBmp.setPixels(outPixels, 0, outW, 0, 0, outW, outH)
-        return resultBmp
-    }
-
-    private fun processChannelRecon(arr: FloatArray, w: Int, h: Int, outRecon: FloatArray) {
-        val outW = w * 2
-
-        for (y in 0 until h) {
-            val yPrev = if (y > 0) y - 1 else 0
-            val yNext = if (y < h - 1) y + 1 else h - 1
-
-            val rowCurr = y * w
-            val rowPrev = yPrev * w
-            val rowNext = yNext * w
-
-            for (x in 0 until w) {
-                val xPrev = if (x > 0) x - 1 else 0
-                val xNext = if (x < w - 1) x + 1 else w - 1
-
-                val center = arr[rowCurr + x]
-                val top = arr[rowPrev + x]
-                val bottom = arr[rowNext + x]
-                val left = arr[rowCurr + xPrev]
-                val right = arr[rowCurr + xNext]
-                val topLeft = arr[rowPrev + xPrev]
-                val topRight = arr[rowPrev + xNext]
-                val bottomLeft = arr[rowNext + xPrev]
-                val bottomRight = arr[rowNext + xNext]
-
-                val subTL = (4f * center + topLeft + 2f * top + 2f * left) / 9.0f
-                val subTR = (4f * center + topRight + 2f * top + 2f * right) / 9.0f
-                val subBL = (4f * center + bottomLeft + 2f * bottom + 2f * left) / 9.0f
-                val subBR = (4f * center + bottomRight + 2f * bottom + 2f * right) / 9.0f
-
-                val outY = y * 2
-                val outX = x * 2
-
-                outRecon[outY * outW + outX] = subTL
-                outRecon[outY * outW + (outX + 1)] = subTR
-                outRecon[(outY + 1) * outW + outX] = subBL
-                outRecon[(outY + 1) * outW + (outX + 1)] = subBR
-            }
-        }
-    }
-
-    private fun sharpenPixel(
-        plane: FloatArray, w: Int,
-        x: Int, y: Int,
-        xLeft: Int, xRight: Int,
-        yTop: Int, yBot: Int
-    ): Int {
-        val center = plane[y * w + x]
-        val top = plane[yTop * w + x]
-        val bottom = plane[yBot * w + x]
-        val left = plane[y * w + xLeft]
-        val right = plane[y * w + xRight]
-
-        val topLeft = plane[yTop * w + xLeft]
-        val topRight = plane[yTop * w + xRight]
-        val bottomLeft = plane[yBot * w + xLeft]
-        val bottomRight = plane[yBot * w + xRight]
-
-        val enhanced = (16.0f * center - 2.0f * (top + bottom + left + right) - 0.25f * (topLeft + topRight + bottomLeft + bottomRight)) / 7.0f
-        return enhanced.toInt().coerceIn(0, 255)
+        return out
     }
 }

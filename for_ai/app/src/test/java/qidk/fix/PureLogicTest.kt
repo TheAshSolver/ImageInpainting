@@ -171,22 +171,6 @@ class PureLogicTest {
         assertTrue("decision took $us us", us < 100.0)
     }
 
-    // ---------------------------------------------------------------- NeuralSrEngine
-    @Test fun neuralSrHannWindowMath() {
-        val w0 = NeuralSrEngine.hannWeight(0, 32)
-        val w31 = NeuralSrEngine.hannWeight(31, 32)
-        val wMid = NeuralSrEngine.hannWeight(15, 32)
-
-        assertTrue("w0 should be near 0: $w0", w0 < 0.01f)
-        assertTrue("w31 should be near 1: $w31", w31 > 0.99f)
-        assertEquals(0.5f, wMid, 0.05f)
-
-        // Monotonic ramp verification
-        var prev = -1.0f
-        for (d in 0 until 32) {
-            val curr = NeuralSrEngine.hannWeight(d, 32)
-            assertTrue("Ramp must be non-decreasing at $d: $curr >= $prev", curr >= prev)
-            prev = curr
-        }
-    }
+    // The Hann-window seam test of the removed lattice super-resolution lived here; the NSDT kernels are covered by
+    // tools/native/test_sr_core.cpp and SrPlanTest.
 }

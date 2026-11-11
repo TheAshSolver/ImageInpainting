@@ -13,7 +13,15 @@ import qidk.fix.ClassicalAlgo
 import qidk.fix.ClassicalInpainter
 import qidk.fix.ModelFamily
 import qidk.fix.SdRunnerCommand
+import qidk.fix.PhaseClock
+import qidk.fix.PowerMonitor
+import qidk.fix.RunTelemetry
 import qidk.fix.SmartPrompt
+import qidk.fix.SmartSd
+import qidk.fix.SmartSdAnalyzer
+import qidk.fix.SmartSdPlan
+import qidk.fix.SrRun
+import qidk.fix.ThermalZones
 
 data class SmartTraceInfo(
     val stage1FullImage: String,
@@ -35,7 +43,9 @@ data class InferenceTelemetry(
     val rawCurrentUa: Long?,
     val rawVoltageUv: Long?,
     val resultBitmap: Bitmap,
-    val smartTrace: SmartTraceInfo? = null
+    val smartTrace: SmartTraceInfo? = null,
+    /** Phase times, silicon-junction delta-T and incremental power / energy (see PowerMeter.kt). */
+    val run: RunTelemetry? = null
 )
 
 object OnDeviceProcessDriver {
@@ -350,7 +360,8 @@ object OnDeviceProcessDriver {
         positivePrompt: String = "",
         negativePrompt: String = "",
         smartPrompt: Boolean = false,
-        seed: Int = 42
+        seed: Int = 42,
+        plan: SmartSdPlan? = null
     ): InferenceTelemetry {
         val startTime = System.currentTimeMillis()
         val targetModel = modelKey.uppercase()
@@ -360,22 +371,32 @@ object OnDeviceProcessDriver {
         // =====================================================================
         ClassicalAlgo.fromText(modelKey)?.let { algo ->
             val t0 = System.currentTimeMillis()
+            val monitorC = PowerMonitor.get().also { it.start() }
+            val tokenC = monitorC.begin(ThermalZones.Group.CPU)
+            val clockC = PhaseClock()
+            val tPrepC = System.nanoTime()
             val img = if (image.width == 512 && image.height == 512) image else Bitmap.createScaledBitmap(image, 512, 512, true)
-            val out = ClassicalInpainter.run(img, ClassicalInpainter.holeBytes(mask), algo)
+            val holeC = ClassicalInpainter.holeBytes(mask)
+            val tInferC = System.nanoTime()
+            val out = ClassicalInpainter.run(img, holeC, algo)
+            val tPostC = System.nanoTime()
+            clockC.addAll(tInferC - tPrepC, tPostC - tInferC, System.nanoTime() - tPostC)
+            val runC = monitorC.end(tokenC, clockC, "Oryon ARM64 CPU")
             val total = System.currentTimeMillis() - t0
             Log.i("QIDK.Run", "model=${out.used} backend=CPU engineMs=${out.ms} note=${out.note ?: "-"}")
             return InferenceTelemetry(
                 modelName = out.used,
                 executionMode = "Oryon ARM64 CPU" + (out.note?.let { " ($it)" } ?: ""),
                 latencyMs = total,
-                energyJoules = null,
-                powerWatts = null,
-                thermalDeltaC = 0f,
-                startTempC = readPeakTemperatureC(),
-                endTempC = readPeakTemperatureC(),
+                energyJoules = runC.batteryJoules,
+                powerWatts = runC.activeWatts,
+                thermalDeltaC = runC.deltaTempC ?: 0f,
+                startTempC = runC.startTempC ?: 0f,
+                endTempC = runC.peakTempC ?: 0f,
                 rawCurrentUa = readActiveCurrentUa(),
                 rawVoltageUv = readActiveVoltageUv(),
-                resultBitmap = out.bitmap
+                resultBitmap = out.bitmap,
+                run = runC
             )
         }
 
@@ -388,6 +409,10 @@ object OnDeviceProcessDriver {
         // =====================================================================
         if (isSd) {
             BackendMatrix.require(ModelFamily.SD15, backend)
+            val monitorSd = PowerMonitor.get().also { it.start() }
+            val tokenSd = monitorSd.begin(ThermalZones.Group.NPU)
+            val clockSd = PhaseClock()
+            val tPrepSd = System.nanoTime()
             val runnerBin = if (is20Step) {
                 if (File(DEVICE_SD_DIR, "sd_qidk_runner_inpaint_20step").exists()) "./sd_qidk_runner_inpaint_20step"
                 else if (File(DEVICE_SD_DIR, "sd_qidk_runner_inpaint_cfg75").exists()) "./sd_qidk_runner_inpaint_cfg75"
@@ -410,38 +435,17 @@ object OnDeviceProcessDriver {
                 throw IllegalStateException("The SD runner on the device is the old build (no --prompt/--steps command line). Push the rebuilt runners (Phase 4.3).")
             }
             val steps = if (is20Step || isInefficientSd) 20 else 12
-            var pos = positivePrompt.trim()
-            var neg = negativePrompt.trim()
-            var smartTraceInfo: SmartTraceInfo? = null
-            val isSmart = smartPrompt || targetModel.contains("SMART")
-            if (isSmart) {
-                val img512 = if (image.width == 512 && image.height == 512) image else Bitmap.createScaledBitmap(image, 512, 512, true)
-                val msk512 = if (mask.width == 512 && mask.height == 512) mask else Bitmap.createScaledBitmap(mask, 512, 512, false)
-                val argb = IntArray(512 * 512).also { img512.getPixels(it, 0, 512, 0, 0, 512, 512) }
-                val holeBytes = ClassicalInpainter.holeBytes(msk512)
-                val d = SmartPrompt.analyse(argb, holeBytes, 512, 512)
-                if (d != null) {
-                    Log.i("QIDK.SD", "context: $d")
-                    val synPos = SmartPrompt.build(pos, d)
-                    val synNeg = SmartPrompt.negative(neg)
-                    var holePx = 0
-                    for (b in holeBytes) if (b.toInt() != 0) holePx++
-                    val holePct = (holePx * 100.0f) / (512 * 512)
-                    smartTraceInfo = SmartTraceInfo(
-                        stage1FullImage = "Resolution: 512x512 | RGB: (%.0f, %.0f, %.0f) | Ambient Luma: %.1f | Lighting: %s".format(d.meanR, d.meanG, d.meanB, d.luma, d.light),
-                        stage2MaskedContext = "Void: %d px (%.1f%%) | Surface: %s | Texture: %s | Edge Grad: %.1f | Lens: %s".format(holePx, holePct, d.surface, d.texture, d.grad, d.lens),
-                        stage3UserInput = if (pos.isEmpty()) "[Empty - Auto Inferred Context]" else pos,
-                        stage4FinalPositive = synPos,
-                        stage5Negative = synNeg
-                    )
-                    pos = synPos
-                    neg = synNeg
-                } else {
-                    Log.w("QIDK.SD", "smart prompt: no usable context ring, using the user's text unchanged")
-                }
-            }
-            if (neg.isEmpty()) neg = "painting, drawing, illustration, glitch, deformed, mutated, cross-eyed, ugly, disfigured"
-            Log.i("QIDK.SD", "runner=$runnerBin steps=$steps cfg=2.0 seed=$seed smart=$isSmart pos='$pos' neg='$neg'")
+            val isSmart = plan?.smart ?: (smartPrompt || targetModel.contains("SMART"))
+            // ONE plan per run. Standard SD: the user's words, untouched, CFG 2.0. Smart SD: SmartSd.plan (intent first, scene second).
+            // The Smart-SD drawer in the UI shows this very object, so what is displayed is what is sent.
+            val effPlan: SmartSdPlan = plan
+                ?: if (isSmart) SmartSdAnalyzer.plan(image, mask, positivePrompt, negativePrompt, steps, seed)
+                else SmartSd.standardPlan(positivePrompt, negativePrompt, steps, seed)
+            val pos = effPlan.positive
+            val neg = effPlan.negative
+            val smartTraceInfo: SmartTraceInfo? = if (effPlan.smart)
+                SmartTraceInfo(effPlan.stage1, effPlan.stage2, effPlan.stage3, effPlan.positive, effPlan.negative) else null
+            Log.i("QIDK.SD", "runner=$runnerBin steps=$steps cfg=${effPlan.cfg} seed=$seed smart=$isSmart intent=${effPlan.intent} pos='$pos' neg='$neg'")
 
             val sdDir = File(DEVICE_SD_DIR)
             val imgRaw = File(sdDir, "image.raw")
@@ -468,28 +472,32 @@ object OnDeviceProcessDriver {
                     "export LD_LIBRARY_PATH=$DEVICE_SD_DIR:\$LD_LIBRARY_PATH",
                     "export ADSP_LIBRARY_PATH='$DEVICE_SD_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp'"
                 ),
-                steps, 2.0f, seed
+                steps, effPlan.cfg, seed
             )
 
-            val startTemp = readPeakTemperatureC()
-            val tracker = HardwareTelemetryTracker()
-            tracker.start()
+            val tInferSd = System.nanoTime()
 
             val pb = ProcessBuilder("/system/bin/sh", "-c", script).redirectErrorStream(true)
             pb.environment().putAll(SdRunnerCommand.environment(pos, neg))
             val process = pb.start()
             val logText = process.inputStream.bufferedReader().readText()
             val exitCode = process.waitFor()
+            val tPostSd = System.nanoTime()
             Log.d("OnDeviceProcessDriver", "$runnerBin exit=$exitCode: $logText")
             val totalLatency = System.currentTimeMillis() - startTime
-            val endTemp = readPeakTemperatureC()
-            val (realPower, realEnergy, realDelta) = tracker.stop(totalLatency, startTemp, endTemp)
             val rawCurrent = readActiveCurrentUa()
             val rawVoltage = readActiveVoltageUv()
 
             if (exitCode == 0 && outPng.exists() && outPng.lastModified() >= startTime) {
                 val rawBmp = BitmapFactory.decodeFile(outPng.absolutePath)
                 val resultBmp = if (rawBmp != null) compositeInpaintResult(image, rawBmp, mask) else image
+                clockSd.addAll(tInferSd - tPrepSd, tPostSd - tInferSd, System.nanoTime() - tPostSd)
+                val runSd = monitorSd.end(tokenSd, clockSd, execMode)
+                val startTemp = runSd.startTempC ?: 0f
+                val endTemp = runSd.peakTempC ?: 0f
+                val realPower = runSd.activeWatts
+                val realEnergy = runSd.batteryJoules
+                val realDelta = runSd.deltaTempC ?: 0f
                 Log.i("QIDK.Run", "model=$runnerName backend=$backend via=sd-runner engineMs=$totalLatency")
                 return InferenceTelemetry(
                     modelName = runnerName,
@@ -503,7 +511,8 @@ object OnDeviceProcessDriver {
                     rawCurrentUa = rawCurrent,
                     rawVoltageUv = rawVoltage,
                     resultBitmap = resultBmp,
-                    smartTrace = smartTraceInfo
+                    smartTrace = smartTraceInfo,
+                    run = runSd
                 )
             } else {
                 throw RuntimeException("$runnerName failed on NPU (exit $exitCode):\n$logText")
@@ -568,17 +577,30 @@ object OnDeviceProcessDriver {
             Backend.CPU -> "Oryon CPU (ARM64)"
         }
 
+        val monitor = PowerMonitor.get().also { it.start() }
+        val token = monitor.begin(SrRun.group(backend))
+        val clock = PhaseClock()
+        val tPrepStart = System.nanoTime()
         val imgBytes = bitmapToFloat32Raw(image)
         val maskBytes = maskToFloat32Raw(mask, inverted = isMigan)
 
         return try {
-            val inputDir = File(DEVICE_LAMA_DIR, "input")
-            if (!inputDir.exists()) inputDir.mkdirs()
+            val inputDir = File(DEVICE_LAMA_DIR, "input").apply {
+                if (!exists()) mkdirs()
+                setReadable(true, false)
+                setWritable(true, false)
+                setExecutable(true, false)
+            }
 
             val rawImgFile = File(inputDir, "live_img_v4.raw")
             val rawMaskFile = File(inputDir, "live_mask_v4.raw")
             val listFile = File(DEVICE_LAMA_DIR, "live_input_v4.txt")
-            val outDir = File(DEVICE_LAMA_DIR, "app_live_output_v4")
+            val outDir = File(DEVICE_LAMA_DIR, "app_live_output_v4").apply {
+                if (!exists()) mkdirs()
+                setReadable(true, false)
+                setWritable(true, false)
+                setExecutable(true, false)
+            }
 
             if (rawImgFile.exists()) rawImgFile.delete()
             if (rawMaskFile.exists()) rawMaskFile.delete()
@@ -606,9 +628,7 @@ object OnDeviceProcessDriver {
                 "chmod -R 777 app_live_output_v4 2>/dev/null"
             )
 
-            val startTemp = readPeakTemperatureC()
-            val tracker = HardwareTelemetryTracker()
-            tracker.start()
+            val tInferStart = System.nanoTime()
 
             // Check if Resident FastRPC Daemon is active on 127.0.0.1:55555
             val residentOutFile = File(outDir, "output_0.raw")
@@ -637,9 +657,8 @@ object OnDeviceProcessDriver {
                 }
             }
 
+            val tPostStart = System.nanoTime()
             val totalLatency = if (usedResidentDaemon) daemonLatencyMs else (System.currentTimeMillis() - startTime)
-            val endTemp = readPeakTemperatureC()
-            val (realPower, realEnergy, realDelta) = tracker.stop(totalLatency, startTemp, endTemp)
             val rawCurrent = readActiveCurrentUa()
             val rawVoltage = readActiveVoltageUv()
 
@@ -659,6 +678,13 @@ object OnDeviceProcessDriver {
                 val rawOutBytes = resultRawFile!!.readBytes()
                 val rawBmp = rawFloat32ToBitmap(rawOutBytes, 512, 512)
                 val resultBmp = compositeInpaintResult(image, rawBmp, mask)
+                clock.addAll(tInferStart - tPrepStart, tPostStart - tInferStart, System.nanoTime() - tPostStart)
+                val runInfo = monitor.end(token, clock, if (usedResidentDaemon && backend == Backend.NPU) "Qualcomm Hexagon NPU (HTP v79 Resident CDSP FastRPC)" else execMode)
+                val startTemp = runInfo.startTempC ?: 0f
+                val endTemp = runInfo.peakTempC ?: 0f
+                val realPower = runInfo.activeWatts
+                val realEnergy = runInfo.batteryJoules
+                val realDelta = runInfo.deltaTempC ?: 0f
                 Log.i("QIDK.Run", "model=$displayName backend=$backend via=${if (usedResidentDaemon) "daemon" else "snpe-net-run"} engineMs=${if (usedResidentDaemon) daemonLatencyMs else totalLatency}")
                 InferenceTelemetry(
                     modelName = displayName,
@@ -671,7 +697,8 @@ object OnDeviceProcessDriver {
                     endTempC = endTemp,
                     rawCurrentUa = rawCurrent,
                     rawVoltageUv = rawVoltage,
-                    resultBitmap = resultBmp
+                    resultBitmap = resultBmp,
+                    run = runInfo
                 )
             } else {
                 throw RuntimeException("SNPE ($dlcName) inference failed on $backend (exit code $exitCode):\n$logText")

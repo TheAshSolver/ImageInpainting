@@ -4,7 +4,7 @@
     android:id="@+id/mainScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0B0F19"
+    android:background="@color/qidk_canvas"
     android:fillViewport="true">
 
     <LinearLayout
@@ -36,7 +36,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="⚡ Snapdragon Inpaint Studio"
-                    android:textColor="#F8FAFC"
+                    android:textColor="@color/qidk_text"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
@@ -45,12 +45,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Hexagon HTP v79 NPU Acceleration • Mobile Studio"
-                    android:textColor="#C084FC"
+                    android:textColor="@color/qidk_purple"
                     android:textSize="12sp" />
             </LinearLayout>
 
             <Button
                 android:id="@+id/btnThemeToggle"
+                android:contentDescription="Switch between light and dark theme"
                 android:layout_width="44dp"
                 android:layout_height="44dp"
                 android:minWidth="0dp"
@@ -58,7 +59,8 @@
                 android:padding="0dp"
                 android:text="🌙"
                 android:textSize="18sp"
-                android:backgroundTint="#161F30" />
+                android:backgroundTint="@color/qidk_card"
+                android:textColor="@color/qidk_text"/>
         </LinearLayout>
 
         <!-- Source Image Controls -->
@@ -77,7 +79,8 @@
                 android:textAllCaps="false"
                 android:textSize="12sp"
                 android:layout_marginEnd="3dp"
-                android:backgroundTint="#1E293B" />
+                android:backgroundTint="@color/qidk_field"
+                android:textColor="@color/qidk_text"/>
 
             <Button
                 android:id="@+id/btnCamera"
@@ -89,7 +92,8 @@
                 android:textSize="12sp"
                 android:layout_marginStart="3dp"
                 android:layout_marginEnd="3dp"
-                android:backgroundTint="#1E293B" />
+                android:backgroundTint="@color/qidk_field"
+                android:textColor="@color/qidk_text"/>
 
             <Button
                 android:id="@+id/btnLoadSample"
@@ -100,15 +104,17 @@
                 android:textAllCaps="false"
                 android:textSize="12sp"
                 android:layout_marginStart="3dp"
-                android:backgroundTint="#1E3A8A" />
+                android:backgroundTint="@color/qidk_navy"
+                android:textColor="@color/qidk_on_accent"/>
         </LinearLayout>
 
         <!-- Interactive Canvas View -->
         <FrameLayout
             android:id="@+id/canvasContainer"
+        android:clipToOutline="true"
             android:layout_width="match_parent"
             android:layout_height="320dp"
-            android:background="#161F30"
+            android:background="@drawable/bg_card"
             android:layout_marginBottom="8dp">
 
             <com.qualcomm.qidk.inpaint.ui.InpaintCanvasView
@@ -130,7 +136,7 @@
                 android:layout_gravity="top|end"
                 android:layout_margin="10dp"
                 android:orientation="horizontal"
-                android:background="#D9161F30"
+                android:background="@drawable/bg_card_scrim"
                 android:padding="2dp">
 
                 <Button
@@ -142,7 +148,8 @@
                     android:padding="0dp"
                     android:text="➕"
                     android:textSize="12sp"
-                    android:backgroundTint="#1E293B" />
+                    android:backgroundTint="@color/qidk_field"
+                android:textColor="@color/qidk_text"/>
 
                 <Button
                     android:id="@+id/btnZoomOut"
@@ -154,54 +161,54 @@
                     android:text="➖"
                     android:textSize="12sp"
                     android:layout_marginStart="3dp"
-                    android:backgroundTint="#1E293B" />
+                    android:backgroundTint="@color/qidk_field"
+                android:textColor="@color/qidk_text"/>
             </LinearLayout>
         </FrameLayout>
 
-        <!-- Unified 3-Way Tool Segment Toggle -->
-        <LinearLayout
+        <!-- Unified 3-way tool segment: Manual Brush | Smart AI Touch | Bounding Box -->
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toolToggleGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="6dp">
+            android:layout_marginBottom="6dp"
+            app:singleSelection="true"
+            app:selectionRequired="true"
+            app:checkedButton="@+id/btnModeBrush">
 
             <Button
                 android:id="@+id/btnModeBrush"
+                style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:minHeight="44dp"
                 android:text="🖌️ Manual Brush"
                 android:textAllCaps="false"
-                android:textSize="12sp"
-                android:minHeight="42dp"
-                android:layout_marginEnd="3dp"
-                android:backgroundTint="#2563EB" />
+                android:textSize="12sp" />
 
             <Button
                 android:id="@+id/btnModeSmart"
+                style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.2"
+                android:minHeight="44dp"
                 android:text="✨ Smart AI Touch"
                 android:textAllCaps="false"
-                android:textSize="12sp"
-                android:minHeight="42dp"
-                android:layout_marginStart="3dp"
-                android:layout_marginEnd="3dp"
-                android:backgroundTint="#1E293B" />
+                android:textSize="12sp" />
 
             <Button
                 android:id="@+id/btnModeBox"
+                style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.9"
-                android:text="🔲 Box"
+                android:layout_weight="1.1"
+                android:minHeight="44dp"
+                android:text="🔲 Bounding Box"
                 android:textAllCaps="false"
-                android:textSize="12sp"
-                android:minHeight="42dp"
-                android:layout_marginStart="3dp"
-                android:backgroundTint="#1E293B" />
-        </LinearLayout>
+                android:textSize="12sp" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <!-- Secondary Actions Toolbar (Undo, Clear Mask, Reset Zoom) -->
         <LinearLayout
@@ -220,32 +227,35 @@
                 android:textSize="12sp"
                 android:minHeight="38dp"
                 android:layout_marginEnd="3dp"
-                android:backgroundTint="#334155" />
+                android:backgroundTint="@color/qidk_neutral"
+                android:textColor="@color/qidk_text"/>
 
             <Button
                 android:id="@+id/btnClear"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.2"
-                android:text="🗑️ Clear Mask"
+                android:text="🗑️ Clear"
                 android:textAllCaps="false"
                 android:textSize="12sp"
                 android:minHeight="38dp"
                 android:layout_marginStart="3dp"
                 android:layout_marginEnd="3dp"
-                android:backgroundTint="#DC2626" />
+                android:backgroundTint="@color/qidk_crimson"
+                android:textColor="@color/qidk_on_accent"/>
 
             <Button
                 android:id="@+id/btnZoomReset"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="🔍 Reset 1:1"
+                android:text="1:1 Reset"
                 android:textAllCaps="false"
                 android:textSize="12sp"
                 android:minHeight="38dp"
                 android:layout_marginStart="3dp"
-                android:backgroundTint="#334155" />
+                android:backgroundTint="@color/qidk_neutral"
+                android:textColor="@color/qidk_text"/>
         </LinearLayout>
 
         <!-- Router Recommendation Card -->
@@ -254,7 +264,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#161F30"
+            android:background="@drawable/bg_card"
             android:padding="12dp"
             android:layout_marginBottom="12dp">
 
@@ -263,7 +273,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🎯 RECOMMENDED: MIGAN"
-                android:textColor="#10B981"
+                android:textColor="@color/qidk_emerald"
                 android:textStyle="bold"
                 android:textSize="15sp" />
 
@@ -272,7 +282,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Router heuristic analysis ready."
-                android:textColor="#94A3B8"
+                android:textColor="@color/qidk_text_muted"
                 android:textSize="12sp"
                 android:layout_marginTop="4dp" />
 
@@ -281,7 +291,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="⚡ Preloading NPU models..."
-                android:textColor="#38BDF8"
+                android:textColor="@color/qidk_cyan"
                 android:textStyle="bold"
                 android:textSize="12sp"
                 android:layout_marginTop="6dp" />
@@ -293,7 +303,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#161F30"
+            android:background="@drawable/bg_card"
             android:padding="12dp"
             android:visibility="gone"
             android:layout_marginBottom="8dp">
@@ -311,7 +321,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="✨ Dual Text Guidance (SD NPU)"
-                    android:textColor="#38BDF8"
+                    android:textColor="@color/qidk_cyan"
                     android:textStyle="bold"
                     android:textSize="14sp" />
 
@@ -320,7 +330,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="CLIP Guided"
-                    android:textColor="#94A3B8"
+                    android:textColor="@color/qidk_text_muted"
                     android:textSize="11sp" />
             </LinearLayout>
 
@@ -330,7 +340,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Positive Prompt (What to generate in hole):"
-                android:textColor="#93C5FD"
+                android:textColor="@color/qidk_info_text"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="4dp" />
@@ -340,9 +350,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="44dp"
-                android:background="#1E293B"
-                android:textColor="#FFFFFF"
-                android:textColorHint="#94A3B8"
+                android:background="@drawable/bg_field"
+                android:textColor="@color/qidk_text"
+                android:textColorHint="@color/qidk_text_muted"
                 android:hint="e.g. photograph of a beautiful empty scene"
                 android:textSize="13sp"
                 android:padding="10dp"
@@ -371,7 +381,8 @@
                         android:textSize="11sp"
                         android:paddingHorizontal="8dp"
                         android:layout_marginEnd="6dp"
-                        android:backgroundTint="#334155" />
+                        android:backgroundTint="@color/qidk_neutral"
+                android:textColor="@color/qidk_text"/>
 
                     <Button
                         android:id="@+id/chipWood"
@@ -382,7 +393,8 @@
                         android:textSize="11sp"
                         android:paddingHorizontal="8dp"
                         android:layout_marginEnd="6dp"
-                        android:backgroundTint="#334155" />
+                        android:backgroundTint="@color/qidk_neutral"
+                android:textColor="@color/qidk_text"/>
 
                     <Button
                         android:id="@+id/chipNature"
@@ -393,7 +405,8 @@
                         android:textSize="11sp"
                         android:paddingHorizontal="8dp"
                         android:layout_marginEnd="6dp"
-                        android:backgroundTint="#334155" />
+                        android:backgroundTint="@color/qidk_neutral"
+                android:textColor="@color/qidk_text"/>
 
                     <Button
                         android:id="@+id/chipWater"
@@ -404,7 +417,8 @@
                         android:textSize="11sp"
                         android:paddingHorizontal="8dp"
                         android:layout_marginEnd="6dp"
-                        android:backgroundTint="#334155" />
+                        android:backgroundTint="@color/qidk_neutral"
+                android:textColor="@color/qidk_text"/>
 
                     <Button
                         android:id="@+id/chipApple"
@@ -415,7 +429,8 @@
                         android:textSize="11sp"
                         android:paddingHorizontal="8dp"
                         android:layout_marginEnd="6dp"
-                        android:backgroundTint="#334155" />
+                        android:backgroundTint="@color/qidk_neutral"
+                android:textColor="@color/qidk_text"/>
                 </LinearLayout>
             </HorizontalScrollView>
 
@@ -425,7 +440,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Negative Prompt (What to avoid):"
-                android:textColor="#FCA5A5"
+                android:textColor="@color/qidk_danger_text"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="4dp" />
@@ -435,23 +450,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="44dp"
-                android:background="#1E293B"
-                android:textColor="#FFFFFF"
-                android:textColorHint="#94A3B8"
+                android:background="@drawable/bg_field"
+                android:textColor="@color/qidk_text"
+                android:textColorHint="@color/qidk_text_muted"
                 android:hint="e.g. painting, drawing, glitch, deformed, ugly"
                 android:textSize="13sp"
                 android:padding="10dp"
                 android:inputType="textCapSentences|textMultiLine"
                 android:maxLines="3"
                 android:layout_marginBottom="4dp" />
-
-            <Switch
-                android:id="@+id/swSmartPrompt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Smart SD: build prompt from surrounding scene"
-                android:textColor="#F8FAFC"
-                android:layout_marginTop="6dp" />
         </LinearLayout>
 
         <!-- Smart SD Pipeline Trace & Inspector Drawer -->
@@ -460,7 +467,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#161F30"
+            android:background="@drawable/bg_card"
             android:padding="12dp"
             android:visibility="gone"
             android:layout_marginBottom="12dp">
@@ -480,7 +487,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="🔍 Pipeline Trace &amp; Prompt Inspector"
-                    android:textColor="#38BDF8"
+                    android:textColor="@color/qidk_cyan"
                     android:textStyle="bold"
                     android:textSize="13sp" />
 
@@ -489,7 +496,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="▼"
-                    android:textColor="#94A3B8"
+                    android:textColor="@color/qidk_text_muted"
                     android:textSize="13sp" />
             </LinearLayout>
 
@@ -506,8 +513,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Stage 1: Full Image Context"
-                    android:textColor="#10B981"
+                    android:text="Stage 1: Full-Image Context"
+                    android:textColor="@color/qidk_emerald"
                     android:textStyle="bold"
                     android:textSize="11sp" />
                 <TextView
@@ -515,7 +522,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Ambient light: natural daylight • Environment: outdoor landscape • Tone: neutral"
-                    android:textColor="#E2E8F0"
+                    android:textColor="@color/qidk_text_strong"
                     android:textSize="11sp"
                     android:layout_marginBottom="6dp" />
 
@@ -524,7 +531,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Stage 2: Masked Target Context"
-                    android:textColor="#10B981"
+                    android:textColor="@color/qidk_emerald"
                     android:textStyle="bold"
                     android:textSize="11sp" />
                 <TextView
@@ -532,7 +539,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Detected void: foreground object • Boundary texture: smooth • Edge gradient: 18.4"
-                    android:textColor="#E2E8F0"
+                    android:textColor="@color/qidk_text_strong"
                     android:textSize="11sp"
                     android:layout_marginBottom="6dp" />
 
@@ -540,8 +547,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Stage 3: Raw User Input"
-                    android:textColor="#10B981"
+                    android:text="Stage 3: Raw User Prompt"
+                    android:textColor="@color/qidk_emerald"
                     android:textStyle="bold"
                     android:textSize="11sp" />
                 <TextView
@@ -549,7 +556,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="[None - Empty User Prompt]"
-                    android:textColor="#E2E8F0"
+                    android:textColor="@color/qidk_text_strong"
                     android:textSize="11sp"
                     android:layout_marginBottom="6dp" />
 
@@ -558,7 +565,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Stage 4: Final Synthesized Positive Prompt"
-                    android:textColor="#38BDF8"
+                    android:textColor="@color/qidk_cyan"
                     android:textStyle="bold"
                     android:textSize="11sp" />
                 <TextView
@@ -566,7 +573,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="photograph of empty calm water, natural daylight, sharp focus, 8k"
-                    android:textColor="#F8FAFC"
+                    android:textColor="@color/qidk_text"
                     android:textSize="11sp"
                     android:fontFamily="monospace"
                     android:layout_marginBottom="6dp" />
@@ -575,8 +582,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Stage 5: Active Negative Prompt Conditioning"
-                    android:textColor="#F87171"
+                    android:text="Stage 5: Active Negative Prompt"
+                    android:textColor="@color/qidk_danger_text"
                     android:textStyle="bold"
                     android:textSize="11sp" />
                 <TextView
@@ -584,7 +591,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="painting, drawing, illustration, glitch, deformed, ugly, disfigured, blur"
-                    android:textColor="#FCA5A5"
+                    android:textColor="@color/qidk_danger_text"
                     android:textSize="11sp"
                     android:fontFamily="monospace" />
             </LinearLayout>
@@ -596,7 +603,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#161F30"
+            android:background="@drawable/bg_card"
             android:padding="12dp"
             android:layout_marginBottom="12dp">
 
@@ -605,42 +612,61 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="⚙️ Execution Target"
-                android:textColor="#F8FAFC"
+                android:textColor="@color/qidk_text"
                 android:textStyle="bold"
                 android:textSize="14sp"
                 android:layout_marginBottom="8dp" />
 
-            <LinearLayout
+            <Spinner
+                android:id="@+id/modelSpinner"
+                style="@style/Widget.QIDK.Spinner"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/backendChips"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="10dp">
+                android:layout_marginBottom="10dp"
+                app:singleSelection="true"
+                app:selectionRequired="true">
 
-                <Spinner
-                    android:id="@+id/modelSpinner"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_weight="1.3"
-                    android:background="#1E293B"
-                    android:layout_marginEnd="6dp" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipBackendNpu"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:checked="true"
+                    android:text="NPU" />
 
-                <Spinner
-                    android:id="@+id/backendSpinner"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_weight="1"
-                    android:background="#1E293B" />
-            </LinearLayout>
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipBackendGpu"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="GPU" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipBackendCpu"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="CPU" />
+            </com.google.android.material.chip.ChipGroup>
 
             <Button
                 android:id="@+id/btnRunInpaint"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:text="🚀 Run Inpaint"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/qidk_on_accent"
                 android:textStyle="bold"
                 android:textSize="15sp"
-                android:backgroundTint="#E11D48" />
+                android:backgroundTint="@color/qidk_crimson" />
         </LinearLayout>
 
         <!-- Results & Telemetry -->
@@ -649,16 +675,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Inpainted Output"
-            android:textColor="#F8FAFC"
+            android:textColor="@color/qidk_text"
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
 
         <ImageView
             android:id="@+id/resultImageView"
+            android:clipToOutline="true"
             android:layout_width="match_parent"
             android:layout_height="260dp"
-            android:background="#161F30"
+            android:background="@drawable/bg_well"
             android:scaleType="fitCenter"
             android:layout_marginBottom="12dp" />
 
@@ -667,15 +694,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#1E3A8A"
+            android:background="@drawable/bg_telemetry"
             android:padding="12dp"
             android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📊 FastRPC Hardware Telemetry"
-                android:textColor="#93C5FD"
+                android:text="📊 Run telemetry"
+                android:textColor="@color/qidk_info_text"
                 android:textStyle="bold"
                 android:textSize="14sp" />
 
@@ -683,7 +710,7 @@
                 android:id="@+id/telemetryText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/qidk_telemetry_text"
                 android:textSize="12sp"
                 android:fontFamily="monospace"
                 android:layout_marginTop="4dp" />

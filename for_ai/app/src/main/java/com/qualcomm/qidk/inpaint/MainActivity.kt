@@ -6,6 +6,7 @@ import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -15,6 +16,12 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
+import com.google.android.material.button.MaterialButtonToggleGroup
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.qualcomm.qidk.inpaint.engine.ModelPreloadManager
 import com.qualcomm.qidk.inpaint.engine.OnDeviceProcessDriver
 import com.qualcomm.qidk.inpaint.router.RouterClassifier
@@ -33,10 +40,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var canvasView: InpaintCanvasView
     private lateinit var resultImageView: ImageView
     private lateinit var modelSpinner: Spinner
-    private lateinit var backendSpinner: Spinner
-    val runtimeSpinner: Spinner get() = backendSpinner
+    private lateinit var backendChips: ChipGroup
+    private lateinit var toolToggleGroup: MaterialButtonToggleGroup
+    private val backendOrder = listOf(Backend.NPU, Backend.GPU, Backend.CPU)
     private lateinit var srEngines: List<SrEngine>
-    private lateinit var srPage: SuperResolutionView
+    private lateinit var srPage: SuperResolutionScreen
     private lateinit var routerBadgeText: TextView
     private lateinit var routerJustificationText: TextView
     private lateinit var preloadStatusBadge: TextView
@@ -65,7 +73,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvTraceStage4: TextView
     private lateinit var tvTraceStage5: TextView
     private lateinit var tvResultsHeader: TextView
-    private var isDarkMode: Boolean = true
+    private var traceGeneration = 0
 
     private var currentBitmap: Bitmap? = null
 
@@ -80,6 +88,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Light / Dark is an AppCompat night mode (persisted); every colour of every screen is a theme token that follows it.
+        AppCompatDelegate.setDefaultNightMode(getSharedPreferences(UI_PREFS, MODE_PRIVATE).getInt(KEY_NIGHT, AppCompatDelegate.MODE_NIGHT_YES))
         super.onCreate(savedInstanceState)
         try {
             System.loadLibrary("qidk_classical")
@@ -115,7 +125,8 @@ class MainActivity : AppCompatActivity() {
         canvasView = findViewById(R.id.inpaintCanvasView)
         resultImageView = findViewById(R.id.resultImageView)
         modelSpinner = findViewById(R.id.modelSpinner)
-        backendSpinner = findViewById(R.id.backendSpinner)
+        backendChips = findViewById(R.id.backendChips)
+        toolToggleGroup = findViewById(R.id.toolToggleGroup)
         routerBadgeText = findViewById(R.id.routerBadgeText)
         routerJustificationText = findViewById(R.id.routerJustificationText)
         preloadStatusBadge = findViewById(R.id.preloadStatusBadge)
@@ -131,36 +142,103 @@ class MainActivity : AppCompatActivity() {
         triggerModelPreload()
 
         srEngines = listOf(
-            NeuralSrEngine("migan_sr", "MIGAN Neural SR (Sub-Pixel Tiled)", ModelFamily.SR_MIGAN, daemonKey = "migan"),
-            NeuralSrEngine("lama_sr", "LaMa Dilated SR (Fourier Tiled)", ModelFamily.SR_LAMA, daemonKey = "lama"),
-            NeuralSrEngine("aotgan_sr", "AOT-GAN SR (Contextual Tiled)", ModelFamily.SR_AOT_GAN, daemonKey = "aotgan"),
-            NeuralSrEngine("sd_sr", "Stable Diffusion Latent SR", ModelFamily.SR_SD, isSd = true),
+            NeuralSrEngine("migan_sr", "MIGAN detail transfer (NPU/GPU/CPU)", ModelFamily.SR_MIGAN, "migan"),
+            NeuralSrEngine("lama_sr", "LaMa detail transfer (NPU/GPU/CPU)", ModelFamily.SR_LAMA, "lama"),
+            NeuralSrEngine("aotgan_sr", "AOT-GAN detail transfer (NPU/GPU/CPU)", ModelFamily.SR_AOT_GAN, "aotgan"),
+            SdSuperResEngine(),
             TarshSrEngine(),
             BicubicSrEngine()
         )
-        srPage = SuperResolutionView(this, srEngines) { canvasView.getSourceBitmap() }
+        Log.i("QIDK.SR", "native SR kernels loaded=${SrNative.available}")
+        srPage = SuperResolutionScreen(this, srEngines) { canvasView.getSourceBitmap() }
         SuperResolutionTab.install(this, srPage)
 
         RouterRuntime.init(applicationContext)
         registerDebugHooks()
 
-        applyThemeMode(true)
+        val night = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES
+        btnThemeToggle.text = if (night) "🌙" else "☀️"
 
-        if (savedInstanceState == null) {
-            loadDefaultSample()
-        }
+        restoreOrLoadSample()
+        startPowerCalibrationOnce()
     }
+
+    override fun onResume() {
+        super.onResume()
+        PowerMonitor.get().start()
+    }
+
+    override fun onPause() {
+        saveSession()
+        PowerMonitor.get().stop()
+        super.onPause()
+    }
+
+    private fun startPowerCalibrationOnce() {
+        val prefs = getSharedPreferences(UI_PREFS, MODE_PRIVATE)
+        val known = prefs.getInt(KEY_POWER_SIGN, 0)
+        PowerMonitor.get().loadSign = known
+        if (known != 0) return
+        Thread {
+            val sign = PowerCalibration.measureSign(PowerMonitor.get())
+            Log.i("QIDK.Power", "load sign calibrated: $sign (0 = burn not visible on the fuel gauge, retried next start)")
+            if (sign != 0) prefs.edit().putInt(KEY_POWER_SIGN, sign).apply()
+            PowerMonitor.get().loadSign = sign
+        }.apply { isDaemon = true; start() }
+    }
+
+    private fun saveSession() {
+        if (!::canvasView.isInitialized) return
+        UiSession.inpaintSource = canvasView.getSourceBitmap()
+        UiSession.inpaintMask = canvasView.getRawMaskBitmap()
+        UiSession.modelIndex = modelSpinner.selectedItemPosition
+        UiSession.backendLabel = selectedBackend().name
+        UiSession.toolId = toolToggleGroup.checkedButtonId
+        UiSession.promptPos = etPromptPositive.text.toString()
+        UiSession.promptNeg = etPromptNegative.text.toString()
+        UiSession.inpaintTelemetry = if (telemetryCard.visibility == View.VISIBLE) telemetryText.text.toString() else null
+    }
+
+    private fun restoreOrLoadSample() {
+        val src = UiSession.inpaintSource
+        if (src == null) { loadDefaultSample(); return }
+        currentBitmap = src
+        canvasView.setSourceBitmap(src)
+        UiSession.inpaintMask?.let { canvasView.setRawMaskBitmap(it) }
+        UiSession.inpaintResult?.let { resultImageView.setImageBitmap(it) }
+        UiSession.inpaintTelemetry?.let { telemetryText.text = it; telemetryCard.visibility = View.VISIBLE }
+        UiSession.plan?.takeIf { it.smart }?.let { showPlan(it) }
+        if (UiSession.toolId > 0) toolToggleGroup.check(UiSession.toolId)
+        updateRouterLogic()
+    }
+
+    private fun backendChip(b: Backend): Chip = findViewById(when (b) {
+        Backend.NPU -> R.id.chipBackendNpu
+        Backend.GPU -> R.id.chipBackendGpu
+        Backend.CPU -> R.id.chipBackendCpu
+    })
 
     private fun refreshBackends(modelText: String) {
         val family = BackendMatrix.familyOf(modelText)
         val allowed = family?.let { BackendMatrix.allowed(it) } ?: listOf(Backend.NPU)
-        val prev = backendSpinner.selectedItem?.toString()
-        backendSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, allowed.map { it.label })
-        allowed.indexOfFirst { it.label == prev }.takeIf { it >= 0 }?.let { backendSpinner.setSelection(it) }
-        backendSpinner.isEnabled = allowed.size > 1
+        val prev = selectedBackend()
+        for (b in backendOrder) backendChip(b).isEnabled = b in allowed
+        backendChips.check(backendChip(if (prev in allowed) prev else allowed.first()).id)
     }
 
-    private fun selectedBackend(): Backend = Backend.values().firstOrNull { it.label == backendSpinner.selectedItem?.toString() } ?: Backend.NPU
+    private fun selectedBackend(): Backend = when (backendChips.checkedChipId) {
+        R.id.chipBackendGpu -> Backend.GPU
+        R.id.chipBackendCpu -> Backend.CPU
+        else -> Backend.NPU
+    }
+
+    private fun setControlsEnabled(on: Boolean) {
+        modelSpinner.isEnabled = on
+        if (on) refreshBackends(modelSpinner.selectedItem?.toString() ?: "") else backendOrder.forEach { backendChip(it).isEnabled = false }
+    }
+
+    private fun isSmartSelected() = (modelSpinner.selectedItem?.toString() ?: "").contains("Smart")
 
     private fun setupModelSpinner() {
         val models = arrayOf(
@@ -168,24 +246,27 @@ class MainActivity : AppCompatActivity() {
             "LaMa Dilated (Large Voids)",
             "MIGAN (Portraits & Speed)",
             "AOT-GAN (Dense Texture)",
-            "Stable Diffusion 1.5 (Inpainting - DPM 12-step)",
-            "Smart SD",
+            "Standard SD 1.5 (your prompt, untouched)",
+            "Smart SD (context-aware prompt)",
             "Fast Marching (Telea)",
             "Fluid Streamlines (Navier-Stokes)",
             "Criminisi Exemplar",
             "Biharmonic Poisson"
         )
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, models)
+        val adapter = ArrayAdapter(this, R.layout.item_spinner, models)
+        adapter.setDropDownViewResource(R.layout.item_spinner_dropdown)
         modelSpinner.adapter = adapter
 
         modelSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selected = parent?.getItemAtPosition(position)?.toString() ?: ""
                 refreshBackends(selected)
-                val isSd = selected.contains("Stable Diffusion") || selected.contains("Diffusion") || selected.contains("Smart SD")
+                val smart = selected.contains("Smart")
+                val isSd = smart || selected.contains("Standard SD") || selected.contains("Diffusion")
                 promptCard.visibility = if (isSd) View.VISIBLE else View.GONE
-                pipelineTraceCard.visibility = if (isSd) View.VISIBLE else View.GONE
-                if (isSd) updatePipelineTrace()
+                // The 5-stage drawer belongs to Smart SD only: Standard SD sends the user's words as they are, there is nothing to trace.
+                pipelineTraceCard.visibility = if (smart) View.VISIBLE else View.GONE
+                if (smart) updatePipelineTrace()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -193,7 +274,13 @@ class MainActivity : AppCompatActivity() {
                 pipelineTraceCard.visibility = View.GONE
             }
         }
-        refreshBackends(models[0])
+        if (UiSession.modelIndex in models.indices) modelSpinner.setSelection(UiSession.modelIndex)
+        refreshBackends(models[UiSession.modelIndex.coerceIn(0, models.size - 1)])
+        UiSession.backendLabel?.let { name -> Backend.values().firstOrNull { it.name == name }?.let { b -> if (backendChip(b).isEnabled) backendChips.check(backendChip(b).id) } }
+        etPromptPositive.setText(UiSession.promptPos)
+        etPromptNegative.setText(UiSession.promptNeg)
+        etPromptPositive.doAfterTextChanged { updatePipelineTrace() }
+        etPromptNegative.doAfterTextChanged { updatePipelineTrace() }
     }
 
     private fun triggerModelPreload() {
@@ -203,39 +290,30 @@ class MainActivity : AppCompatActivity() {
         // 1. Synchronous GAN preload during startup
         val ganTime = ModelPreloadManager.preloadGanModelsSync(this)
         preloadStatusBadge.text = "⚡ GANs ready on NPU (${ganTime}ms) | Streaming SD models in background..."
-        preloadStatusBadge.setTextColor(Color.parseColor("#38BDF8"))
+        preloadStatusBadge.setTextColor(ContextCompat.getColor(this, R.color.qidk_cyan))
 
         // 2. Asynchronous SD background streaming
         ModelPreloadManager.preloadSdModelsAsync { sdTime ->
             runOnUiThread {
                 preloadStatusBadge.text = "✅ Hexagon NPU Ready (GANs: ${ganTime}ms, SD: ${sdTime}ms)"
-                preloadStatusBadge.setTextColor(Color.parseColor("#10B981"))
+                preloadStatusBadge.setTextColor(ContextCompat.getColor(this, R.color.qidk_emerald))
             }
         }
     }
 
     private fun setupButtons() {
-        val btnModeSmart = findViewById<Button>(R.id.btnModeSmart)
-        val btnModeBrush = findViewById<Button>(R.id.btnModeBrush)
-        val btnModeBox = findViewById<Button>(R.id.btnModeBox)
-
-        fun updateModeButtons(activeMode: InpaintCanvasView.Mode) {
-            btnModeBrush?.backgroundTintList = ColorStateList.valueOf(
-                if (activeMode == InpaintCanvasView.Mode.BRUSH) Color.parseColor("#2563EB") else Color.parseColor("#374151")
-            )
-            btnModeSmart?.backgroundTintList = ColorStateList.valueOf(
-                if (activeMode == InpaintCanvasView.Mode.SMART) Color.parseColor("#2563EB") else Color.parseColor("#374151")
-            )
-            btnModeBox?.backgroundTintList = ColorStateList.valueOf(
-                if (activeMode == InpaintCanvasView.Mode.BOUNDING_BOX) Color.parseColor("#2563EB") else Color.parseColor("#374151")
-            )
+        // 3-way segmented control: Manual Brush | Smart AI Touch | Bounding Box (Material toggle group, colours from the theme)
+        toolToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            when (checkedId) {
+                R.id.btnModeBrush -> { canvasView.setMode(InpaintCanvasView.Mode.BRUSH); Toast.makeText(this, "🖌️ Manual Precision: Finger draw mask", Toast.LENGTH_SHORT).show() }
+                R.id.btnModeSmart -> { canvasView.setMode(InpaintCanvasView.Mode.SMART); Toast.makeText(this, "✨ Smart AI Touch: Circle an object or scribble over it", Toast.LENGTH_SHORT).show() }
+                R.id.btnModeBox -> { canvasView.setMode(InpaintCanvasView.Mode.BOUNDING_BOX); Toast.makeText(this, "🔲 Box Mode: Tap 1st corner, then opposite corner", Toast.LENGTH_SHORT).show() }
+            }
         }
+        toolToggleGroup.check(R.id.btnModeBrush)
 
-        updateModeButtons(InpaintCanvasView.Mode.BRUSH)
-
-        btnThemeToggle.setOnClickListener {
-            applyThemeMode(!isDarkMode)
-        }
+        btnThemeToggle.setOnClickListener { toggleTheme() }
 
         findViewById<View>(R.id.pipelineTraceHeader).setOnClickListener {
             val willShow = pipelineTraceContent.visibility != View.VISIBLE
@@ -265,24 +343,6 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnCamera).setOnClickListener {
             takePhotoLauncher.launch(null)
-        }
-
-        btnModeBrush?.setOnClickListener {
-            canvasView.setMode(InpaintCanvasView.Mode.BRUSH)
-            updateModeButtons(InpaintCanvasView.Mode.BRUSH)
-            Toast.makeText(this, "🖌️ Manual Precision: Finger draw mask", Toast.LENGTH_SHORT).show()
-        }
-
-        btnModeSmart?.setOnClickListener {
-            canvasView.setMode(InpaintCanvasView.Mode.SMART)
-            updateModeButtons(InpaintCanvasView.Mode.SMART)
-            Toast.makeText(this, "✨ Smart AI Touch: Circle an object or scribble over it", Toast.LENGTH_SHORT).show()
-        }
-
-        btnModeBox?.setOnClickListener {
-            canvasView.setMode(InpaintCanvasView.Mode.BOUNDING_BOX)
-            updateModeButtons(InpaintCanvasView.Mode.BOUNDING_BOX)
-            Toast.makeText(this, "🔲 Box Mode: Tap 1st corner, then opposite corner", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.btnClear).setOnClickListener {
@@ -336,56 +396,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun applyThemeMode(dark: Boolean) {
-        isDarkMode = dark
-        val density = resources.displayMetrics.density
-        val cornerRadius = 12 * density
-
-        val bgCol = if (dark) Color.parseColor("#0B0F19") else Color.parseColor("#F8FAFC")
-        val cardCol = if (dark) Color.parseColor("#161F30") else Color.parseColor("#FFFFFF")
-        val cardBorder = if (dark) Color.parseColor("#1E293B") else Color.parseColor("#CBD5E1")
-        val primaryText = if (dark) Color.parseColor("#F8FAFC") else Color.parseColor("#0F172A")
-        val secondaryText = if (dark) Color.parseColor("#94A3B8") else Color.parseColor("#64748B")
-        val inputBg = if (dark) Color.parseColor("#1E293B") else Color.parseColor("#F1F5F9")
-        val toggleBg = if (dark) Color.parseColor("#161F30") else Color.parseColor("#E2E8F0")
-
-        btnThemeToggle.text = if (dark) "🌙" else "☀️"
-        btnThemeToggle.backgroundTintList = ColorStateList.valueOf(toggleBg)
-
-        mainScrollView.setBackgroundColor(bgCol)
-        mainRootLayout.setBackgroundColor(bgCol)
-        appTitleText.setTextColor(primaryText)
-        tvResultsHeader.setTextColor(primaryText)
-
-        fun styleCard(v: View) {
-            v.background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(cardCol)
-                this.cornerRadius = cornerRadius
-                if (!dark) setStroke((1 * density).toInt(), cardBorder)
-            }
-        }
-
-        styleCard(canvasContainer)
-        styleCard(routerCard)
-        styleCard(promptCard)
-        styleCard(pipelineTraceCard)
-        styleCard(executionTargetCard)
-        styleCard(telemetryCard)
-
-        etPromptPositive.setBackgroundColor(inputBg)
-        etPromptPositive.setTextColor(primaryText)
-        etPromptPositive.setHintTextColor(secondaryText)
-
-        etPromptNegative.setBackgroundColor(inputBg)
-        etPromptNegative.setTextColor(primaryText)
-        etPromptNegative.setHintTextColor(secondaryText)
-
-        modelSpinner.setBackgroundColor(inputBg)
-        backendSpinner.setBackgroundColor(inputBg)
-        resultImageView.setBackgroundColor(cardCol)
-
-        srPage.setThemeMode(dark)
-        SuperResolutionTab.setThemeMode(dark)
+    /** Switches the AppCompat night mode. The activity is recreated; saveSession() / restoreOrLoadSample() carry the work over. */
+    private fun toggleTheme() {
+        saveSession()
+        val night = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val next = if (night) AppCompatDelegate.MODE_NIGHT_NO else AppCompatDelegate.MODE_NIGHT_YES
+        getSharedPreferences(UI_PREFS, MODE_PRIVATE).edit().putInt(KEY_NIGHT, next).apply()
+        Log.i("QIDK.Theme", "night mode -> ${if (next == AppCompatDelegate.MODE_NIGHT_YES) "dark" else "light"}")
+        AppCompatDelegate.setDefaultNightMode(next)
     }
 
     private fun showSamplePickerDialog() {
@@ -531,11 +550,11 @@ class MainActivity : AppCompatActivity() {
 
         val decision = RouterClassifier.classifyAndRoute(src, mask)
 
-        val color = when (decision.recommendedModel) {
-            "MIGAN" -> Color.parseColor("#10B981")
-            "AOTGAN" -> Color.parseColor("#3B82F6")
-            else -> Color.parseColor("#8B5CF6")
-        }
+        val color = ContextCompat.getColor(this, when (decision.recommendedModel) {
+            "MIGAN" -> R.color.qidk_emerald
+            "AOTGAN" -> R.color.qidk_cyan
+            else -> R.color.qidk_purple
+        })
 
         routerBadgeText.setTextColor(color)
         routerBadgeText.text = "🎯 RECOMMENDED: ${decision.recommendedModel} (${decision.ruleTriggered})"
@@ -544,17 +563,30 @@ class MainActivity : AppCompatActivity() {
         updatePipelineTrace()
     }
 
+    /** Smart SD only. The plan is computed off the UI thread; a stale result (older generation) is dropped. */
     private fun updatePipelineTrace() {
+        if (!isSmartSelected()) return
         val src = canvasView.getSourceBitmap() ?: return
         val mask = canvasView.getMaskBitmap()
         val pos = etPromptPositive.text.toString()
         val neg = etPromptNegative.text.toString()
-        val trace = OnDeviceProcessDriver.analyzeSmartPipeline(src, mask, pos, neg)
-        tvTraceStage1.text = trace.stage1FullImage
-        tvTraceStage2.text = trace.stage2MaskedContext
-        tvTraceStage3.text = trace.stage3UserInput
-        tvTraceStage4.text = trace.stage4FinalPositive
-        tvTraceStage5.text = trace.stage5Negative
+        val gen = ++traceGeneration
+        Thread {
+            val plan = try { SmartSdAnalyzer.plan(src, mask, pos, neg) } catch (e: Exception) { Log.w("QIDK.SD", "plan failed: ${e.message}"); null }
+            runOnUiThread { if (gen == traceGeneration && plan != null) showPlan(plan) }
+        }.apply { isDaemon = true; start() }
+    }
+
+    /** The drawer shows exactly the strings the runner will receive (see OnDeviceProcessDriver: it uses the same plan). */
+    private fun showPlan(p: SmartSdPlan) {
+        UiSession.plan = p
+        findViewById<TextView>(R.id.tvTraceHeaderTitle).text = String.format(java.util.Locale.US, "🧠 Smart SD pipeline  •  CFG %.1f  •  %d steps", p.cfg, p.steps)
+        tvTraceStage1.text = p.stage1
+        tvTraceStage2.text = p.stage2
+        tvTraceStage3.text = p.stage3
+        tvTraceStage4.text = p.positive
+        tvTraceStage5.text = p.negative
+        Log.i("QIDK.SD", "plan intent=${p.intent} cfg=${p.cfg} pos='${p.positive}' neg='${p.negative}'")
     }
 
     private fun runInpainting() {
@@ -583,8 +615,7 @@ class MainActivity : AppCompatActivity() {
 
         val btnRunInpaint = findViewById<Button>(R.id.btnRunInpaint)
         btnRunInpaint.isEnabled = false
-        modelSpinner.isEnabled = false
-        backendSpinner.isEnabled = false
+        setControlsEnabled(false)
         progressBar.visibility = View.VISIBLE
 
         val selectedOption = modelSpinner.selectedItem?.toString() ?: "Auto (Router Recommended)"
@@ -608,20 +639,24 @@ class MainActivity : AppCompatActivity() {
 
         val posPrompt = etPromptPositive.text.toString().trim()
         val negPrompt = etPromptNegative.text.toString().trim()
-        val swSmartPrompt = findViewById<Switch>(R.id.swSmartPrompt)
-        val isSmartPrompt = (swSmartPrompt?.isChecked == true) || selectedOption.contains("Smart")
+        val isSmartPrompt = selectedOption.contains("Smart")        // Smart SD is its own model entry: no extra switch
 
         Thread {
             try {
+                // ONE plan per run: Standard SD = the user's words untouched, Smart SD = SmartSd.plan. The drawer shows it before the NPU starts.
+                val plan: SmartSdPlan? = if (targetModel == "SD") {
+                    if (isSmartPrompt) SmartSdAnalyzer.plan(src, mask, posPrompt, negPrompt) else SmartSd.standardPlan(posPrompt, negPrompt, 12)
+                } else null
+                if (plan != null && plan.smart) runOnUiThread { showPlan(plan) }
                 val telemetry = OnDeviceProcessDriver.executeInference(
-                    src, mask, targetModel, backend, posPrompt, negPrompt, smartPrompt = isSmartPrompt
+                    src, mask, targetModel, backend, posPrompt, negPrompt, smartPrompt = isSmartPrompt, plan = plan
                 )
                 runOnUiThread {
                     progressBar.visibility = View.GONE
                     btnRunInpaint.isEnabled = true
-                    modelSpinner.isEnabled = true
-                    backendSpinner.isEnabled = true
+                    setControlsEnabled(true)
                     resultImageView.setImageBitmap(telemetry.resultBitmap)
+                    UiSession.inpaintResult = telemetry.resultBitmap
                     telemetryCard.visibility = View.VISIBLE
 
                     telemetry.smartTrace?.let { trace ->
@@ -635,33 +670,24 @@ class MainActivity : AppCompatActivity() {
                         tvTraceExpandIcon.text = "▲"
                     }
 
-                    val powerStr = if (telemetry.powerWatts != null) "%.2f W".format(telemetry.powerWatts) else "N/A"
-                    val energyStr = if (telemetry.energyJoules != null) "%.2f J".format(telemetry.energyJoules) else "N/A"
-                    val currentStr = if (telemetry.rawCurrentUa != null) "%d µA (%.1f mA)".format(telemetry.rawCurrentUa, telemetry.rawCurrentUa / 1000.0) else "N/A"
-                    val voltageStr = if (telemetry.rawVoltageUv != null) "%.3f V".format(telemetry.rawVoltageUv / 1e6) else "N/A"
-                    val deltaSign = if (telemetry.thermalDeltaC >= 0) "+" else ""
-                    val deltaStr = "%s%.2f °C".format(deltaSign, telemetry.thermalDeltaC)
-                    val tempRangeStr = "%.1f °C ➔ %.1f °C".format(telemetry.startTempC, telemetry.endTempC)
-
-                    telemetryText.text = """
-                        Model: ${telemetry.modelName}
-                        Backend: ${telemetry.executionMode}
-                        Latency: ${telemetry.latencyMs} ms
-                        Active Power: $powerStr
-                        Active Energy: $energyStr
-                        Battery Current: $currentStr
-                        Battery Voltage: $voltageStr
-                        Peak Temperature: $tempRangeStr
-                        Thermal Delta: $deltaStr
-                    """.trimIndent()
+                    val run = telemetry.run
+                    telemetryText.typeface = Typeface.MONOSPACE
+                    telemetryText.text = buildString {
+                        append("Model".padEnd(14)).append(telemetry.modelName).append('\n')
+                        if (run != null) {
+                            run.rows().forEach { (k, v) -> append(k.padEnd(14)).append(v).append('\n') }
+                            append("power note".padEnd(14)).append(run.powerNote)
+                        } else {
+                            append("Latency".padEnd(14)).append("${telemetry.latencyMs} ms")
+                        }
+                    }
                     Toast.makeText(this, "✨ Inpainting complete with ${telemetry.modelName}", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 runOnUiThread {
                     progressBar.visibility = View.GONE
                     btnRunInpaint.isEnabled = true
-                    modelSpinner.isEnabled = true
-                    backendSpinner.isEnabled = true
+                    setControlsEnabled(true)
                     AlertDialog.Builder(this)
                         .setTitle("❌ Inference Error")
                         .setMessage(e.message ?: "An unexpected error occurred during inference")
@@ -754,6 +780,9 @@ class MainActivity : AppCompatActivity() {
                     val srcPath = i.getStringExtra("src")
                     val src = if (srcPath != null) BitmapFactory.decodeFile(srcPath) else canvasView.getSourceBitmap()
                     val engine = srEngines.firstOrNull { it.id == id }
+                    if (src != null) i.getStringExtra("in")?.let { p ->        // the exact input the engine gets, for tools/sr_metrics.py
+                        File(p).apply { parentFile?.mkdirs() }.outputStream().use { src.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                    }
                     if (src == null || engine == null) "no source or unknown engine $id"
                     else if (engine.unavailableReason != null) "engine disabled: ${engine.unavailableReason}"
                     else {
@@ -764,10 +793,86 @@ class MainActivity : AppCompatActivity() {
                         i.getStringExtra("out")?.let { p ->
                             File(p).apply { parentFile?.mkdirs() }.outputStream().use { out.compress(Bitmap.CompressFormat.PNG, 100, it) }
                         }
-                        Log.i("QIDK.SR", "engine=$id backend=$backend scale=${scale}x out=${out.width}x${out.height} ms=${telem.totalMs} prep=${telem.prepMs} infer=${telem.inferMs} post=${telem.postMs}")
-                        "engine=$id backend=$backend scale=${scale}x out=${out.width}x${out.height} ms=${telem.totalMs} prep=${telem.prepMs} infer=${telem.inferMs} post=${telem.postMs}"
+                        i.getStringExtra("detail")?.toFloatOrNull()?.let { d -> (engine as? NeuralSrEngine)?.detailStrength = d; (engine as? SdSuperResEngine)?.detailStrength = d }
+                        res.notes.forEach { Log.i("QIDK.SR", "note: $it") }
+                        val line = "engine=$id backend=$backend scale=${scale}x out=${out.width}x${out.height} ms=${telem.tTotalMs} prep=${telem.tPrepMs} infer=${telem.tInferMs} post=${telem.tPostMs} " +
+                            "dT=${telem.deltaTempC} W=${telem.activeWatts} J=${telem.batteryJoules} note='${telem.powerNote}'"
+                        Log.i("QIDK.SR", line)
+                        line
                     }
                 }
+            },
+            "qidk.debug.INPAINT" to { i ->
+                // every GAN / classical model through the real driver: qidk.debug.INPAINT --es model migan|lama|aotgan|telea --es backend NPU|GPU|CPU --es out <png>
+                val src = canvasView.getSourceBitmap()
+                val mask = canvasView.getMaskBitmap()
+                if (src == null) "no image" else DebugHooks.async("qidk.debug.INPAINT") {
+                    val model = (i.getStringExtra("model") ?: "migan").uppercase()
+                    val backend = Backend.values().firstOrNull { it.name == (i.getStringExtra("backend") ?: "NPU") } ?: Backend.NPU
+                    val t = OnDeviceProcessDriver.executeInference(src, mask, model, backend)
+                    i.getStringExtra("out")?.let { p ->
+                        File(p).apply { parentFile?.mkdirs() }.outputStream().use { t.resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                    }
+                    val r = t.run
+                    "model=${t.modelName} backend=$backend ms=${t.latencyMs} prep=${r?.tPrepMs} infer=${r?.tInferMs} post=${r?.tPostMs} total=${r?.tTotalMs} " +
+                        "dT=${r?.deltaTempC} W=${r?.activeWatts} J=${r?.batteryJoules} note='${r?.powerNote}'"
+                }
+            },
+            "qidk.debug.TAB" to { i ->
+                val toSr = (i.getStringExtra("tab") ?: "sr") == "sr"
+                SuperResolutionTab.switcher?.invoke(toSr)
+                "tab=${if (toSr) "sr" else "inpaint"}"
+            },
+            "qidk.debug.VIEWPORT" to { i ->
+                var r = "sr page not ready"
+                val latch = java.util.concurrent.CountDownLatch(1)
+                runOnUiThread {
+                    r = srPage.debugViewport(i.getStringExtra("zoom")?.toFloatOrNull(), i.getStringExtra("cx")?.toFloatOrNull(),
+                        i.getStringExtra("cy")?.toFloatOrNull(), i.getBooleanExtra("reset", false))
+                    latch.countDown()
+                }
+                latch.await(2, java.util.concurrent.TimeUnit.SECONDS)
+                Log.i("QIDK.Viewport", r)
+                r
+            },
+            "qidk.debug.THEMEINFO" to { _ ->
+                val night = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+                fun c(id: Int) = ContextCompat.getColor(this, id)
+                fun hex(id: Int) = "#%06X".format(c(id) and 0xFFFFFF)
+                fun contrast(a: Int, b: Int) = androidx.core.graphics.ColorUtils.calculateContrast(c(a), c(b))
+                val src = canvasView.getSourceBitmap()
+                val hash = if (src == null) "none" else {
+                    val px = IntArray(src.width * src.height).also { src.getPixels(it, 0, src.width, 0, 0, src.width, src.height) }
+                    val md = MessageDigest.getInstance("SHA-256")
+                    for (v in px) { md.update((v shr 16).toByte()); md.update((v shr 8).toByte()); md.update(v.toByte()) }
+                    md.digest().joinToString("") { "%02x".format(it) }.take(16)
+                }
+                val line = "night=$night canvas=${hex(R.color.qidk_canvas)} card=${hex(R.color.qidk_card)} text=${hex(R.color.qidk_text)} " +
+                    "contrast_text=%.1f contrast_muted=%.1f contrast_cyan=%.1f contrast_emerald=%.1f srcHash=$hash".format(
+                        contrast(R.color.qidk_text, R.color.qidk_card), contrast(R.color.qidk_text_muted, R.color.qidk_card),
+                        contrast(R.color.qidk_cyan, R.color.qidk_card), contrast(R.color.qidk_emerald, R.color.qidk_card))
+                Log.i("QIDK.Theme", line)
+                line
+            },
+            "qidk.debug.PLAN" to { i ->
+                // prints the five Smart-SD stages for the loaded image + mask without touching the NPU
+                val src = canvasView.getSourceBitmap()
+                if (src == null) "no image" else DebugHooks.async("qidk.debug.PLAN") {
+                    val p = if (i.getBooleanExtra("smart", true))
+                        SmartSdAnalyzer.plan(src, canvasView.getMaskBitmap(), i.getStringExtra("prompt") ?: "", i.getStringExtra("neg") ?: "")
+                    else SmartSd.standardPlan(i.getStringExtra("prompt") ?: "", i.getStringExtra("neg") ?: "", 12)
+                    Log.i("QIDK.SD", "S1=${p.stage1}"); Log.i("QIDK.SD", "S2=${p.stage2}"); Log.i("QIDK.SD", "S3=${p.stage3}")
+                    Log.i("QIDK.SD", "S4=${p.positive}"); Log.i("QIDK.SD", "S5=${p.negative}"); Log.i("QIDK.SD", p.runParams())
+                    "smart=${p.smart} cfg=${p.cfg} intent=${p.intent} S4=${p.positive}"
+                }
+            },
+            "qidk.debug.THEME" to { i ->
+                val want = i.getStringExtra("mode") ?: "toggle"
+                runOnUiThread {
+                    val night = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+                    if (want == "toggle" || (want == "dark") != night) toggleTheme()
+                }
+                "theme request: $want"
             },
             "qidk.debug.FEATURES" to { i ->
                 DebugHooks.async("qidk.debug.FEATURES") {
@@ -806,6 +911,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         ))
+    }
+
+    companion object {
+        private const val UI_PREFS = "qidk_ui"
+        private const val KEY_NIGHT = "night_mode"
+        private const val KEY_POWER_SIGN = "power_load_sign"
     }
 
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
