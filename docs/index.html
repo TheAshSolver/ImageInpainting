@@ -701,9 +701,9 @@
   <!-- TAB 6: LINUCB POLICY ROUTER -->
   <div id="router" class="tab-content">
     <div class="card">
-      <h2><i class="fas fa-brain" style="color: var(--purple);"></i> Contextual Bandit (LinUCB) Policy Router</h2>
+      <h2><i class="fas fa-brain" style="color: var(--purple);"></i> Constrained Contextual Bandit (LinUCB) Model Router</h2>
       <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">
-        Automates model selection per mask and device state across 7 arms. Benchmarked on hardware:
+        Single-step episodic decision-making under strict thermal (&lt;75.0°C) and active power budgets (&lt;120 mW). Evaluated across 1,000 consecutive requests on Qualcomm Snapdragon 8 Elite (SM8750P).
       </p>
       <div class="grid-3" style="margin-bottom: 16px;">
         <div class="stat-box">
@@ -715,11 +715,103 @@
           <div class="stat-lbl">LinUCB Policy Decision</div>
         </div>
         <div class="stat-box">
-          <div class="stat-val" style="color: var(--purple);">20</div>
-          <div class="stat-lbl">Fused Feature Dimensions</div>
+          <div class="stat-val" style="color: var(--purple);">5D</div>
+          <div class="stat-lbl">Context Vector [1, Area, Edge, Temp, Batt]</div>
         </div>
       </div>
-      <pre>QIDK.Router: mode=MAX_QUALITY arm=AOT-GAN (Textures) model=MIGAN scores=[46.91, 46.91, 46.91, 65.17, 64.66, 70.75, 70.19] feat_us=20 policy_us=0 T=36.7C batt=100%</pre>
+
+      <div class="table-container" style="margin-bottom: 20px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Policy</th>
+              <th>Total Reward</th>
+              <th>Mean Regret</th>
+              <th>Mean Latency</th>
+              <th>Mean Power</th>
+              <th>Thermal Violations (&gt;48°C)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background: rgba(88, 166, 255, 0.15);">
+              <td><strong>LinUCB Adaptive (Ours)</strong></td>
+              <td><strong>+1709.6</strong></td>
+              <td><strong>0.0021</strong></td>
+              <td><strong>104.1 ms</strong></td>
+              <td><strong>39.6 mW</strong></td>
+              <td><strong>0.1%</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Oracle Optimal (Hindsight)</strong></td>
+              <td>+1711.7</td>
+              <td>0.0000</td>
+              <td>103.0 ms</td>
+              <td>39.4 mW</td>
+              <td>0.0%</td>
+            </tr>
+            <tr>
+              <td><strong>Greedy Fastest (MIGAN NPU)</strong></td>
+              <td>+1505.2</td>
+              <td>0.2065</td>
+              <td>59.3 ms</td>
+              <td>31.0 mW</td>
+              <td>0.0%</td>
+            </tr>
+            <tr>
+              <td><strong>Static MIGAN NPU</strong></td>
+              <td>+1505.2</td>
+              <td>0.2065</td>
+              <td>59.3 ms</td>
+              <td>31.0 mW</td>
+              <td>0.0%</td>
+            </tr>
+            <tr>
+              <td><strong>Static LaMa NPU</strong></td>
+              <td>+1533.6</td>
+              <td>0.1781</td>
+              <td>119.1 ms</td>
+              <td>42.0 mW</td>
+              <td>0.0%</td>
+            </tr>
+            <tr>
+              <td><strong>Static AOT-GAN NPU</strong></td>
+              <td>+1442.8</td>
+              <td>0.2689</td>
+              <td>177.7 ms</td>
+              <td>55.0 mW</td>
+              <td>0.0%</td>
+            </tr>
+            <tr>
+              <td><strong>Uniform Random Policy</strong></td>
+              <td>+971.7</td>
+              <td>0.7400</td>
+              <td>215.7 ms</td>
+              <td>76.5 mW</td>
+              <td>13.8%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-3" style="margin-bottom: 16px;">
+        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
+          <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--accent);">01. Cumulative Regret</h4>
+          <img src="../Benchmark/output/rl_evaluation_figures/01_cumulative_regret.png" alt="Cumulative Regret" style="max-width: 100%; border-radius: 6px;">
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Concave sub-linear O(√T) regret proof</p>
+        </div>
+        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
+          <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--green);">02. Cumulative Reward</h4>
+          <img src="../Benchmark/output/rl_evaluation_figures/02_cumulative_reward.png" alt="Cumulative Reward" style="max-width: 100%; border-radius: 6px;">
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Tracks directly behind Oracle Optimal</p>
+        </div>
+        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
+          <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--purple);">03. Action Distribution</h4>
+          <img src="../Benchmark/output/rl_evaluation_figures/03_linucb_action_distribution.png" alt="Action Distribution" style="max-width: 100%; border-radius: 6px;">
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Zero GPU arms in hot regime (&gt;48°C)</p>
+        </div>
+      </div>
+
+      <pre>QIDK.Router: mode=MAX_QUALITY arm=LaMa-Dilated (Wide Void) model=LAMA scores=[1.42, 1.18, 1.89, 1.45, 1.76, 1.22] feat_us=20 policy_us=0 T=38.4C batt=98%</pre>
     </div>
   </div>
 

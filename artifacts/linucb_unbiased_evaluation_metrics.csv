@@ -1,0 +1,9 @@
+Policy,Total_Reward,Cumulative_Regret,Mean_Regret_Per_Request,Mean_Latency_ms,Mean_Active_Power_W,Thermal_Violation_Pct,Advantage_vs_Best_Static_Pct,Arm_Distribution
+Oracle_Optimal,160.07,0.0,0.0,81.01,2.547,7.17,16.55,"{""migan_npu"": 382, ""lama_npu"": 364, ""aotgan_npu"": 424, ""migan_gpu"": 0, ""lama_gpu"": 0, ""aotgan_gpu"": 0, ""telea_cpu"": 30}"
+LinUCB_Adaptive,155.05,5.02,0.0042,79.77,2.561,7.17,12.89,"{""migan_npu"": 459, ""lama_npu"": 361, ""aotgan_npu"": 375, ""migan_gpu"": 0, ""lama_gpu"": 0, ""aotgan_gpu"": 0, ""telea_cpu"": 5}"
+Supervised_Argmax,158.48,1.6,0.0013,79.89,2.565,7.17,15.38,"{""migan_npu"": 481, ""lama_npu"": 383, ""aotgan_npu"": 336, ""migan_gpu"": 0, ""lama_gpu"": 0, ""aotgan_gpu"": 0, ""telea_cpu"": 0}"
+Heuristic_pi_0,153.76,6.32,0.0053,99.47,2.615,7.17,11.95,"{""migan_npu"": 128, ""lama_npu"": 664, ""aotgan_npu"": 396, ""migan_gpu"": 0, ""lama_gpu"": 0, ""aotgan_gpu"": 0, ""telea_cpu"": 12}"
+Static_LaMa_NPU,137.35,22.72,0.0189,119.35,2.685,7.17,0.0,"{""migan_npu"": 0, ""lama_npu"": 1200, ""aotgan_npu"": 0, ""migan_gpu"": 0, ""lama_gpu"": 0, ""aotgan_gpu"": 0, ""telea_cpu"": 0}"
+Static_MIGAN_NPU,139.67,20.4,0.017,43.58,2.456,7.17,1.69,"{""migan_npu"": 1200, ""lama_npu"": 0, ""aotgan_npu"": 0, ""migan_gpu"": 0, ""lama_gpu"": 0, ""aotgan_gpu"": 0, ""telea_cpu"": 0}"
+Static_AOTGAN_NPU,148.14,11.93,0.0099,86.84,2.586,7.17,7.86,"{""migan_npu"": 0, ""lama_npu"": 0, ""aotgan_npu"": 1200, ""migan_gpu"": 0, ""lama_gpu"": 0, ""aotgan_gpu"": 0, ""telea_cpu"": 0}"
+Random_Policy,101.54,58.53,0.0488,101.78,3.041,7.17,-26.07,"{""migan_npu"": 184, ""lama_npu"": 166, ""aotgan_npu"": 160, ""migan_gpu"": 179, ""lama_gpu"": 174, ""aotgan_gpu"": 168, ""telea_cpu"": 169}"

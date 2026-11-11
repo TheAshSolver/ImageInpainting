@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.QIDKInpaint" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#10B981</item>
+        <item name="colorSecondary">#2563EB</item>
+        <item name="android:statusBarColor">#111827</item>
+    </style>
+</resources>

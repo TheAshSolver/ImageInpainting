@@ -449,7 +449,7 @@ class BenchmarkVisualizer:
         ax1.set_title("NPU Usage (% Active Cycles / Total Cycles)", weight="bold")
         ax1.set_xlabel("NPU Temperature (°C)")
         ax1.set_ylabel("NPU Hardware Usage (%)")
-        ax1.set_ylim(50, 105)
+        ax1.set_ylim(0, 105)
         ax1.grid(True, linestyle="--", alpha=0.6)
         if not npu_df.empty:
             ax1.legend(loc="lower right")
@@ -464,7 +464,7 @@ class BenchmarkVisualizer:
         ax2.set_title("GPU Engine Busy Utilization (kgsl)", weight="bold")
         ax2.set_xlabel("GPU Temperature (°C)")
         ax2.set_ylabel("GPU Usage (%)")
-        ax2.set_ylim(50, 105)
+        ax2.set_ylim(0, 105)
         ax2.grid(True, linestyle="--", alpha=0.6)
         if not gpu_df.empty:
             ax2.legend(loc="lower right")
@@ -566,7 +566,7 @@ class BenchmarkVisualizer:
         axs[1, 0].set_title("C. Engine Utilization (%)", weight="bold")
         axs[1, 0].set_xlabel("Operating Temperature (°C)")
         axs[1, 0].set_ylabel("Usage (%)")
-        axs[1, 0].set_ylim(60, 105)
+        axs[1, 0].set_ylim(0, 105)
         axs[1, 0].grid(True, linestyle="--", alpha=0.5)
         axs[1, 0].legend(fontsize=8, loc="best")
 
