@@ -1,6 +1,11 @@
 package qidk.fix
 
 import android.graphics.Bitmap
+import org.opencv.android.OpenCVLoader
+import org.opencv.android.Utils
+import org.opencv.core.Mat
+import org.opencv.core.Size
+import org.opencv.imgproc.Imgproc
 
 /**
  * Tarsh's hand-built 4-quadrant sub-pixel reconstructor (port of meow.py lines 170-220), numerically identical to the
@@ -79,6 +84,12 @@ object TarshCore {
 }
 
 class TarshSrEngine : SrEngine {
+    init {
+        try {
+            if (!OpenCVLoader.initDebug()) System.loadLibrary("opencv_java4")
+        } catch (_: Throwable) {}
+    }
+
     override val id: String = "tarsh"
     override val label: String = "Tarsh 4-Quadrant Sub-Pixel Reconstructor"
     override val family: ModelFamily = ModelFamily.SR_TARSH
@@ -98,7 +109,62 @@ class TarshSrEngine : SrEngine {
             if (current !== src) current.recycle()
             current = next
         }
-        return SrExecutionResult(current, monitor.end(token, clock, SrRun.coreLabel(Backend.CPU)))
+        val finalBmp = if (passes > 1) {
+            val alpha = when (scale) {
+                4 -> 0.48f
+                8 -> 0.28f
+                else -> 1.0f
+            }
+            blendWithBicubic(src, current, scale, alpha, clock)
+        } else current
+        return SrExecutionResult(finalBmp, monitor.end(token, clock, SrRun.coreLabel(Backend.CPU)))
+    }
+
+    private fun blendWithBicubic(src: Bitmap, tarshOut: Bitmap, scale: Int, alpha: Float, clock: PhaseClock): Bitmap {
+        val outW = src.width * scale
+        val outH = src.height * scale
+        val bicBmp = clock.prep {
+            val srcMat = Mat()
+            val dstMat = Mat()
+            try {
+                Utils.bitmapToMat(src, srcMat)
+                Imgproc.resize(srcMat, dstMat, Size(outW.toDouble(), outH.toDouble()), 0.0, 0.0, Imgproc.INTER_CUBIC)
+                val bmp = Bitmap.createBitmap(outW, outH, Bitmap.Config.ARGB_8888)
+                Utils.matToBitmap(dstMat, bmp)
+                bmp
+            } finally {
+                srcMat.release(); dstMat.release()
+            }
+        }
+
+        val res = clock.post {
+            val out = Bitmap.createBitmap(outW, outH, Bitmap.Config.ARGB_8888)
+            val chunk = 128
+            val tBand = IntArray(outW * chunk)
+            val bBand = IntArray(outW * chunk)
+            val oneMinusAlpha = 1.0f - alpha
+            var y = 0
+            while (y < outH) {
+                val rows = minOf(chunk, outH - y)
+                val len = outW * rows
+                tarshOut.getPixels(tBand, 0, outW, 0, y, outW, rows)
+                bicBmp.getPixels(bBand, 0, outW, 0, y, outW, rows)
+                for (i in 0 until len) {
+                    val tc = tBand[i]
+                    val bc = bBand[i]
+                    val r = (alpha * ((tc ushr 16) and 0xFF) + oneMinusAlpha * ((bc ushr 16) and 0xFF)).toInt().coerceIn(0, 255)
+                    val g = (alpha * ((tc ushr 8) and 0xFF) + oneMinusAlpha * ((bc ushr 8) and 0xFF)).toInt().coerceIn(0, 255)
+                    val b = (alpha * (tc and 0xFF) + oneMinusAlpha * (bc and 0xFF)).toInt().coerceIn(0, 255)
+                    tBand[i] = (0xFF shl 24) or (r shl 16) or (g shl 8) or b
+                }
+                out.setPixels(tBand, 0, outW, 0, y, outW, rows)
+                y += rows
+            }
+            bicBmp.recycle()
+            tarshOut.recycle()
+            out
+        }
+        return res
     }
 
     private fun pass(src: Bitmap, p: Int, passes: Int, progress: SrProgress?, clock: PhaseClock): Bitmap {

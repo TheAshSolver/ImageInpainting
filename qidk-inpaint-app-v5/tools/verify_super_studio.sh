@@ -16,7 +16,7 @@ say(){ echo "$*" | tee -a "$REPORT"; }
 pass(){ say "PASS  $*"; }; skip(){ say "SKIP  $*"; }
 fail(){ say "FAIL  $*"; FAILS=$((FAILS+1)); }; warn(){ say "WARN  $*"; WARNS=$((WARNS+1)); }
 
-hook(){ local a=$1; shift; $ADB shell am broadcast -a "$a" -p "$PKG" "$@" >/dev/null 2>&1; }
+hook(){ local a=$1; shift; local args=""; for x in "$@"; do args="$args $(printf %q "$x")"; done; $ADB shell "am broadcast -a \"$a\" -p \"$PKG\" $args" >/dev/null 2>&1; }
 # wait_hook <action> <regex that the FINAL result line must match> <seconds>
 wait_hook(){ local a=$1 rx=$2 t=$3 i=0 l
   while [ "$i" -lt "$t" ]; do
