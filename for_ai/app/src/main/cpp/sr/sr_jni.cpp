@@ -65,7 +65,7 @@ JNIEXPORT jboolean JNICALL Java_qidk_fix_SrNative_sampleBase(JNIEnv* env, jclass
 
 JNIEXPORT jboolean JNICALL Java_qidk_fix_SrNative_holeMask(JNIEnv* env, jclass, jint x0, jint y0, jint win, jint cell,
                                                             jint phase, jfloatArray out) {
-    if (win <= 0 || cell <= 0 || (phase != 0 && phase != 1)) return JNI_FALSE;
+    if (win <= 0 || cell < 0 || (phase != 0 && phase != 1)) return JNI_FALSE;
     if (!lenAtLeast(env, out, static_cast<jlong>(win) * win)) return JNI_FALSE;
     FloatsRW o(env, out);
     if (!o.p) return JNI_FALSE;
@@ -80,7 +80,7 @@ JNIEXPORT jdoubleArray JNICALL Java_qidk_fix_SrNative_compose(
         jint margin, jfloat alpha, jfloat tau, jfloat driftLimit, jint cx0, jint cy0, jint cw, jint ch, jobject dst,
         jint dstX, jint dstY) {
     const jlong n = static_cast<jlong>(win) * win * 3;
-    if (win <= 0 || (win & 1) || cell <= 0 || cw <= 0 || ch <= 0 || cx0 < 0 || cy0 < 0 || cx0 + cw > win || cy0 + ch > win) return nullptr;
+    if (win <= 0 || (win & 1) || cell < 0 || cw <= 0 || ch <= 0 || cx0 < 0 || cy0 < 0 || cx0 + cw > win || cy0 + ch > win) return nullptr;
     if (!lenAtLeast(env, U, n) || (o0 && !lenAtLeast(env, o0, n)) || (o1 && !lenAtLeast(env, o1, n))) return nullptr;
     try {
         LockedBitmap d(env, dst);
