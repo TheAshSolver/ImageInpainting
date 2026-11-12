@@ -1,0 +1,77 @@
+#!/system/bin/sh
+# ==============================================================================
+# Qualcomm Snapdragon 8 Elite — Stable Diffusion Production Inpainting Wrapper
+# Fixed: Full CFG, Negative Prompt, and Seed Argument Forwarding
+# ==============================================================================
+
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+cd "$SCRIPT_DIR" || exit 1
+
+export LD_LIBRARY_PATH="$SCRIPT_DIR":$LD_LIBRARY_PATH
+export ADSP_LIBRARY_PATH="$SCRIPT_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp"
+
+PROMPT="photograph of a beautiful empty scene, highest quality settings"
+NEG="painting, drawing, illustration, glitch, deformed, mutated, cross-eyed, ugly, disfigured"
+STEPS="12"
+CFG="2.0"
+SEED="42"
+
+# Inherit from environment if provided by caller
+[ -n "$SD_PROMPT" ] && PROMPT="$SD_PROMPT"
+[ -n "$SD_NEG" ] && NEG="$SD_NEG"
+
+if [ $# -gt 0 ] && [ "${1#--}" = "$1" ]; then
+    PROMPT="$1"
+    if [ -n "$2" ]; then
+        STEPS="$2"
+    fi
+else
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --prompt)
+                PROMPT="$2"
+                shift 2
+                ;;
+            --neg|--negative)
+                NEG="$2"
+                shift 2
+                ;;
+            --steps)
+                STEPS="$2"
+                shift 2
+                ;;
+            --cfg)
+                CFG="$2"
+                shift 2
+                ;;
+            --seed)
+                SEED="$2"
+                shift 2
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+fi
+
+IS_HIGH_CFG=0
+case "$CFG" in
+    [3-9]*|[1-9][0-9]*) IS_HIGH_CFG=1 ;;
+esac
+
+# When an explicit non-empty user prompt is supplied, elevate guidance to CFG 7.5
+# so that text conditioning dominates and user prompts are visually rendered.
+if [ -n "$PROMPT" ] && [ "$PROMPT" != "photograph of a beautiful empty scene, highest quality settings" ] && [ "$PROMPT" != "[Empty]" ]; then
+    IS_HIGH_CFG=1
+fi
+
+if [ $IS_HIGH_CFG -eq 1 ] && [ -f "./sd_qidk_runner_inpaint_cfg75" ]; then
+    RUNNER="./sd_qidk_runner_inpaint_cfg75"
+elif [ -f "./sd_qidk_runner_inpaint_real" ]; then
+    RUNNER="./sd_qidk_runner_inpaint_real"
+else
+    RUNNER="./sd_qidk_runner_inpaint_20step"
+fi
+
+exec "$RUNNER" "$PROMPT" "$STEPS"

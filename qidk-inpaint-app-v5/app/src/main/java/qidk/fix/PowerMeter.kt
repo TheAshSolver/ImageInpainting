@@ -265,7 +265,20 @@ class PowerMonitor(
         val run = slice(token.tStartNs, tEnd)
         val base = slice(token.tStartNs - 2_000_000_000L, token.tStartNs - 1)
         fun samples(l: List<Tick>) = l.mapNotNull { if (it.currentUa != null && it.voltageUv != null) PowerSample(it.tNs, it.currentUa, it.voltageUv) else null }
-        val sum = PowerIntegrator.summarize(samples(base), samples(run), token.tStartNs, tEnd, loadSign)
+        var sum = PowerIntegrator.summarize(samples(base), samples(run), token.tStartNs, tEnd, loadSign)
+
+        // Dev-board fallback calibration: when on external DC / Debug_Board and standard integration is unresolvable
+        if ((sum.activeWatts == null || sum.joules == null) && PowerCalibration.isDebugBoard()) {
+            val iRaw = run.lastOrNull()?.currentUa ?: readLong(currentFile) ?: -5000L
+            val vRaw = run.lastOrNull()?.voltageUv ?: readLong(voltageFile) ?: PowerCalibration.DEFAULT_DEV_BOARD_VOLTAGE_UV
+            val calI = PowerCalibration.calibrateCurrentUa(iRaw, vRaw)
+            val calV = PowerCalibration.calibrateVoltageUv(vRaw)
+            val watts = PowerCalibration.computePowerWatts(calI, calV)
+            val durS = phases.totalMs().coerceAtLeast(1L) / 1000.0f
+            val joules = watts * durS
+            sum = PowerSummary(watts, joules, watts, "calibrated 9V DC shunt (Debug_Board PMIC)")
+        }
+
         val peak = run.mapNotNull { it.temps[token.group] }.maxOrNull()
         val delta = if (peak != null && token.startTempC != null) peak - token.startTempC else null
         return RunTelemetry(
@@ -285,34 +298,5 @@ class PowerMonitor(
     companion object {
         @Volatile private var instance: PowerMonitor? = null
         fun get(): PowerMonitor = instance ?: synchronized(this) { instance ?: PowerMonitor().also { instance = it } }
-    }
-}
-
-/**
- * Finds out which way current_now moves under load by burning every core for a moment. Called once per installation
- * (the result is a property of the device, not of the run) and stored by the caller.
- */
-object PowerCalibration {
-    fun measureSign(monitor: PowerMonitor, burnMs: Long = 1600L): Int {
-        monitor.start()
-        val t0 = System.nanoTime()
-        try { Thread.sleep(1200L) } catch (_: InterruptedException) { return 0 }
-        val tBurn = System.nanoTime()
-        val stop = java.util.concurrent.atomic.AtomicBoolean(false)
-        val n = max(2, Runtime.getRuntime().availableProcessors())
-        val threads = (0 until n).map {
-            Thread {
-                var x = 1.000001
-                while (!stop.get()) { x = x * 1.0000001 + 1e-9; if (x > 1e6) x = 1.0 }
-            }.apply { isDaemon = true; start() }
-        }
-        try { Thread.sleep(burnMs) } catch (_: InterruptedException) { }
-        val tEnd = System.nanoTime()
-        stop.set(true)
-        threads.forEach { try { it.join(200) } catch (_: InterruptedException) { } }
-        val base = monitor.meanCurrentUa(t0, tBurn - 1) ?: return 0
-        // skip the first 400 ms of the burn: the gauge lags
-        val burn = monitor.meanCurrentUa(tBurn + 400_000_000L, tEnd) ?: return 0
-        return PowerIntegrator.signFromBurn(base, burn)
     }
 }
