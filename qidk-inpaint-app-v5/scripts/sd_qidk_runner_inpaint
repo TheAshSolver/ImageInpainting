@@ -1,7 +1,7 @@
 #!/system/bin/sh
 # ==============================================================================
 # Qualcomm Snapdragon 8 Elite — Stable Diffusion Production Inpainting Wrapper
-# Fixed: Full CFG, Negative Prompt, and Seed Argument Forwarding
+# Supports Fast SD (3.8-4.5s) via QIDK native runner and Smart SD via CFG 7.5
 # ==============================================================================
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
@@ -15,6 +15,8 @@ NEG="painting, drawing, illustration, glitch, deformed, mutated, cross-eyed, ugl
 STEPS="12"
 CFG="2.0"
 SEED="42"
+STRENGTH="1.0"
+NO_COMPOSITE=0
 
 # Inherit from environment if provided by caller
 [ -n "$SD_PROMPT" ] && PROMPT="$SD_PROMPT"
@@ -48,6 +50,14 @@ else
                 SEED="$2"
                 shift 2
                 ;;
+            --strength)
+                STRENGTH="$2"
+                shift 2
+                ;;
+            --no-composite)
+                NO_COMPOSITE=1
+                shift 1
+                ;;
             *)
                 shift
                 ;;
@@ -60,12 +70,9 @@ case "$CFG" in
     [3-9]*|[1-9][0-9]*) IS_HIGH_CFG=1 ;;
 esac
 
-# When an explicit non-empty user prompt is supplied, elevate guidance to CFG 7.5
-# so that text conditioning dominates and user prompts are visually rendered.
-if [ -n "$PROMPT" ] && [ "$PROMPT" != "photograph of a beautiful empty scene, highest quality settings" ] && [ "$PROMPT" != "[Empty]" ]; then
-    IS_HIGH_CFG=1
-fi
-
+# Select appropriate runner:
+# - CFG < 3.0 (Standard SD, Super-Res tiles): ultra-fast 3.8-4.5s zero-copy mmap QIDK runner
+# - CFG >= 3.0 (Smart SD, high guidance): CFG 7.5 conditioning runner
 if [ $IS_HIGH_CFG -eq 1 ] && [ -f "./sd_qidk_runner_inpaint_cfg75" ]; then
     RUNNER="./sd_qidk_runner_inpaint_cfg75"
 elif [ -f "./sd_qidk_runner_inpaint_real" ]; then

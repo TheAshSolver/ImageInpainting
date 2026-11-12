@@ -211,8 +211,8 @@ class SdSuperResEngine(
     override val unavailableReason: String?
         get() = when {
             !SrNative.available -> "libqidk_sr.so is not loaded: rebuild the app with the NDK"
-            !File(SD_DIR, MARKER).exists() -> "the SD runner on the device has no img2img mode (create $SD_DIR/$MARKER after installing the patched runner, guide section 4)"
-            !File(SD_DIR, "sd_cli_v2").exists() -> "the SD runner is the old build without a command line"
+            !File(SD_DIR, "sd_cli_v2").exists() && !File(SD_DIR, "sd_qidk_runner_inpaint").exists() && !File(SD_DIR, MARKER).exists() ->
+                "the SD runner is not installed in $SD_DIR"
             else -> null
         }
 
@@ -307,7 +307,7 @@ class SdSuperResEngine(
                     "export LD_LIBRARY_PATH=$SD_DIR:\$LD_LIBRARY_PATH",
                     "export ADSP_LIBRARY_PATH='$SD_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp'"
                 ),
-                steps = 12, cfg = 4.5f, seed = seed, extra = listOf("--strength", "0.30", "--no-composite")
+                steps = 12, cfg = 2.0f, seed = seed, extra = listOf("--strength", "0.30", "--no-composite")
             )
             val pb = ProcessBuilder("/system/bin/sh", "-c", script).redirectErrorStream(true)
             pb.environment().putAll(SdRunnerCommand.environment(SR_PROMPT, SR_NEGATIVE))

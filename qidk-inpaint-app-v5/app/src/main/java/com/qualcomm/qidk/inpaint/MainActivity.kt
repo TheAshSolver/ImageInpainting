@@ -246,8 +246,8 @@ class MainActivity : AppCompatActivity() {
             "LaMa Dilated (Large Voids)",
             "MIGAN (Portraits & Speed)",
             "AOT-GAN (Dense Texture)",
-            "Standard SD 1.5 (your prompt, untouched)",
-            "Smart SD (context-aware prompt)",
+            "Standard SD 1.5 (Fast 4s • Untouched)",
+            "Smart SD (Context-Aware Prompt • CFG 7.5)",
             "Fast Marching (Telea)",
             "Fluid Streamlines (Navier-Stokes)",
             "Criminisi Exemplar",
@@ -262,7 +262,7 @@ class MainActivity : AppCompatActivity() {
                 val selected = parent?.getItemAtPosition(position)?.toString() ?: ""
                 refreshBackends(selected)
                 val smart = selected.contains("Smart")
-                val isSd = smart || selected.contains("Standard SD") || selected.contains("Diffusion")
+                val isSd = smart || selected.contains("SD") || selected.contains("Diffusion")
                 promptCard.visibility = if (isSd) View.VISIBLE else View.GONE
                 // The 5-stage drawer belongs to Smart SD only: Standard SD sends the user's words as they are, there is nothing to trace.
                 pipelineTraceCard.visibility = if (smart) View.VISIBLE else View.GONE
@@ -633,7 +633,7 @@ class MainActivity : AppCompatActivity() {
             selectedOption.contains("MIGAN") -> "MIGAN"
             selectedOption.contains("LaMa") -> "LAMA"
             selectedOption.contains("AOT") -> "AOTGAN"
-            selectedOption.contains("Stable Diffusion") || selectedOption.contains("Diffusion") || selectedOption.contains("Smart SD") -> "SD"
+            selectedOption.contains("SD") || selectedOption.contains("Diffusion") -> "SD"
             else -> "LAMA"
         }
 
