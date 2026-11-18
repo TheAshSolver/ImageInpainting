@@ -405,106 +405,114 @@
   <!-- SLIDE 9: LINUCB ROUTER FORMULATION -->
   <div class="slide" id="slide-9">
     <span class="slide-badge">Reinforcement Learning</span>
-    <h2>LinUCB Contextual Bandit Policy</h2>
-    <p class="lead">Disjoint LinUCB router optimizing engine selection in real time under dynamic visual context and thermal/power drift.</p>
+    <h2>LinUCB Contextual Bandit Policy (21D Context & Calibrated Utility)</h2>
+    <p class="lead">Disjoint LinUCB router optimizing engine selection in real time under standardized visual geometry, mask morphology, and PMIC telemetry.</p>
 
     <div class="grid-2">
       <div class="card">
         <h3>Mathematical Formulation</h3>
-        <p>• <strong>5D Context Vector:</strong><br>
-          <code>x_t = [1.0, MaskArea_norm, EdgeDensity_norm, Temp_norm, Battery_norm]^T ∈ ℝ⁵</code></p>
-        <p>• <strong>Precision Matrix & Vector:</strong><br>
-          <code>A_a = ∑ (x_t x_t^T) + λ I ∈ ℝ⁵ˣ⁵</code><br>
-          <code>b_a = ∑ (r_t x_t) ∈ ℝ⁵</code></p>
-        <p>• <strong>Ridge Parameter Estimate:</strong><br>
+        <p>• <strong>21D Context Vector:</strong><br>
+          <code>x_t = [1.0, f_img¹⁰, m_mask⁵, t_telemetry⁵]^T ∈ ℝ²¹</code></p>
+        <p>• <strong>Ridge Covariance Matrix & Reward Vector:</strong><br>
+          <code>A_a = ∑ (x_t x_t^T) + λ I ∈ ℝ²¹ˣ²¹</code><br>
+          <code>b_a = ∑ (r_t x_t) ∈ ℝ²¹</code></p>
+        <p>• <strong>Closed-Form Parameter Estimate:</strong><br>
           <code>θ̂_a = A_a⁻¹ b_a</code></p>
-        <p>• <strong>Upper Confidence Bound Selection:</strong><br>
+        <p>• <strong>Upper Confidence Bound Selection (α = 0.25):</strong><br>
           <code>a_t = argmax [ x_t^T θ̂_a + α √(x_t^T A_a⁻¹ x_t) ]</code></p>
       </div>
       <div class="card">
-        <h3>Multi-Objective Pareto Reward</h3>
+        <h3>Calibrated Multi-Objective Utility Reward</h3>
         <p>• <strong>Objective Function:</strong><br>
-          <code>R(a, x) = 2.0*Q(a, x) - 0.75*(Latency/250ms) - 0.20*(Power/100mW) - 1.5*T_viol</code></p>
-        <p>• <strong>Visual Model Utility Q(a, x):</strong> MIGAN specializes in localized infill (&lt;12%), LaMa in wide voids (&gt;15%), AOT-GAN in dense textures.</p>
-        <p>• <strong>Latency & Power Penalties:</strong> Normalized against 250 ms interactive budget and 100 mW power budget.</p>
-        <p>• <strong>Thermal Violation Penalty T_viol:</strong> Heavy penalty if GPU arms are selected during high thermal regimes (&gt;48°C).</p>
+          <code>R(x_t, a) = 0.40*(1 - LPIPS) + 0.20*SSIM - 0.20*(Lat/500ms) - 0.20*(E_J/2.0J) - 5.0*1_{T &gt; 75°C}</code></p>
+        <p>• <strong>Visual Quality:</strong> Deep perceptual patch similarity (LPIPS-VGG) and structural similarity (SSIM) across 40 balanced strata.</p>
+        <p>• <strong>Physical Energy Consistency:</strong> SoC PMIC rail power (1.45 W – 4.10 W) where energy strictly satisfies <code>E = P * t</code> (35.1 mJ – 861.0 mJ).</p>
+        <p>• <strong>Zero Data Leakage:</strong> Scalers & priors fit strictly on 4,800 train set; evaluated strictly on 1,200 holdout set.</p>
       </div>
     </div>
   </div>
 
   <!-- SLIDE 10: POLICY BENCHMARK SIMULATION -->
   <div class="slide" id="slide-10">
-    <span class="slide-badge">Simulation & Verification</span>
-    <h2>Policy Simulation & Baseline Showdown</h2>
-    <p class="lead">1,000-request dynamic workload comparing LinUCB against standard routing heuristics on Snapdragon 8 Elite.</p>
+    <span class="slide-badge">Holdout Verification</span>
+    <h2>Zero-Data-Leakage Policy Evaluation (1,200 Test Rounds)</h2>
+    <p class="lead">80/20 Stratified Holdout evaluation across 1,200 unseen test requests on Snapdragon 8 Elite hardware.</p>
 
     <table>
       <thead>
         <tr>
           <th>Policy</th>
           <th>Total Reward</th>
-          <th>Mean Regret</th>
+          <th>Cumul Regret</th>
           <th>Mean Latency</th>
           <th>Mean Power</th>
-          <th>Thermal Budget Violations</th>
+          <th>vs Best Static</th>
         </tr>
       </thead>
       <tbody>
         <tr style="background: rgba(88, 166, 255, 0.15);">
           <td><strong>LinUCB Adaptive (Ours)</strong></td>
-          <td><strong>+1709.6</strong></td>
-          <td><strong>0.0021</strong></td>
-          <td><strong>104.1 ms</strong></td>
-          <td><strong>39.6 mW</strong></td>
-          <td><strong>0.1%</strong></td>
+          <td><strong>+155.0</strong></td>
+          <td><strong>5.0</strong></td>
+          <td><strong>79.8 ms</strong></td>
+          <td><strong>2.56 W</strong></td>
+          <td><strong>+12.9%</strong></td>
         </tr>
         <tr>
           <td><strong>Oracle Optimal (Hindsight)</strong></td>
-          <td>+1711.7</td>
-          <td>0.0000</td>
-          <td>103.0 ms</td>
-          <td>39.4 mW</td>
-          <td>0.0%</td>
+          <td>+160.1</td>
+          <td>0.0</td>
+          <td>81.0 ms</td>
+          <td>2.55 W</td>
+          <td>+16.5%</td>
         </tr>
         <tr>
-          <td><strong>Greedy Fastest (MIGAN NPU)</strong></td>
-          <td>+1505.2</td>
-          <td>0.2065</td>
-          <td>59.3 ms</td>
-          <td>31.0 mW</td>
-          <td>0.0%</td>
+          <td><strong>Supervised Argmax</strong></td>
+          <td>+158.5</td>
+          <td>1.6</td>
+          <td>79.9 ms</td>
+          <td>2.56 W</td>
+          <td>+15.4%</td>
         </tr>
         <tr>
-          <td><strong>Static MIGAN NPU</strong></td>
-          <td>+1505.2</td>
-          <td>0.2065</td>
-          <td>59.3 ms</td>
-          <td>31.0 mW</td>
-          <td>0.0%</td>
-        </tr>
-        <tr>
-          <td><strong>Static LaMa NPU</strong></td>
-          <td>+1533.6</td>
-          <td>0.1781</td>
-          <td>119.1 ms</td>
-          <td>42.0 mW</td>
-          <td>0.0%</td>
+          <td><strong>Heuristic Ladder π₀</strong></td>
+          <td>+153.8</td>
+          <td>6.3</td>
+          <td>99.5 ms</td>
+          <td>2.62 W</td>
+          <td>+11.9%</td>
         </tr>
         <tr>
           <td><strong>Static AOT-GAN NPU</strong></td>
-          <td>+1442.8</td>
-          <td>0.2689</td>
-          <td>177.7 ms</td>
-          <td>55.0 mW</td>
+          <td>+148.1</td>
+          <td>11.9</td>
+          <td>86.8 ms</td>
+          <td>2.59 W</td>
+          <td>+7.9%</td>
+        </tr>
+        <tr>
+          <td><strong>Static MIGAN NPU</strong></td>
+          <td>+139.7</td>
+          <td>20.4</td>
+          <td>43.6 ms</td>
+          <td>2.46 W</td>
+          <td>+1.7%</td>
+        </tr>
+        <tr>
+          <td><strong>Static LaMa NPU (Base)</strong></td>
+          <td>+137.3</td>
+          <td>22.7</td>
+          <td>119.4 ms</td>
+          <td>2.68 W</td>
           <td>0.0%</td>
         </tr>
         <tr>
           <td><strong>Uniform Random Policy</strong></td>
-          <td>+971.7</td>
-          <td>0.7400</td>
-          <td>215.7 ms</td>
-          <td>76.5 mW</td>
-          <td>13.8%</td>
+          <td>+101.5</td>
+          <td>58.5</td>
+          <td>101.8 ms</td>
+          <td>3.04 W</td>
+          <td>-26.1%</td>
         </tr>
       </tbody>
     </table>

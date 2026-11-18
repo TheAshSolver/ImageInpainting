@@ -82,3 +82,4 @@ Benchmark/6000_images/compiled/masks/
 !Benchmark/6000_images/**/*.csv
 
 for_ai.zip
+qidk-inpaint-app-v5/verify_out/
