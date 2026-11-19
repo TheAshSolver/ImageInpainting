@@ -1,0 +1,6 @@
+level,target_cpu_pct,achieved_cpu_pct_mean,achieved_cpu_pct_std,target_ram_mb,achieved_ram_mb,target_temp_c,mean_cpu_temp_c,peak_cpu_temp_c,mean_npu_temp_c,mean_gpu_temp_c,mean_power_w,std_power_w,mean_mem_bw_gbps,sample_count,provenance
+L0,0,1.08,0.78,0,0,34.0,32.01,32.6,31.58,31.93,5.1,1.75,0.0,147,MEASURED_ON_DEVICE
+L1,15,14.98,0.81,1024,1024,37.0,52.45,56.9,40.03,42.09,4.88,1.67,15.84,147,MEASURED_ON_DEVICE
+L2,35,28.9,0.87,2560,2560,40.0,56.37,58.8,43.69,45.88,4.6,1.24,15.36,147,MEASURED_ON_DEVICE
+L3,65,59.54,0.5,4096,4096,43.0,60.78,67.2,45.82,48.72,5.69,1.65,15.64,150,MEASURED_ON_DEVICE
+L4,85,92.41,1.4,4096,4096,46.5,69.51,74.2,47.72,51.34,5.16,1.78,10.64,147,MEASURED_ON_DEVICE

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="qidk_canvas">#0B0F19</color>  <!-- page background -->
+    <color name="qidk_card">#161F30</color>  <!-- card surface -->
+    <color name="qidk_card_scrim">#D9161F30</color>  <!-- floating controls over the canvas -->
+    <color name="qidk_well">#0F1626</color>  <!-- image well behind photos -->
+    <color name="qidk_field">#1E293B</color>  <!-- inputs, spinners, neutral chips -->
+    <color name="qidk_neutral">#334155</color>  <!-- neutral buttons -->
+    <color name="qidk_outline">#26334A</color>  <!-- hairlines -->
+    <color name="qidk_text">#F8FAFC</color>  <!-- primary text -->
+    <color name="qidk_text_strong">#E2E8F0</color>  <!-- emphasised secondary text -->
+    <color name="qidk_text_muted">#94A3B8</color>  <!-- captions, hints -->
+    <color name="qidk_on_accent">#FFFFFF</color>  <!-- text on filled accent buttons -->
+    <color name="qidk_on_primary">#0B0F19</color>  <!-- text on the cyan primary colour -->
+    <color name="qidk_cyan">#38BDF8</color>  <!-- accent: cyan -->
+    <color name="qidk_emerald">#10B981</color>  <!-- accent: emerald -->
+    <color name="qidk_purple">#C084FC</color>  <!-- accent: purple -->
+    <color name="qidk_amber">#F59E0B</color>  <!-- accent: amber -->
+    <color name="qidk_crimson">#EF4444</color>  <!-- accent: crimson (primary action, destructive) -->
+    <color name="qidk_danger_text">#FCA5A5</color>  <!-- red text on cards -->
+    <color name="qidk_info_text">#93C5FD</color>  <!-- blue text on cards -->
+    <color name="qidk_primary_action">#2563EB</color>  <!-- filled blue buttons -->
+    <color name="qidk_navy">#1E3A8A</color>  <!-- filled navy buttons -->
+    <color name="qidk_selected">#1E3A8A</color>  <!-- selected / active state -->
+    <color name="qidk_telemetry_bg">#1E3A8A</color>  <!-- post-run telemetry card -->
+    <color name="qidk_telemetry_text">#F8FAFC</color>  <!-- text on the telemetry card -->
+    <color name="qidk_badge_bg">#CC0B0F19</color>  <!-- viewport badge scrim -->
+    <color name="qidk_badge_text">#F8FAFC</color>  <!-- viewport badge text -->
+</resources>

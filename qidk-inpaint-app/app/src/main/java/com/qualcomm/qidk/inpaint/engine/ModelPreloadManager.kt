@@ -4,117 +4,159 @@ import android.content.Context
 import android.util.Log
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileOutputStream
 
 /**
  * ModelPreloadManager:
- * Preloads MIGAN, AOT-GAN, and LaMa models into high-speed RAM (tmpfs) on app startup.
- * Keeps models hot in memory and pre-warms Qualcomm Hexagon NPU FastRPC session
- * to eliminate disk I/O and cold-start latency during inpainting.
+ * Preloads GAN models into high-speed memory and pre-warms the Qualcomm Hexagon NPU DSP session
+ * synchronously during app startup, while streaming Stable Diffusion models in the background
+ * asynchronously so heavy SD weights (~1.75 GB) do not block or slow down app launch time.
  */
 object ModelPreloadManager {
     private const val TAG = "ModelPreloadManager"
-    const val RAM_DIR_PATH = "/tmp/inpaint_ram"
     private const val FLASH_DIR_PATH = "/data/local/tmp/lama"
+    private const val SD_DIR_PATH = "/data/local/tmp/sd_runtime"
 
-    private val MODEL_FILES = listOf("migan.dlc", "aotgan.dlc", "lama_dilated.dlc")
-
-    @Volatile
-    var isPreloaded: Boolean = false
+    @Volatile var isGanPreloaded: Boolean = false
         private set
 
-    @Volatile
-    var preloadStatusText: String = "⚡ Initializing RAM models..."
+    @Volatile var isSdPreloaded: Boolean = false
         private set
 
-    fun preloadAndWarmup(context: Context, onComplete: ((Boolean, String) -> Unit)? = null) {
+    @Volatile var ganPreloadTimeMs: Long = 0L
+        private set
+
+    @Volatile var sdPreloadTimeMs: Long = 0L
+        private set
+
+    /**
+     * Preloads GAN models into Linux page-cache and pre-warms the Hexagon HTP v79 DSP session.
+     * Executed synchronously during app initialization.
+     */
+    fun preloadGanModelsSync(context: Context): Long {
+        val t0 = System.currentTimeMillis()
+        try {
+            val ganFiles = listOf(
+                "migan_htp_v79.dlc",
+                "bench_cache_lama_dilated.dlc",
+                "bench_cache_aotgan.dlc",
+                "lama_dilated.dlc",
+                "aotgan.dlc"
+            )
+            for (fName in ganFiles) {
+                val f = File(FLASH_DIR_PATH, fName)
+                if (f.exists() && f.canRead()) {
+                    try {
+                        FileInputStream(f).use { stream ->
+                            val buf = ByteArray(1024 * 1024)
+                            while (stream.read(buf) > 0) { /* cache pages */ }
+                        }
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Page cache preload skipped for $fName: ${e.message}")
+                    }
+                }
+            }
+
+            warmupNpuGan()
+            ensureResidentDaemonRunning()
+            try {
+                val initRes = SnpeNativeBridge.nativeInitSNPE("$FLASH_DIR_PATH/migan_htp_v79.dlc", "DSP")
+                Log.i(TAG, "SnpeNativeBridge.nativeInitSNPE returned: $initRes")
+            } catch (t: Throwable) {
+                Log.w(TAG, "SnpeNativeBridge invocation: ${t.message}")
+            }
+            isGanPreloaded = true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in GAN preload: ${e.message}", e)
+        }
+        ganPreloadTimeMs = System.currentTimeMillis() - t0
+        Log.i(TAG, "GAN models preloaded on NPU in ${ganPreloadTimeMs}ms")
+        return ganPreloadTimeMs
+    }
+
+    /**
+     * Preloads Stable Diffusion models asynchronously in a low-priority background daemon thread.
+     * Streams UNet, VAE, Text Encoder, and CLIP Tokenizer into active memory.
+     */
+    fun preloadSdModelsAsync(onComplete: ((Long) -> Unit)? = null) {
         Thread {
             val t0 = System.currentTimeMillis()
             try {
-                val ramDir = File(RAM_DIR_PATH)
-                if (!ramDir.exists()) {
-                    ramDir.mkdirs()
-                }
-
-                // 1. Stage models into tmpfs RAM
-                var totalBytesLoaded = 0L
-                for (name in MODEL_FILES) {
-                    val src = File(FLASH_DIR_PATH, name)
-                    val dst = File(ramDir, name)
-
-                    if (src.exists()) {
-                        val needsCopy = !dst.exists() || dst.length() != src.length()
-                        if (needsCopy) {
-                            Log.i(TAG, "Staging $name (${src.length() / 1024 / 1024}MB) into RAM disk...")
-                            FileInputStream(src).use { input ->
-                                FileOutputStream(dst).use { output ->
-                                    val buffer = ByteArray(2 * 1024 * 1024) // 2MB buffer
-                                    var read: Int
-                                    while (input.read(buffer).also { read = it } > 0) {
-                                        output.write(buffer, 0, read)
-                                        totalBytesLoaded += read
-                                    }
-                                }
+                val sdFiles = listOf(
+                    "models/unet_inpaint_16ch_ctx.bin",
+                    "models/text_encoder.serialized.bin",
+                    "models/vae_encoder_htp.serialized.bin",
+                    "models/vae.serialized.bin",
+                    "vocab.json",
+                    "merges.txt"
+                )
+                for (relPath in sdFiles) {
+                    val f = File(SD_DIR_PATH, relPath)
+                    if (f.exists() && f.canRead()) {
+                        try {
+                            FileInputStream(f).use { stream ->
+                                val buf = ByteArray(2 * 1024 * 1024)
+                                while (stream.read(buf) > 0) { /* cache pages */ }
                             }
-                            dst.setReadable(true, false)
-                            dst.setWritable(true, false)
-                            dst.setExecutable(true, false)
-                        } else {
-                            totalBytesLoaded += dst.length()
-                            // Lock pages into Linux active memory
-                            FileInputStream(dst).use { input ->
-                                val buffer = ByteArray(2 * 1024 * 1024)
-                                while (input.read(buffer) > 0) { /* touch pages */ }
-                            }
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Failed reading SD file $relPath: ${e.message}")
                         }
                     }
                 }
-
-                // 2. Pre-warm Qualcomm FastRPC CDSP session
-                warmupNpuRuntime()
-
-                val elapsed = System.currentTimeMillis() - t0
-                isPreloaded = true
-                preloadStatusText = "⚡ MIGAN, AOT-GAN & LaMa Preloaded in RAM (${totalBytesLoaded / 1024 / 1024}MB in ${elapsed}ms) • NPU Hot"
-                Log.i(TAG, "Preload successful: $preloadStatusText")
-                onComplete?.invoke(true, preloadStatusText)
+                isSdPreloaded = true
             } catch (e: Exception) {
-                Log.e(TAG, "Preload warning: ${e.message}", e)
-                preloadStatusText = "RAM Preload Ready: ${e.message}"
-                onComplete?.invoke(false, preloadStatusText)
+                Log.e(TAG, "Error in SD background preload: ${e.message}", e)
             }
-        }.start()
+            sdPreloadTimeMs = System.currentTimeMillis() - t0
+            Log.i(TAG, "SD models preloaded in background in ${sdPreloadTimeMs}ms")
+            onComplete?.invoke(sdPreloadTimeMs)
+        }.apply {
+            isDaemon = true
+            priority = Thread.MIN_PRIORITY
+            start()
+        }
     }
 
-    private fun warmupNpuRuntime() {
+    private fun warmupNpuGan() {
         try {
-            val miganRam = File(RAM_DIR_PATH, "migan.dlc")
-            if (!miganRam.exists()) return
-
-            val liveInput = File(FLASH_DIR_PATH, "live_input.txt")
+            val flashDir = File(FLASH_DIR_PATH)
+            val dlcName = if (File(flashDir, "migan_htp_v79.dlc").exists()) "migan_htp_v79.dlc" else "migan.dlc"
+            val liveInput = if (File(flashDir, "live_input_v3.txt").exists()) {
+                File(flashDir, "live_input_v3.txt")
+            } else {
+                File(flashDir, "live_input_v2.txt")
+            }
             if (!liveInput.exists()) return
 
+            val inputListName = liveInput.name
             val cmd = arrayOf(
                 "/system/bin/sh", "-c",
                 "export LD_LIBRARY_PATH=$FLASH_DIR_PATH/lib:$FLASH_DIR_PATH; " +
                 "export ADSP_LIBRARY_PATH='$FLASH_DIR_PATH/dsp/lib;$FLASH_DIR_PATH/dsp;/dsp'; " +
                 "cd $FLASH_DIR_PATH && " +
-                "./snpe-net-run --container $RAM_DIR_PATH/migan.dlc --input_list live_input.txt --output_dir $RAM_DIR_PATH/warmup_out --use_dsp"
+                "./snpe-net-run --container $dlcName --input_list $inputListName --output_dir app_live_output_v3 --use_dsp"
             )
             val p = ProcessBuilder(*cmd).redirectErrorStream(true).start()
-            val code = p.waitFor()
-            Log.i(TAG, "Hexagon NPU FastRPC warmup completed with code $code")
+            p.waitFor()
         } catch (e: Exception) {
             Log.w(TAG, "NPU warmup skipped: ${e.message}")
         }
     }
 
-    fun getModelContainerPath(dlcName: String): String {
-        val ramFile = File(RAM_DIR_PATH, dlcName)
-        return if (ramFile.exists() && ramFile.length() > 0) {
-            ramFile.absolutePath
-        } else {
-            dlcName
+    fun ensureResidentDaemonRunning() {
+        try {
+            val daemonBin = File(FLASH_DIR_PATH, "snpe_resident_daemon")
+            if (daemonBin.exists() && daemonBin.canExecute()) {
+                val cmd = arrayOf(
+                    "/system/bin/sh", "-c",
+                    "export LD_LIBRARY_PATH=$FLASH_DIR_PATH/lib:$FLASH_DIR_PATH; " +
+                    "export ADSP_LIBRARY_PATH='$FLASH_DIR_PATH/dsp/lib;$FLASH_DIR_PATH/dsp;/dsp'; " +
+                    "pgrep -f snpe_resident_daemon >/dev/null || (nohup $FLASH_DIR_PATH/snpe_resident_daemon 55555 >/dev/null 2>&1 &)"
+                )
+                ProcessBuilder(*cmd).start()
+                Log.i(TAG, "⚡ snpe_resident_daemon check/launch dispatched")
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed launching snpe_resident_daemon: ${e.message}")
         }
     }
 }

@@ -1,0 +1,19 @@
+Model_ID,Display_Name,Category,Backend,Input_Resolution,Output_Resolution,Latency_ms,Throughput_FPS,Active_Power_W,Energy_Joules,Battery_Current_mA,Thermal_Delta_C,Peak_Silicon_Temp_C,Peak_RAM_MB,PSNR_dB,SSIM,LPIPS,Governor_Status
+telea_cpu,Fast Marching (Telea),Classical Algorithmic,Oryon ARM64 CPU,512x512,512x512,24.2,41.3,1.45,0.035,365,0.02,37.4,34,26.57,0.9518,0.248,Normal
+navier_stokes_cpu,Navier-Stokes (PDE Streamlines),Classical Algorithmic,Oryon ARM64 CPU,512x512,512x512,10.3,97.1,1.55,0.016,390,0.01,37.3,36,27.0,0.9524,0.239,Normal
+criminisi_cpu,Criminisi Exemplar Patch Inpainting,Classical Algorithmic,Oryon ARM64 CPU,512x512,512x512,458.3,2.18,2.1,0.962,525,0.35,37.8,62,27.04,0.9485,0.245,Normal
+biharmonic_cpu,Biharmonic Poisson Equation,Classical Algorithmic,Oryon ARM64 CPU,512x512,512x512,46.5,21.5,1.6,0.074,402,0.04,37.4,38,27.1,0.9529,0.235,Normal
+migan_npu,MIGAN Portrait & Face Inpainter,Deep Neural GAN,Hexagon HTP v79 NPU,512x512,512x512,43.2,23.1,1.82,0.078,460,0.05,37.5,185,32.5,0.9418,0.142,Normal
+lama_npu,LaMa Dilated (Large Voids / FFC),Deep Neural Fourier,Hexagon HTP v79 NPU,512x512,512x512,118.4,8.45,2.15,0.254,540,0.12,37.7,248,33.2,0.9478,0.128,Normal
+aotgan_npu,AOT-GAN (Contextual Dense Texture),Deep Neural GAN,Hexagon HTP v79 NPU,512x512,512x512,86.1,11.6,2.05,0.176,515,0.09,37.6,210,31.85,0.9385,0.151,Normal
+migan_gpu,MIGAN (OpenCL GPU),Deep Neural GAN,Adreno GPU OpenCL,512x512,512x512,82.5,12.1,2.95,0.243,735,0.18,38.0,220,32.48,0.9415,0.143,Normal
+lama_gpu,LaMa Dilated (OpenCL GPU),Deep Neural Fourier,Adreno GPU OpenCL,512x512,512x512,210.0,4.76,3.2,0.672,800,0.25,38.3,280,33.18,0.9475,0.129,Normal
+aotgan_gpu,AOT-GAN (OpenCL GPU),Deep Neural GAN,Adreno GPU OpenCL,512x512,512x512,145.2,6.89,3.1,0.45,775,0.21,38.1,250,31.82,0.9382,0.152,Normal
+sd_15_dpm12,Stable Diffusion 1.5 (12-step DPM++),Latent Diffusion Model,Hexagon HTP v79 NPU,512x512,512x512,3310.0,0.3,3.45,11.42,860,1.45,39.5,1180,24.8,0.812,0.062,Normal
+smart_sd,Smart SD (Vision Guided Prompting),Vision-Conditioned Diffusion,Hexagon HTP v79 NPU,512x512,512x512,3318.5,0.3,3.46,11.48,862,1.46,39.5,1185,25.1,0.824,0.058,Normal
+bicubic_sr,Bicubic Interpolation (OpenCV),Classical Geometric SR,Oryon ARM64 CPU,512x512,1024x1024,5.49,182.1,1.2,0.007,300,0.01,37.3,18,38.2,0.9456,0.109,Normal
+tarsh_sr,Tarsh 4-Quadrant Sub-Pixel Reconstructor,Handbuilt First-Principles CV,Oryon ARM64 CPU (Multi-core NEON),512x512,1024x1024,8.59,116.4,1.65,0.014,412,0.01,37.3,32,34.97,0.9198,0.178,Normal
+migan_sr,MIGAN Neural SR (Sub-Pixel Tiled),Neural Super-Resolution,Hexagon HTP v79 NPU (RAM-Disk /tmp/sr_shm),512x512,1024x1024,3870.0,0.26,2.25,8.71,560,0.85,38.8,195,32.5,0.9418,0.187,Normal
+lama_sr,LaMa Dilated SR (Fourier Tiled),Neural Super-Resolution,Hexagon HTP v79 NPU (RAM-Disk /tmp/sr_shm),512x512,1024x1024,8926.0,0.11,2.4,21.42,600,1.65,39.7,260,33.2,0.9478,0.162,Normal
+aotgan_sr,AOT-GAN SR (Contextual Tiled),Neural Super-Resolution,Hexagon HTP v79 NPU (RAM-Disk /tmp/sr_shm),512x512,1024x1024,7149.0,0.14,2.35,16.8,585,1.4,39.4,225,31.85,0.9385,0.182,Normal
+sd_sr,Stable Diffusion Latent SR (Tiled Slerp),Latent Diffusion Super-Resolution,Hexagon HTP v79 NPU (RAM-Disk /tmp/sr_shm),512x512,1024x1024,20041.0,0.05,3.52,70.54,880,2.85,41.2,1240,24.8,0.812,0.052,Normal

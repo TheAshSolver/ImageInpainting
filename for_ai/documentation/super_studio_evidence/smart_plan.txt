@@ -1,0 +1,6 @@
+08-25 17:09:31.562 30095  2644 I QIDK.SD : S1=Scene: portrait, 1 face (eye distance 130 px) | Lighting: dim low-key light from below (luma 71, contrast 52) | Colour: warm tones (R-B +29) | Environment: plain backdrop (edge density 4.2%)
+08-25 17:09:31.562 30095  2644 I QIDK.SD : S2=Void: 20,920 px (8.0% of the image), box x 104-414 y 206-303 | Target: eyewear region (both eyes and the nose bridge) of face 1 | Boundary: ring of 24 px, luma 106, warm golden tones
+08-25 17:09:31.562 30095  2644 I QIDK.SD : S3=sunglasses
+08-25 17:09:31.562 30095  2644 I QIDK.SD : S4=sunglasses, a person wearing sunglasses, sunglasses worn over the eyes, dim low-key light from below, warm tones, photorealistic, sharp focus, natural skin texture, seamless blend with the surrounding photo
+08-25 17:09:31.562 30095  2644 I QIDK.SD : S5=painting, drawing, illustration, cartoon, glitch, deformed, blurry, low quality, artifacts, text, watermark, oversaturated, cross-eyed, ugly, disfigured, mutated, no sunglasses, without sunglasses, bare eyes, no eyewear
+08-25 17:09:31.562 30095  2644 I QIDK.SD : Sampler: DPM++ 12 steps | CFG 7.0 | seed 42 | intent wearable

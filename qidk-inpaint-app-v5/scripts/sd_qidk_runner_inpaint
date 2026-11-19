@@ -1,0 +1,84 @@
+#!/system/bin/sh
+# ==============================================================================
+# Qualcomm Snapdragon 8 Elite — Stable Diffusion Production Inpainting Wrapper
+# Supports Fast SD (3.8-4.5s) via QIDK native runner and Smart SD via CFG 7.5
+# ==============================================================================
+
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+cd "$SCRIPT_DIR" || exit 1
+
+export LD_LIBRARY_PATH="$SCRIPT_DIR":$LD_LIBRARY_PATH
+export ADSP_LIBRARY_PATH="$SCRIPT_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp"
+
+PROMPT="photograph of a beautiful empty scene, highest quality settings"
+NEG="painting, drawing, illustration, glitch, deformed, mutated, cross-eyed, ugly, disfigured"
+STEPS="12"
+CFG="2.0"
+SEED="42"
+STRENGTH="1.0"
+NO_COMPOSITE=0
+
+# Inherit from environment if provided by caller
+[ -n "$SD_PROMPT" ] && PROMPT="$SD_PROMPT"
+[ -n "$SD_NEG" ] && NEG="$SD_NEG"
+
+if [ $# -gt 0 ] && [ "${1#--}" = "$1" ]; then
+    PROMPT="$1"
+    if [ -n "$2" ]; then
+        STEPS="$2"
+    fi
+else
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --prompt)
+                PROMPT="$2"
+                shift 2
+                ;;
+            --neg|--negative)
+                NEG="$2"
+                shift 2
+                ;;
+            --steps)
+                STEPS="$2"
+                shift 2
+                ;;
+            --cfg)
+                CFG="$2"
+                shift 2
+                ;;
+            --seed)
+                SEED="$2"
+                shift 2
+                ;;
+            --strength)
+                STRENGTH="$2"
+                shift 2
+                ;;
+            --no-composite)
+                NO_COMPOSITE=1
+                shift 1
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+fi
+
+IS_HIGH_CFG=0
+case "$CFG" in
+    [3-9]*|[1-9][0-9]*) IS_HIGH_CFG=1 ;;
+esac
+
+# Select appropriate runner:
+# - CFG < 3.0 (Standard SD, Super-Res tiles): ultra-fast 3.8-4.5s zero-copy mmap QIDK runner
+# - CFG >= 3.0 (Smart SD, high guidance): CFG 7.5 conditioning runner
+if [ $IS_HIGH_CFG -eq 1 ] && [ -f "./sd_qidk_runner_inpaint_cfg75" ]; then
+    RUNNER="./sd_qidk_runner_inpaint_cfg75"
+elif [ -f "./sd_qidk_runner_inpaint_real" ]; then
+    RUNNER="./sd_qidk_runner_inpaint_real"
+else
+    RUNNER="./sd_qidk_runner_inpaint_20step"
+fi
+
+exec "$RUNNER" "$PROMPT" "$STEPS"

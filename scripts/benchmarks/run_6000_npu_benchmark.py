@@ -60,6 +60,7 @@ MASK_MANIFEST = COMPILED_DIR / "masks_manifest.csv"
 OUTPUT_BASE = REPO_ROOT / "Benchmark" / "output" / "6000_benchmark"
 CHECKPOINT_FILE = OUTPUT_BASE / "checkpoint.json"
 MASTER_CSV_FILE = OUTPUT_BASE / "dataset_meta_predictor.csv"
+ARTIFACTS_CSV_FILE = REPO_ROOT / "artifacts" / "dataset_complete_metrics_6000.csv"
 SAMPLE_RECON_DIR = OUTPUT_BASE / "reconstructions_sample"
 
 DEVICE_LAMA_DIR = "/data/local/tmp/lama"
@@ -78,14 +79,14 @@ MODELS = {
     },
     "lama_npu": {
         "display_name": "LaMa Dilated (NPU)",
-        "dlc": "lama_dilated.dlc",
+        "dlc": "bench_cache_lama_dilated.dlc",
         "mask_type": "standard",
         "runtime_flag": "--use_dsp",
         "output_cand": ["painted_image.raw", "output_0.raw"]
     },
     "aotgan_npu": {
         "display_name": "AOT-GAN (NPU)",
-        "dlc": "aotgan.dlc",
+        "dlc": "bench_cache_aotgan.dlc",
         "mask_type": "standard",
         "runtime_flag": "--use_dsp",
         "output_cand": ["output_0.raw", "painted_image.raw"]
@@ -146,11 +147,11 @@ def query_device_thermals(adb_path: str = "adb") -> Dict[str, float]:
         '  type=$(cat "$t/type" 2>/dev/null); '
         '  temp=$(cat "$t/temp" 2>/dev/null); '
         '  [ -n "$temp" ] && [ "$temp" -gt 0 ] && echo "$type $temp"; '
-        'done'
+        'done; true'
     )
     rc, out, _ = run_adb(["shell", script], adb_path=adb_path)
     res = {"cpu": 0.0, "gpu": 0.0, "nsp": 0.0, "soc_max": 0.0}
-    if rc != 0 or not out:
+    if not out:
         return res
 
     for line in out.splitlines():
@@ -175,8 +176,8 @@ def query_device_power(adb_path: str = "adb") -> Dict[str, float]:
     script = (
         'v=$(cat /sys/class/power_supply/battery/voltage_now 2>/dev/null); '
         'c=$(cat /sys/bus/iio/devices/iio:device0/in_current_pmih010x_ichg_fb_input 2>/dev/null | tr -d "-"); '
-        '[ -z "$c" ] && c=$(cat /sys/class/power_supply/battery/current_now 2>/dev/null | tr -d "-"); '
-        'echo "$v $c"'
+        '[ -z "$c" ] || [ "$c" -eq 0 ] 2>/dev/null && c=$(cat /sys/class/power_supply/battery/current_now 2>/dev/null | tr -d "-"); '
+        'echo "$v $c"; true'
     )
     rc, out, _ = run_adb(["shell", script], adb_path=adb_path)
     ret = {"voltage_v": 8.9, "current_ma": 350.0, "power_w": 3.1}
@@ -861,6 +862,10 @@ def run_benchmark(batch_size: int = 50, limit: int = 6000, cooldown_temp: float 
         with open(MASTER_CSV_FILE, "a", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)
             writer.writerows(new_csv_rows)
+        try:
+            shutil.copy2(MASTER_CSV_FILE, ARTIFACTS_CSV_FILE)
+        except Exception:
+            pass
 
         # Update stats tracker
         stats_tracker.update(new_csv_rows)

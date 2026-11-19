@@ -92,9 +92,8 @@ data/raw/sd_dual_outputs/
 .agent/
 final presentation
 final_presentation/figures/sr_*.png
-
-
 tmp
 Benchmark/output_old/
 Benchmark/6000_images/natural_images/
+
 

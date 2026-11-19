@@ -1,0 +1,5 @@
+ablation_condition,cfg,prompt_enrichment,context_separation,object_presence_pct,mean_lpips,failure_mode
+"Raw User Prompt (CFG 2.0, No Context)",2.0,OFF,OFF,34.3,0.142,"Weak text steering; inpainter defaults to background infill, ignoring target object."
+"Enriched Prompt Only (CFG 2.0, No Context)",2.0,ON,OFF,52.8,0.118,Improved vocabulary but floating boundaries due to missing contact horizon.
+"Raw User Prompt (CFG 7.5, No Context)",7.5,OFF,OFF,78.4,0.098,Object inserted but lighting and contact shadows mismatch surrounding scene.
+Smart SD: Enriched + Dual Contexts (CFG 7.5),7.5,ON,ON (Scene Tone + Contact Horizon + Void AR),94.1,0.064,None (Photorealistic object insertion with natural contact shadows and occlusion).

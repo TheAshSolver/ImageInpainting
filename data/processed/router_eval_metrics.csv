@@ -1,0 +1,13 @@
+mode,router_family,n_test_samples,mean_utility,std_utility,median_utility,p95_utility,p99_utility,mean_regret,pareto_accuracy_pct,exact_match_pct,mean_latency_ms,p95_latency_ms,mean_power_w,mean_energy_j,mean_ssim,mean_lpips,action_distribution
+Quality,Heuristic,1200,0.4952,0.1003,0.5647,0.5941,0.5996,0.0884,58.17,20.17,843.82,2226.74,5.05,5.948,0.9708,0.0524,"Algorithmic:0%, MIGAN:20.2%, LaMa:37.2%, AOT_GAN:1.7%, SD_Duel:40.9%"
+Quality,LinUCB,1200,0.5835,0.0095,0.5839,0.5976,0.6003,0.0,100.0,97.83,72.63,179.56,2.95,0.249,0.9476,0.0823,"Algorithmic:0%, MIGAN:71.5%, LaMa:28.5%, AOT_GAN:0%, SD_Duel:0%"
+Quality,RL_Policy,1200,0.5835,0.0095,0.5839,0.5976,0.6003,0.0,100.0,97.83,72.63,179.56,2.95,0.249,0.9476,0.0823,"Algorithmic:0%, MIGAN:71.5%, LaMa:28.5%, AOT_GAN:0%, SD_Duel:0%"
+Quality,Deep_MLP,1200,0.5834,0.0096,0.5838,0.5975,0.6002,0.0001,100.0,96.08,71.5,179.91,2.94,0.244,0.9471,0.0829,"Algorithmic:0%, MIGAN:72.6%, LaMa:27.4%, AOT_GAN:0%, SD_Duel:0%"
+Balanced,Heuristic,1200,0.2609,0.0238,0.267,0.2928,0.2959,0.0149,65.33,65.33,77.81,165.87,3.04,0.266,0.9482,0.082,"Algorithmic:0%, MIGAN:65.3%, LaMa:34.7%, AOT_GAN:0%, SD_Duel:0%"
+Balanced,LinUCB,1200,0.2758,0.0114,0.2756,0.2932,0.2959,0.0,100.0,100.0,38.53,46.58,2.57,0.1,0.9349,0.1007,"Algorithmic:0%, MIGAN:100.0%, LaMa:0%, AOT_GAN:0%, SD_Duel:0%"
+Balanced,RL_Policy,1200,0.2758,0.0114,0.2756,0.2932,0.2959,0.0,100.0,100.0,38.53,46.58,2.57,0.1,0.9349,0.1007,"Algorithmic:0%, MIGAN:100.0%, LaMa:0%, AOT_GAN:0%, SD_Duel:0%"
+Balanced,Deep_MLP,1200,0.2758,0.0114,0.2756,0.2932,0.2959,0.0,100.0,100.0,38.53,46.58,2.57,0.1,0.9349,0.1007,"Algorithmic:0%, MIGAN:100.0%, LaMa:0%, AOT_GAN:0%, SD_Duel:0%"
+Power_Efficiency,Heuristic,1200,0.0099,0.0307,0.0216,0.0478,0.0522,0.0117,56.17,54.42,29.98,38.53,2.24,0.068,0.8279,0.2622,"Algorithmic:49.8%, MIGAN:50.2%, LaMa:0%, AOT_GAN:0%, SD_Duel:0%"
+Power_Efficiency,LinUCB,1200,0.0216,0.0172,0.0225,0.0478,0.0524,0.0001,84.5,95.75,38.53,46.58,2.57,0.1,0.9349,0.1007,"Algorithmic:0%, MIGAN:100.0%, LaMa:0%, AOT_GAN:0%, SD_Duel:0%"
+Power_Efficiency,RL_Policy,1200,0.0216,0.0172,0.0225,0.0478,0.0524,0.0001,84.5,95.75,38.53,46.58,2.57,0.1,0.9349,0.1007,"Algorithmic:0%, MIGAN:100.0%, LaMa:0%, AOT_GAN:0%, SD_Duel:0%"
+Power_Efficiency,Deep_MLP,1200,0.0216,0.0172,0.0224,0.0478,0.0524,0.0001,85.92,97.5,37.74,46.57,2.53,0.097,0.9293,0.1113,"Algorithmic:5.1%, MIGAN:94.9%, LaMa:0%, AOT_GAN:0%, SD_Duel:0%"
