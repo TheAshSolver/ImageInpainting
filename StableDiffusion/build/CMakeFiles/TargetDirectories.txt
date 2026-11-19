@@ -1,4 +1,6 @@
-/home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles/sd_qidk_runner.dir
-/home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles/sd_qidk_runner_encoder.dir
-/home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles/edit_cache.dir
-/home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles/rebuild_cache.dir
+/home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles/sd_qidk_runner.dir
+/home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles/sd_qidk_runner_encoder.dir
+/home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles/sd_qidk_runner_inpaint.dir
+/home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles/sd_qidk_runner_dual_zerocopy.dir
+/home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles/edit_cache.dir
+/home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles/rebuild_cache.dir

@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/sd_runner_encoder.cpp" "CMakeFiles/sd_qidk_runner_encoder.dir/sd_runner_encoder.cpp.o" "gcc" "CMakeFiles/sd_qidk_runner_encoder.dir/sd_runner_encoder.cpp.o.d"
+  "/home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/sd_runner_encoder.cpp" "CMakeFiles/sd_qidk_runner_encoder.dir/sd_runner_encoder.cpp.o" "gcc" "CMakeFiles/sd_qidk_runner_encoder.dir/sd_runner_encoder.cpp.o.d"
   "" "sd_qidk_runner_encoder" "gcc" "CMakeFiles/sd_qidk_runner_encoder.dir/link.d"
   )
 

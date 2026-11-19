@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion
+CMAKE_SOURCE_DIR = /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build
+CMAKE_BINARY_DIR = /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/sd_qidk_runner.dir/depend.make
@@ -73,18 +73,18 @@ CMakeFiles/sd_qidk_runner.dir/codegen:
 .PHONY : CMakeFiles/sd_qidk_runner.dir/codegen
 
 CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.o: CMakeFiles/sd_qidk_runner.dir/flags.make
-CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.o: /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/sd_runner.cpp
+CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.o: /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/sd_runner.cpp
 CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.o: CMakeFiles/sd_qidk_runner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.o"
-	/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android31 --sysroot=/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.o -MF CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.o.d -o CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.o -c /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/sd_runner.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.o"
+	/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android34 --sysroot=/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.o -MF CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.o.d -o CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.o -c /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/sd_runner.cpp
 
 CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.i"
-	/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android31 --sysroot=/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/sd_runner.cpp > CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.i
+	/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android34 --sysroot=/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/sd_runner.cpp > CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.i
 
 CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.s"
-	/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android31 --sysroot=/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/sd_runner.cpp -o CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.s
+	/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android34 --sysroot=/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/sd_runner.cpp -o CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.s
 
 # Object files for target sd_qidk_runner
 sd_qidk_runner_OBJECTS = \
@@ -97,7 +97,7 @@ sd_qidk_runner: CMakeFiles/sd_qidk_runner.dir/sd_runner.cpp.o
 sd_qidk_runner: CMakeFiles/sd_qidk_runner.dir/build.make
 sd_qidk_runner: CMakeFiles/sd_qidk_runner.dir/compiler_depend.ts
 sd_qidk_runner: CMakeFiles/sd_qidk_runner.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable sd_qidk_runner"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable sd_qidk_runner"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/sd_qidk_runner.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -109,6 +109,6 @@ CMakeFiles/sd_qidk_runner.dir/clean:
 .PHONY : CMakeFiles/sd_qidk_runner.dir/clean
 
 CMakeFiles/sd_qidk_runner.dir/depend:
-	cd /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles/sd_qidk_runner.dir/DependInfo.cmake "--color=$(COLOR)" sd_qidk_runner
+	cd /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles/sd_qidk_runner.dir/DependInfo.cmake "--color=$(COLOR)" sd_qidk_runner
 .PHONY : CMakeFiles/sd_qidk_runner.dir/depend
 

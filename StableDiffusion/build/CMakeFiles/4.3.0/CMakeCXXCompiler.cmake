@@ -1,4 +1,4 @@
-set(CMAKE_CXX_COMPILER "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++")
+set(CMAKE_CXX_COMPILER "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++")
 set(CMAKE_CXX_COMPILER_ARG1 "")
 set(CMAKE_CXX_COMPILER_ID "Clang")
 set(CMAKE_CXX_COMPILER_VERSION "17.0.2")
@@ -26,14 +26,14 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID "aarch64")
 
 
 
-set(CMAKE_AR "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar")
-set(CMAKE_CXX_COMPILER_AR "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar")
-set(CMAKE_RANLIB "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib")
-set(CMAKE_CXX_COMPILER_RANLIB "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib")
-set(CMAKE_LINKER "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld")
+set(CMAKE_AR "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar")
+set(CMAKE_CXX_COMPILER_AR "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar")
+set(CMAKE_RANLIB "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib")
+set(CMAKE_CXX_COMPILER_RANLIB "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib")
+set(CMAKE_LINKER "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld")
 set(CMAKE_LINKER_LINK "")
 set(CMAKE_LINKER_LLD "")
-set(CMAKE_CXX_COMPILER_LINKER "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld")
+set(CMAKE_CXX_COMPILER_LINKER "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld")
 set(CMAKE_CXX_COMPILER_LINKER_ID "LLD")
 set(CMAKE_CXX_COMPILER_LINKER_VERSION 17.0.2)
 set(CMAKE_CXX_COMPILER_LINKER_FRONTEND_VARIANT GNU)
@@ -91,11 +91,11 @@ endif()
 
 
 
-set(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1;/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17/include;/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android;/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include")
+set(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1;/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17/include;/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android;/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include")
 set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "c++;m;-l:libunwind.a;dl;c;-l:libunwind.a;dl")
-set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17/lib/linux/aarch64;/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/31;/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android;/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib")
+set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17/lib/linux/aarch64;/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/34;/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android;/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib")
 set(CMAKE_CXX_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES "")
-set(CMAKE_CXX_COMPILER_CLANG_RESOURCE_DIR "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17")
+set(CMAKE_CXX_COMPILER_CLANG_RESOURCE_DIR "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17")
 
 set(CMAKE_CXX_COMPILER_IMPORT_STD "")
 set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE  "Unsupported generator: Unix Makefiles")
