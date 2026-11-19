@@ -202,23 +202,31 @@ export ADSP_LIBRARY_PATH='/data/local/tmp/lama/dsp/lib;/data/local/tmp/lama/dsp;
 export PATH=$PATH:/data/local/tmp/lama
 ```
 
-### Running Feed-Forward Models with `snpe-net-run`
+### Running Feed-Forward Models with `snpe-net-run` (V3 Burst Profile)
+In V3, `snpe-net-run` is invoked with clock burst mode, profiling disabled, and RAM-disk staging:
+
 ```bash
 cd /data/local/tmp/lama
 
-# 1. MI-GAN on Hexagon NPU (HTP v79 DSP)
+# 1. MI-GAN on Hexagon NPU (HTP v79 DSP) — V3 Burst Profile (217 ms)
 ./snpe-net-run \
     --container migan_htp_v79.dlc \
-    --input_list live_input.txt \
-    --output_dir app_live_output \
-    --use_dsp
+    --input_list live_input_v3.txt \
+    --output_dir /tmp/app_live_output_v3 \
+    --use_dsp \
+    --perf_profile burst \
+    --profiling_level off \
+    --priority_hint critical
 
-# 2. LaMa Dilated on Hexagon NPU (HTP v79 DSP)
+# 2. LaMa Dilated on Hexagon NPU (HTP v79 DSP) — V3 Burst Profile (306 ms)
 ./snpe-net-run \
     --container lama_dilated.dlc \
-    --input_list live_input.txt \
-    --output_dir app_live_output \
-    --use_dsp
+    --input_list live_input_v3.txt \
+    --output_dir /tmp/app_live_output_v3 \
+    --use_dsp \
+    --perf_profile burst \
+    --profiling_level off \
+    --priority_hint critical
 
 # 3. LaMa Dilated on Adreno 830 GPU
 ./snpe-net-run \
@@ -227,12 +235,15 @@ cd /data/local/tmp/lama
     --output_dir app_live_output \
     --use_gpu
 
-# 4. AOT-GAN on Hexagon NPU (HTP v79 DSP)
+# 4. AOT-GAN on Hexagon NPU (HTP v79 DSP) — V3 Burst Profile (316 ms)
 ./snpe-net-run \
     --container aotgan.dlc \
-    --input_list live_input.txt \
-    --output_dir app_live_output \
-    --use_dsp
+    --input_list live_input_v3.txt \
+    --output_dir /tmp/app_live_output_v3 \
+    --use_dsp \
+    --perf_profile burst \
+    --profiling_level off \
+    --priority_hint critical
 
 # 5. AOT-GAN on Adreno 830 GPU
 ./snpe-net-run \
@@ -240,6 +251,26 @@ cd /data/local/tmp/lama
     --input_list live_input.txt \
     --output_dir app_live_output \
     --use_gpu
+```
+
+### High-Throughput Resident FastRPC DSP Daemon (`snpe_resident_daemon`)
+Keeps MIGAN, LaMa, and AOT-GAN neural graphs permanently resident in Hexagon memory, breaking below 50 ms by bypassing external subprocess creation:
+
+```bash
+# 1. Compile native daemon with Android NDK clang++
+$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang++ \
+    -O3 -static-libstdc++ snpe_resident_daemon.cpp -o snpe_resident_daemon
+
+# 2. Push to device and set executable permissions
+adb push snpe_resident_daemon /data/local/tmp/lama/
+adb shell "chmod 755 /data/local/tmp/lama/snpe_resident_daemon"
+
+# 3. Launch resident daemon on port 55555 (keeps models in FastRPC CDSP memory)
+adb shell "cd /data/local/tmp/lama && export LD_LIBRARY_PATH=/data/local/tmp/lama/lib:/data/local/tmp/lama && export ADSP_LIBRARY_PATH='/data/local/tmp/lama/dsp/lib;/data/local/tmp/lama/dsp;/dsp' && ./snpe_resident_daemon 55555"
+
+# 4. Query daemon status or run instant inference over loopback
+# PING -> PONG
+# INFER <migan|lama|aotgan> <imgPath> <maskPath> <outPath> -> OK <latencyMs>
 ```
 
 ### Building & Staging Native Stable Diffusion Inpainting Runner
@@ -258,17 +289,21 @@ adb push sd_runtime/models/unet_inpaint_16ch_ctx.bin /data/local/tmp/sd_runtime/
 adb shell "chmod +x /data/local/tmp/sd_runtime/sd_qidk_runner_inpaint"
 ```
 
-### Running Stable Diffusion 1.5 on Hexagon NPU
+### Running Stable Diffusion 1.5 on Hexagon NPU (Dual-Prompt Contracts)
 ```bash
 cd /data/local/tmp/sd_runtime
 export LD_LIBRARY_PATH=/data/local/tmp/sd_runtime:$LD_LIBRARY_PATH
 export ADSP_LIBRARY_PATH='/data/local/tmp/sd_runtime;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp'
 
-# 1. Optimized 12-Step DPM-Solver++ Runner (Empty prompt prevents hallucinations)
+# 1. Pure Restoration Mode (Empty strings eliminate hallucinations)
 rm -f sd_output.png
-./sd_qidk_runner_inpaint ""
+./sd_qidk_runner_inpaint "" ""
 
-# 2. Legacy 20-Step Euler RePaint Runner
+# 2. Dual-Prompt Guided Inpainting (Arg 1 = Positive, Arg 2 = Negative)
+rm -f sd_output.png
+./sd_qidk_runner_inpaint "clear blue sky over calm lake" "clouds, distortion, noise, artifacts"
+
+# 3. Legacy 20-Step Euler RePaint Runner
 rm -f sd_output.png
 ./sd_qidk_runner_inefficient ""
 ```

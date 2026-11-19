@@ -1,0 +1,12 @@
+{
+  "total_samples": 50,
+  "batch_size": 10,
+  "num_batches": 5,
+  "total_pipelined_time_s": 4.14,
+  "pipelined_throughput_img_per_s": 12.09,
+  "synchronous_throughput_img_per_s": 11.69,
+  "pipelining_speedup_factor": 1.03,
+  "mean_batch_push_s": 0.038,
+  "mean_batch_infer_s": 0.817,
+  "mean_batch_eval_s": 0.0
+}

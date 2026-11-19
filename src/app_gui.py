@@ -39,6 +39,10 @@ from src.auto_masking import (
     create_brush_mask,
     create_mask_overlay,
     grabcut_bounding_box_mask,
+    circle_to_select_mask,
+    grabcut_from_circle_polygon,
+    ai_circle_to_select,
+    compute_mobilesam_embeddings,
     tap_to_mask,
     mask_to_raw_tensors,
     refine_mask_grabcut,
@@ -165,6 +169,76 @@ def generate_grabcut_mask(
     router_md = format_router_markdown(route_res)
 
     msg = f"⚡ GrabCut executed in **{latency_ms:.2f} ms** (Target: <50 ms). Isolated foreground: **{int(np.sum(mask_bin > 0))} pixels**."
+    return mask_pil, overlay_pil, router_md, msg, mask_bin
+
+
+def generate_circle_select_mask(
+    editor_data: Any,
+    circle_cx: int = 256,
+    circle_cy: int = 256,
+    circle_r: int = 80,
+    use_drawn_loop: bool = True,
+    segmentation_engine: str = "Auto-GrabCut (Graph-Cut Energy Minimization)",
+    sample_id: Optional[str] = None,
+):
+    """
+    Executes Circle to Select (Magic Touch) object segmentation.
+    Supports:
+    1. Auto-GrabCut: 4-state trimap Gibbs energy graph-cuts (<45ms).
+    2. On-Device AI: Promptable MobileSAM vision decoder (<20ms).
+    3. Fast Color/Edge Gradient: Lightweight mobile heuristics (<10ms).
+    """
+    base_img = None
+    if isinstance(editor_data, dict):
+        base_img = editor_data.get("background") or editor_data.get("composite")
+    elif editor_data is not None:
+        base_img = editor_data
+
+    if base_img is None and sample_id:
+        fpath = find_sample_file("image", sample_id)
+        if fpath and os.path.isfile(fpath):
+            base_img = Image.open(fpath).convert("RGB")
+
+    if base_img is None:
+        empty = Image.new("L", TARGET_SIZE, 0)
+        empty_rgb = Image.new("RGB", TARGET_SIZE, (0, 0, 0))
+        empty_np = np.zeros(TARGET_SIZE, dtype=np.uint8)
+        return empty, empty_rgb, "", "⚠️ Please load or upload an image first.", empty_np
+
+    img_512 = ensure_512_image(base_img)
+
+    loop_points = None
+    if use_drawn_loop and isinstance(editor_data, dict) and editor_data.get("layers"):
+        drawn_mask = create_brush_mask(editor_data)
+        if np.any(drawn_mask > 0):
+            cnts, _ = cv2.findContours(drawn_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+            if cnts and len(cnts[0]) >= 3:
+                loop_points = cnts[0].squeeze()
+
+    if loop_points is None or len(loop_points) < 3:
+        angles = np.linspace(0, 2 * np.pi, 64, endpoint=False)
+        pts_x = np.clip(circle_cx + circle_r * np.cos(angles), 0, 511).astype(int)
+        pts_y = np.clip(circle_cy + circle_r * np.sin(angles), 0, 511).astype(int)
+        loop_points = np.stack([pts_x, pts_y], axis=1)
+
+    eng_lower = segmentation_engine.lower()
+    if "sam" in eng_lower or "ai" in eng_lower:
+        mask_bin, latency_ms, iou = ai_circle_to_select(img_512, loop_points)
+        engine_tag = f"🤖 On-Device AI (MobileSAM Decoder, IoU={iou:.3f})"
+    elif "grabcut" in eng_lower or "graph" in eng_lower:
+        mask_bin, latency_ms = grabcut_from_circle_polygon(img_512, loop_points, iterations=2)
+        engine_tag = "⚡ Auto-GrabCut (4-State Trimap Graph-Cut)"
+    else:
+        mask_bin, latency_ms = circle_to_select_mask(img_512, loop_points)
+        engine_tag = "⭕ Fast Color/Edge Gradient"
+
+    mask_pil = Image.fromarray(mask_bin, mode="L")
+    overlay_pil = create_mask_overlay(img_512, mask_bin, color=(168, 85, 247), alpha=0.5)
+
+    route_res = classify_and_route(img_512, mask_bin)
+    router_md = format_router_markdown(route_res)
+
+    msg = f"{engine_tag} segmented object in **{latency_ms:.2f} ms**! Enclosed pixels: **{int(np.sum(mask_bin > 0))}**."
     return mask_pil, overlay_pil, router_md, msg, mask_bin
 
 
@@ -536,6 +610,25 @@ def build_app():
                     fast_gc_checkbox = gr.Checkbox(value=True, label="Fast Mode (Sub-50ms Guaranteed)")
                     grabcut_btn = gr.Button("⚡ Run GrabCut Auto-Mask (<50ms)", variant="primary")
 
+                with gr.Accordion("⭕ Magic Touch: Circle-to-Select / Lasso Object Segmentation", open=False):
+                    gr.Markdown("Encircle an object on the canvas using the brush, or use the circle controls below to auto-segment the enclosed object.")
+                    with gr.Row():
+                        seg_engine_radio = gr.Radio(
+                            choices=[
+                                "Auto-GrabCut (Graph-Cut Energy Minimization)",
+                                "On-Device AI (MobileSAM Interactive Decoupled)",
+                                "Fast Color/Edge Gradient",
+                            ],
+                            value="Auto-GrabCut (Graph-Cut Energy Minimization)",
+                            label="Segmentation Engine"
+                        )
+                    with gr.Row():
+                        circle_cx = gr.Slider(0, 512, value=256, step=1, label="Center X")
+                        circle_cy = gr.Slider(0, 512, value=256, step=1, label="Center Y")
+                        circle_r = gr.Slider(10, 250, value=80, step=1, label="Radius (px)")
+                    use_drawn_loop_chk = gr.Checkbox(value=True, label="Auto-detect drawn loop from canvas (preferred)")
+                    magic_touch_btn = gr.Button("⭕ Run Magic Touch: Circle to Select", variant="primary")
+
                 with gr.Row():
                     refine_btn = gr.Button("✨ Refine Mask (Snap to Edges)", variant="secondary")
                     reset_btn = gr.Button("🧹 Reset / Clear Mask", variant="stop")
@@ -612,6 +705,12 @@ def build_app():
             outputs=[mask_display, overlay_display, router_output, status_box, active_mask_state]
         )
 
+        magic_touch_btn.click(
+            fn=generate_circle_select_mask,
+            inputs=[image_editor, circle_cx, circle_cy, circle_r, use_drawn_loop_chk, seg_engine_radio, sample_dropdown],
+            outputs=[mask_display, overlay_display, router_output, status_box, active_mask_state]
+        )
+
         refine_btn.click(
             fn=refine_mask_interaction,
             inputs=[image_editor, mask_display, active_mask_state, sample_dropdown],
@@ -670,6 +769,26 @@ def run_headless_test():
     assert gc_state is not None and np.sum(gc_state > 0) > 0
     assert "GrabCut executed" in gc_status
     print("3. Target Bounding Box GrabCut executed cleanly in sub-50ms with state synchronization.")
+
+    print("3b. Testing Auto-GrabCut (Graph-Cut) Circle-to-Select...")
+    cm_mask, cm_overlay, cm_md, cm_status, cm_state = generate_circle_select_mask(
+        ed_010, 256, 256, 80, use_drawn_loop=False, segmentation_engine="Auto-GrabCut (Graph-Cut Energy Minimization)", sample_id=sample_010
+    )
+    assert cm_mask is not None
+    assert cm_overlay is not None
+    assert cm_state is not None and np.sum(cm_state > 0) > 0
+    assert "Auto-GrabCut" in cm_status
+    print("3c. Auto-GrabCut executed cleanly with state synchronization.")
+
+    print("3d. Testing Promptable Vision AI (MobileSAM) Circle-to-Select...")
+    sam_mask, sam_overlay, sam_md, sam_status, sam_state = generate_circle_select_mask(
+        ed_010, 256, 256, 80, use_drawn_loop=False, segmentation_engine="On-Device AI (MobileSAM Interactive Decoupled)", sample_id=sample_010
+    )
+    assert sam_mask is not None
+    assert sam_overlay is not None
+    assert sam_state is not None and np.sum(sam_state > 0) > 0
+    assert "MobileSAM" in sam_status
+    print("3e. MobileSAM Promptable Vision AI executed cleanly with state synchronization.")
 
     print("4. Testing Inpainting Pipeline execution with MIGAN...")
     res_img, tele_md, inpaint_status = run_inpaint(
