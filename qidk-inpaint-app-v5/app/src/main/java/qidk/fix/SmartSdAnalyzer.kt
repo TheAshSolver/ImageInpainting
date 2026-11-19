@@ -36,7 +36,7 @@ object SmartSdAnalyzer {
         val hole = ClassicalInpainter.holeBytes(msk)
         val scene = SmartSd.analyseScene(argb, N, N, detectFaces(img))
         val ring = SmartPrompt.analyse(argb, hole, N, N)
-        val target = SmartSd.analyseTarget(scene, hole, N, N, ring)
+        val target = SmartSd.analyseTarget(scene, hole, N, N, ring, argb)
         return SmartSd.plan(userPositive, userNegative, scene, target, steps, seed)
     }
 }

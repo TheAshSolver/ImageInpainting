@@ -26,6 +26,7 @@ class RouterDecision(
     val mode: RouterMode,
     val armName: String,
     val scores: DoubleArray,
+    val state: DoubleArray,
     /** Whole decision: telemetry snapshot + features + LinUCB. */
     val micros: Long,
     /** Feature extraction on the proxy grid only (target < 1000 us). */
@@ -74,7 +75,7 @@ class RouterPolicy(
         var best = 0
         for (k in 1 until sc.size) if (sc[k] > sc[best]) best = k
         val t2 = System.nanoTime()
-        return RouterDecision(modes[best]!!, model.armNames[best], sc.copyOf(), (t2 - t0) / 1000, (t1 - t0) / 1000, (t2 - t1) / 1000, tel)
+        return RouterDecision(modes[best]!!, model.armNames[best], sc.copyOf(), z.copyOf(), (t2 - t0) / 1000, (t1 - t0) / 1000, (t2 - t1) / 1000, tel)
     }
 }
 

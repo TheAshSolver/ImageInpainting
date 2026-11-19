@@ -189,7 +189,13 @@ object SdRunnerCommand {
         val pre = (listOf("cd $sdDir || exit 97") + exports + listOf("rm -f sd_output.png 2>/dev/null")).joinToString("; ")
         val cfgText = String.format(java.util.Locale.US, "%.2f", cfg)
         val more = if (extra.isEmpty()) "" else " " + extra.joinToString(" ")
-        return "$pre; $runnerBin --prompt \"\$SD_PROMPT\" --neg \"\$SD_NEG\" --steps $steps --cfg $cfgText --seed $seed$more; " +
-            "RET=\$?; chmod 666 sd_output.png image.raw mask.raw 2>/dev/null; exit \$RET"
+        val execCmd = if (runnerBin.contains("sd_dual")) {
+            "$runnerBin \"\$SD_PROMPT\" $steps $seed"
+        } else if (runnerBin.contains("cfg75") || runnerBin.contains("20step")) {
+            "$runnerBin \"\$SD_PROMPT\" $steps"
+        } else {
+            "$runnerBin --prompt \"\$SD_PROMPT\" --neg \"\$SD_NEG\" --steps $steps --cfg $cfgText --seed $seed$more"
+        }
+        return "$pre; $execCmd; RET=\$?; chmod 666 sd_output.png image.raw mask.raw 2>/dev/null; exit \$RET"
     }
 }

@@ -1,0 +1,141 @@
+{
+  "title": "Snapdragon 8 Elite Inpainting Research Reproducibility Manifest",
+  "git_commit": "3742d4c8407fa5b715bea7bd2dbda211eb7fb333",
+  "git_branch": "agy/super-studio",
+  "device_target": "Qualcomm Snapdragon 8 Elite Development Kit (8f27557f, SM8750)",
+  "guardrail_enforcement": "GEMINI.md (Append-Only Raw Data, Zero Hardcoding, Zero Silent Fallbacks)",
+  "total_tracked_artifacts": 26,
+  "verified_artifacts": 26,
+  "artifacts": {
+    "data/splits/train_4800.json": {
+      "sha256": "c5ed49adda494b2d31999f071c4beedd0631fa711fedf082481e4f7c68244ee7",
+      "size_bytes": 91261,
+      "status": "VERIFIED"
+    },
+    "data/splits/test_1200.json": {
+      "sha256": "7d11a196e3edecdbc50413be21a5d54acced6a03d35361e986dcefe76f63e30c",
+      "size_bytes": 22860,
+      "status": "VERIFIED"
+    },
+    "artifacts/train_metrics_4800.csv": {
+      "sha256": "e184fd26592114191909ba5fed49371b2197846b67486c7e8937f725a554db81",
+      "size_bytes": 3100328,
+      "status": "VERIFIED"
+    },
+    "artifacts/test_metrics_1200.csv": {
+      "sha256": "bff7f1354443907eb46685070a6aa6d72eb0c0a8246ba91625ba7d48618e7998",
+      "size_bytes": 775013,
+      "status": "VERIFIED"
+    },
+    "artifacts/dataset_100_features_6000.csv": {
+      "sha256": "943a405fa93e690811f6afd34dd189762407b4bc24b88d7a4a3aec233b93c231",
+      "size_bytes": 10630529,
+      "status": "VERIFIED"
+    },
+    "data/raw/real_contention_levels_l0_l4_telemetry.csv": {
+      "sha256": "3df7e3bd4af395c247d85b77c41a53abcc52d97a69e80df086ba05a75f14e0b0",
+      "size_bytes": 64541,
+      "status": "VERIFIED"
+    },
+    "data/raw/sd_dual_benchmark_latencies.txt": {
+      "sha256": "63689eab5043c8eb6bcaad6a7ba2277562e417d32eac0d39d449392b4842cb5a",
+      "size_bytes": 21501,
+      "status": "VERIFIED"
+    },
+    "data/processed/summary_metrics.csv": {
+      "sha256": "94d408ad68ba3c3c01f80fb4a24b64c9341a557c85f466b977ca952c4e32fccd",
+      "size_bytes": 4729,
+      "status": "VERIFIED"
+    },
+    "data/processed/interaction_test_results.json": {
+      "sha256": "de90b69d3ca31d12a1b8027cd5295dab44530ee1c9835b3bb4a26a20a632d76f",
+      "size_bytes": 19951,
+      "status": "VERIFIED"
+    },
+    "data/processed/load_generator_calibration_report.csv": {
+      "sha256": "20bfa2c0fddfcd7f16e0faa34e1e3dc3893df434d245adfe60e3e3847c9bed2a",
+      "size_bytes": 693,
+      "status": "VERIFIED"
+    },
+    "data/processed/parity_200_test_results.json": {
+      "sha256": "6fd9cb29a2a9265229a88025bacae9dd2c5fab1bbabce2466d0c27c9a23b172f",
+      "size_bytes": 655,
+      "status": "VERIFIED"
+    },
+    "data/processed/alive_loop_latency_overhead.json": {
+      "sha256": "c46d2dd8d7dda6484118e00d46e19a7845a1c5233cc14f9877d3c57e48ac1ed2",
+      "size_bytes": 1143,
+      "status": "VERIFIED"
+    },
+    "data/processed/prompt_bakeoff_summary.csv": {
+      "sha256": "8c64844601a58e103dd73e9b1bb457bfef829a0c47b7bec6fb16d74923162e62",
+      "size_bytes": 410,
+      "status": "VERIFIED"
+    },
+    "data/processed/prompt_ablation_summary.csv": {
+      "sha256": "ebb3e24a548c57bd039a03c80f5b7fc0f76a831888752701d997c959c9f9fc05",
+      "size_bytes": 727,
+      "status": "VERIFIED"
+    },
+    "data/processed/production_linucb_router.json": {
+      "sha256": "4287fe84c1ed16f85c5dee71345575360f5f93e98ad8933895356ea193997380",
+      "size_bytes": 34638,
+      "status": "VERIFIED"
+    },
+    "claims_ledger.md": {
+      "sha256": "58475e06cd36341d6bb573f9649bfd0067c0ecb6acc2b46b7a83f8692763eb3a",
+      "size_bytes": 7213,
+      "status": "VERIFIED"
+    },
+    "data/DATA_PROVENANCE_AUDIT.md": {
+      "sha256": "338769455814748edaa6c1dad40a65b03e273d435b96eab85c5e4371fe970b96",
+      "size_bytes": 5287,
+      "status": "VERIFIED"
+    },
+    "research/AUDIT_0.md": {
+      "sha256": "18efb8642ac093e0c7a38c440bd6aa2bb0273104182813838444c5d9e8b4c33b",
+      "size_bytes": 19495,
+      "status": "VERIFIED"
+    },
+    "final_presentation/figures/figure_1_pareto_utility_by_mode.pdf": {
+      "sha256": "1b57a691e9a833e010c011c0e59fcf8a9107dd81beb8ec5961da6ff7df04ea3f",
+      "size_bytes": 21681,
+      "status": "VERIFIED"
+    },
+    "final_presentation/figures/figure_2_latency_vs_power_tradeoff.pdf": {
+      "sha256": "55c65be9a62e5f15a17ad44704d88ac0291a3775639dcbcc020a3378f91ab264",
+      "size_bytes": 32173,
+      "status": "VERIFIED"
+    },
+    "final_presentation/figures/figure_3_hardware_contention_impact.pdf": {
+      "sha256": "20e1a840579e1d95e3c721b3decfe7e9261039815ea589906b81a4866f74ba5d",
+      "size_bytes": 24553,
+      "status": "VERIFIED"
+    },
+    "final_presentation/figures/figure_4_dual_dlc_unet_speedup.pdf": {
+      "sha256": "215a6ac070ab3dbf4eb5c72b597671f0b8d4ee4349fc115a287e72dc617dada0",
+      "size_bytes": 26382,
+      "status": "VERIFIED"
+    },
+    "final_presentation/figures/figure_5_feature_importance_pareto.pdf": {
+      "sha256": "f6047d39f41ec6b57e814e0c1c3bf9125b9cd054183ab232f5456941ff1fd971",
+      "size_bytes": 31475,
+      "status": "VERIFIED"
+    },
+    "final_presentation/figures/figure_6_adaptive_drift_sliding_window.pdf": {
+      "sha256": "bca3dda8ea278424519fcca189a10b98f0e2fe53923857f0fcbb4f96eb7a6193",
+      "size_bytes": 33959,
+      "status": "VERIFIED"
+    },
+    "final_presentation/slides/01_app_and_features_deck.md": {
+      "sha256": "c0e714f39527cb5748ebfa57ac4abc642d07536a8caf26e61c334fe9f9346fba",
+      "size_bytes": 9476,
+      "status": "VERIFIED"
+    },
+    "final_presentation/slides/02_research_master_deck.md": {
+      "sha256": "5e707673237fa77ff43ef7763bdf70cc55ae8b044dc06528248d74c2bcbf6924",
+      "size_bytes": 12651,
+      "status": "VERIFIED"
+    }
+  }
+}

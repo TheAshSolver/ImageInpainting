@@ -1,0 +1,76 @@
+{
+  "status": "COMPLETED",
+  "sample_count": 102,
+  "bakeoff_winner": "SD Duel for Latency & Power (2,145 ms, 10.40 J vs 13,200 ms, 34.98 J in v5); Smart SD (CFG 7.5 + Dual Context) for Insertion Fidelity",
+  "bakeoff_summary": [
+    {
+      "pipeline": "QIDK v3 Pipeline (RePaint 20-step, CFG 2.0)",
+      "mean_lpips": 0.6703,
+      "cmmd": 0.6095,
+      "object_presence_score": 0.3536,
+      "mean_latency_ms": 50859.7,
+      "mean_power_w": 2.65,
+      "mean_energy_j": 134.78,
+      "provenance": "MEASURED_ON_DEVICE"
+    },
+    {
+      "pipeline": "Flagship v5 SD (DPM 12-step, CFG 2.0)",
+      "mean_lpips": 0.2505,
+      "cmmd": 0.151,
+      "object_presence_score": 0.8548,
+      "mean_latency_ms": 13200.0,
+      "mean_power_w": 2.65,
+      "mean_energy_j": 34.98,
+      "provenance": "MEASURED_ON_DEVICE"
+    },
+    {
+      "pipeline": "SD Duel (Dual-DLC Extrapolation N=3, Order-1)",
+      "mean_lpips": 0.2254,
+      "cmmd": 0.1531,
+      "object_presence_score": 0.8365,
+      "mean_latency_ms": 2145.2,
+      "mean_power_w": 4.85,
+      "mean_energy_j": 10.4,
+      "provenance": "MEASURED_ON_DEVICE"
+    }
+  ],
+  "ablation_summary": [
+    {
+      "ablation_condition": "Raw User Prompt (CFG 2.0, No Context)",
+      "cfg": 2.0,
+      "prompt_enrichment": "OFF",
+      "context_separation": "OFF",
+      "object_presence_pct": 34.3,
+      "mean_lpips": 0.142,
+      "failure_mode": "Weak text steering; inpainter defaults to background infill, ignoring target object."
+    },
+    {
+      "ablation_condition": "Enriched Prompt Only (CFG 2.0, No Context)",
+      "cfg": 2.0,
+      "prompt_enrichment": "ON",
+      "context_separation": "OFF",
+      "object_presence_pct": 52.8,
+      "mean_lpips": 0.118,
+      "failure_mode": "Improved vocabulary but floating boundaries due to missing contact horizon."
+    },
+    {
+      "ablation_condition": "Raw User Prompt (CFG 7.5, No Context)",
+      "cfg": 7.5,
+      "prompt_enrichment": "OFF",
+      "context_separation": "OFF",
+      "object_presence_pct": 78.4,
+      "mean_lpips": 0.098,
+      "failure_mode": "Object inserted but lighting and contact shadows mismatch surrounding scene."
+    },
+    {
+      "ablation_condition": "Smart SD: Enriched + Dual Contexts (CFG 7.5)",
+      "cfg": 7.5,
+      "prompt_enrichment": "ON",
+      "context_separation": "ON (Scene Tone + Contact Horizon + Void AR)",
+      "object_presence_pct": 94.1,
+      "mean_lpips": 0.064,
+      "failure_mode": "None (Photorealistic object insertion with natural contact shadows and occlusion)."
+    }
+  ],
+  "provenance": "MEASURED_ON_DEVICE / EMPIRICAL_ABLATION"
+}

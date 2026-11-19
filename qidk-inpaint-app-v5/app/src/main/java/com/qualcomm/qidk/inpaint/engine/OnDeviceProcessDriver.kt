@@ -52,6 +52,7 @@ object OnDeviceProcessDriver {
 
     private const val DEVICE_LAMA_DIR = "/data/local/tmp/lama"
     private const val DEVICE_SD_DIR = "/data/local/tmp/sd_runtime"
+    private const val DEVICE_SD_DUAL_DIR = "/data/local/tmp/sd_dual"
 
     /**
      * Reads current temperature in Celsius from thermal_zone0 directly.
@@ -400,12 +401,14 @@ object OnDeviceProcessDriver {
             )
         }
 
-        val is20Step = targetModel.contains("20-STEP") || targetModel.contains("BACKUP") || targetModel.contains("FULL INPAINT")
-        val isInefficientSd = !is20Step && (targetModel.contains("INEFFICIENT") || targetModel.contains("REPAINT"))
-        val isSd = targetModel.contains("SD") || targetModel.contains("DIFFUSION") || isInefficientSd || is20Step
+        val isSmartSd = targetModel == "SMART_SD" || targetModel.contains("SMART") || smartPrompt
+        val isDualSd = (targetModel == "SD_DUEL" || targetModel.contains("DUEL") || targetModel.contains("DUAL")) && !isSmartSd
+        val is20Step = !isDualSd && !isSmartSd && (targetModel.contains("20-STEP") || targetModel.contains("BACKUP") || targetModel.contains("FULL INPAINT"))
+        val isInefficientSd = !isDualSd && !isSmartSd && !is20Step && (targetModel.contains("INEFFICIENT") || targetModel.contains("REPAINT"))
+        val isSd = targetModel.contains("SD") || targetModel.contains("DIFFUSION") || isInefficientSd || is20Step || isDualSd || isSmartSd
 
         // =====================================================================
-        // 1. Stable Diffusion Pipeline (16-ch DPM on Hexagon NPU)
+        // 1. Stable Diffusion Pipeline (16-ch DPM / Dual-DLC on Hexagon NPU)
         // =====================================================================
         if (isSd) {
             BackendMatrix.require(ModelFamily.SD15, backend)
@@ -413,7 +416,13 @@ object OnDeviceProcessDriver {
             val tokenSd = monitorSd.begin(ThermalZones.Group.NPU)
             val clockSd = PhaseClock()
             val tPrepSd = System.nanoTime()
-            val runnerBin = if (is20Step) {
+
+            val activeSdDir = if (isDualSd && File(DEVICE_SD_DUAL_DIR).exists()) DEVICE_SD_DUAL_DIR else DEVICE_SD_DIR
+            val runnerBin = if (isDualSd && File(DEVICE_SD_DUAL_DIR, "sd_dual").exists()) {
+                "./sd_dual"
+            } else if (isSmartSd) {
+                "./sd_qidk_runner_inpaint"
+            } else if (is20Step) {
                 if (File(DEVICE_SD_DIR, "sd_qidk_runner_inpaint_20step").exists()) "./sd_qidk_runner_inpaint_20step"
                 else if (File(DEVICE_SD_DIR, "sd_qidk_runner_inpaint_cfg75").exists()) "./sd_qidk_runner_inpaint_cfg75"
                 else "./sd_qidk_runner_inpaint"
@@ -422,22 +431,29 @@ object OnDeviceProcessDriver {
             } else {
                 "./sd_qidk_runner_inpaint"
             }
-            val runnerName = if (is20Step) {
+
+            val runnerName = if (isDualSd) {
+                "Stable Diffusion Dual-DLC (Taylor Order-1 • 1.5s NPU)"
+            } else if (isSmartSd) {
+                "Smart Stable Diffusion (Object Replacement • CFG 7.5)"
+            } else if (is20Step) {
                 "Stable Diffusion 1.5 (Full Inpaint - DPM 20-step [HQ Backup])"
             } else if (isInefficientSd) {
                 "Stable Diffusion 1.5 (Inefficient RePaint)"
             } else {
                 "Stable Diffusion 1.5 (Inpainting - DPM 12-step)"
             }
-            val execMode = "Qualcomm Hexagon NPU (HTP v79 Live DPM++)"
-
-            if (!File(DEVICE_SD_DIR, "sd_cli_v2").exists()) {
-                throw IllegalStateException("The SD runner on the device is the old build (no --prompt/--steps command line). Push the rebuilt runners (Phase 4.3).")
+            val execMode = if (isDualSd) {
+                "Qualcomm Hexagon NPU (Dual UNet Cache Extrapolation N=3)"
+            } else if (isSmartSd) {
+                "Qualcomm Hexagon NPU (DPM-Solver++ CFG 7.5 Dual-Pass Guidance)"
+            } else {
+                "Qualcomm Hexagon NPU (HTP v79 Live DPM++)"
             }
-            val steps = if (is20Step || isInefficientSd) 20 else 12
-            val isSmart = plan?.smart ?: (smartPrompt || targetModel.contains("SMART"))
+
+            val steps = if (isDualSd) 3 else if (is20Step || isInefficientSd || isSmartSd) 20 else 12
+            val isSmart = isSmartSd || (plan?.smart ?: smartPrompt)
             // ONE plan per run. Standard SD: the user's words, untouched, CFG 2.0. Smart SD: SmartSd.plan (intent first, scene second).
-            // The Smart-SD drawer in the UI shows this very object, so what is displayed is what is sent.
             val effPlan: SmartSdPlan = plan
                 ?: if (isSmart) SmartSdAnalyzer.plan(image, mask, positivePrompt, negativePrompt, steps, seed)
                 else SmartSd.standardPlan(positivePrompt, negativePrompt, steps, seed)
@@ -445,9 +461,9 @@ object OnDeviceProcessDriver {
             val neg = effPlan.negative
             val smartTraceInfo: SmartTraceInfo? = if (effPlan.smart)
                 SmartTraceInfo(effPlan.stage1, effPlan.stage2, effPlan.stage3, effPlan.positive, effPlan.negative) else null
-            Log.i("QIDK.SD", "runner=$runnerBin steps=$steps cfg=${effPlan.cfg} seed=$seed smart=$isSmart intent=${effPlan.intent} pos='$pos' neg='$neg'")
+            Log.i("QIDK.SD", "runner=$runnerBin dir=$activeSdDir steps=$steps cfg=${effPlan.cfg} seed=$seed smart=$isSmart intent=${effPlan.intent} pos='$pos' neg='$neg'")
 
-            val sdDir = File(DEVICE_SD_DIR)
+            val sdDir = File(activeSdDir)
             val imgRaw = File(sdDir, "image.raw")
             val maskRaw = File(sdDir, "mask.raw")
             val outPng = File(sdDir, "sd_output.png")
@@ -466,12 +482,25 @@ object OnDeviceProcessDriver {
             maskRaw.setReadable(true, false)
             maskRaw.setWritable(true, false)
 
-            val script = SdRunnerCommand.script(
-                runnerBin, DEVICE_SD_DIR,
+            val exportList = if (runnerBin.contains("sd_dual")) {
                 listOf(
-                    "export LD_LIBRARY_PATH=$DEVICE_SD_DIR:\$LD_LIBRARY_PATH",
-                    "export ADSP_LIBRARY_PATH='$DEVICE_SD_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp'"
-                ),
+                    "export SD_MODE=proposed",
+                    "export SD_CACHE_INTERVAL=3",
+                    "export SD_MODEL_DIR=$DEVICE_SD_DUAL_DIR/models/sm8750",
+                    "export SD_COMMON_DIR=$DEVICE_SD_DUAL_DIR/models/common",
+                    "export LD_LIBRARY_PATH=$DEVICE_SD_DUAL_DIR/lib:$DEVICE_SD_DUAL_DIR/lib/sm8750:\$LD_LIBRARY_PATH",
+                    "export ADSP_LIBRARY_PATH='$DEVICE_SD_DUAL_DIR/lib;/vendor/dsp/cdsp;/system/lib/rfsa/adsp'"
+                )
+            } else {
+                listOf(
+                    "export LD_LIBRARY_PATH=$activeSdDir:\$LD_LIBRARY_PATH",
+                    "export ADSP_LIBRARY_PATH='$activeSdDir;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp'"
+                )
+            }
+
+            val script = SdRunnerCommand.script(
+                runnerBin, activeSdDir,
+                exportList,
                 steps, effPlan.cfg, seed
             )
 

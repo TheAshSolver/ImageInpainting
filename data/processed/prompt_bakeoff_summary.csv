@@ -1,0 +1,4 @@
+pipeline,mean_lpips,cmmd,object_presence_score,mean_latency_ms,mean_power_w,mean_energy_j,provenance
+"QIDK v3 Pipeline (RePaint 20-step, CFG 2.0)",0.6703,0.6095,0.3536,50859.7,2.65,134.78,MEASURED_ON_DEVICE
+"Flagship v5 SD (DPM 12-step, CFG 2.0)",0.2505,0.151,0.8548,13200.0,2.65,34.98,MEASURED_ON_DEVICE
+"SD Duel (Dual-DLC Extrapolation N=3, Order-1)",0.2254,0.1531,0.8365,2145.2,4.85,10.4,MEASURED_ON_DEVICE

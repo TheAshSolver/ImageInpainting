@@ -1,0 +1,87 @@
+{
+  "metadata": {
+    "dataset": "dataset_100_features_6000.csv",
+    "train_samples": 4800,
+    "train_split_sha256": "c5ed49adda494b2d31999f071c4beedd0631fa711fedf082481e4f7c68244ee7",
+    "test_split_sha256": "7d11a196e3edecdbc50413be21a5d54acced6a03d35361e986dcefe76f63e30c",
+    "total_selected_features": 10,
+    "total_extraction_latency_us": 2068,
+    "total_extraction_latency_ms": 2.068,
+    "latency_budget_ms": 5.0,
+    "seed": 42
+  },
+  "selected_features": [
+    {
+      "feature_name": "grad_sobel_h_energy",
+      "importance_score": 0.45993,
+      "cpu_latency_us": 290,
+      "mean_train": 11241.3597,
+      "std_train": 9087.4589
+    },
+    {
+      "feature_name": "mask_area_ratio",
+      "importance_score": 0.33466,
+      "cpu_latency_us": 45,
+      "mean_train": 0.176,
+      "std_train": 0.0699
+    },
+    {
+      "feature_name": "grad_canny_density",
+      "importance_score": 0.07145,
+      "cpu_latency_us": 460,
+      "mean_train": 0.1557,
+      "std_train": 0.069
+    },
+    {
+      "feature_name": "grad_sobel_v_energy",
+      "importance_score": 0.02645,
+      "cpu_latency_us": 290,
+      "mean_train": 9621.8514,
+      "std_train": 6405.5379
+    },
+    {
+      "feature_name": "fft_radial_decay_slope",
+      "importance_score": 0.02336,
+      "cpu_latency_us": 250,
+      "mean_train": -3.0341,
+      "std_train": 0.4881
+    },
+    {
+      "feature_name": "mask_compactness",
+      "importance_score": 0.02292,
+      "cpu_latency_us": 78,
+      "mean_train": 0.1733,
+      "std_train": 0.1258
+    },
+    {
+      "feature_name": "fft_low_freq_power_ratio",
+      "importance_score": 0.01382,
+      "cpu_latency_us": 250,
+      "mean_train": 0.9774,
+      "std_train": 0.0215
+    },
+    {
+      "feature_name": "mask_extent",
+      "importance_score": 0.00776,
+      "cpu_latency_us": 40,
+      "mean_train": 0.3671,
+      "std_train": 0.1763
+    },
+    {
+      "feature_name": "glcm_correlation_0",
+      "importance_score": 0.00758,
+      "cpu_latency_us": 250,
+      "mean_train": 0.9439,
+      "std_train": 0.0464
+    },
+    {
+      "feature_name": "mask_max_inscribed_radius",
+      "importance_score": 0.0059,
+      "cpu_latency_us": 115,
+      "mean_train": 15.9556,
+      "std_train": 4.9845
+    }
+  ],
+  "collinear_dropped_count": 48,
+  "expensive_dropped_count": 5
+}

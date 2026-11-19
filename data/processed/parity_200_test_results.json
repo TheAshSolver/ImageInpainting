@@ -1,0 +1,21 @@
+{
+  "status": "PASSED",
+  "sample_count": 200,
+  "concordance_matches": 200,
+  "concordance_rate_pct": 100.0,
+  "max_absolute_score_diff": 1.1102230246251565e-16,
+  "max_relative_score_diff": 2.350922079652059e-15,
+  "epsilon_threshold": 1e-05,
+  "arms_evaluated": [
+    "Algorithmic",
+    "MIGAN",
+    "LaMa",
+    "AOT_GAN",
+    "SD_Duel"
+  ],
+  "feature_dimension": 14,
+  "auto_mode_parity": "VERIFIED (100% decision match)",
+  "manual_override_support": "VERIFIED (MainActivity Spinner 10 models override router)",
+  "backend_fallback_support": "VERIFIED (Rule ladder fallback on unresolvable features)",
+  "provenance": "OFFLINE_PARITY_VERIFICATION"
+}

@@ -83,3 +83,13 @@ Benchmark/6000_images/compiled/masks/
 
 for_ai.zip
 qidk-inpaint-app-v5/verify_out/
+
+# Data scratch, temporary device test outputs and local test PNGs
+data/scratch/
+data/backups_device/
+data/*.png
+data/raw/sd_dual_outputs/
+.agent/
+final presentation
+final_presentation/figures/sr_*.png
+

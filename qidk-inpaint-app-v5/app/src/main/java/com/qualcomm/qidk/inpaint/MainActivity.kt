@@ -243,11 +243,12 @@ class MainActivity : AppCompatActivity() {
     private fun setupModelSpinner() {
         val models = arrayOf(
             "Auto (Router Recommended)",
+            "SD Duel (Fast Inpaint • 1.5s NPU)",
+            "Smart SD (Prompt Inpaint • CFG 7.5 Object Insertion)",
             "LaMa Dilated (Large Voids)",
             "MIGAN (Portraits & Speed)",
             "AOT-GAN (Dense Texture)",
             "Standard SD 1.5 (Fast 4s • Untouched)",
-            "Smart SD (Context-Aware Prompt • CFG 7.5)",
             "Fast Marching (Telea)",
             "Fluid Streamlines (Navier-Stokes)",
             "Criminisi Exemplar",
@@ -262,7 +263,7 @@ class MainActivity : AppCompatActivity() {
                 val selected = parent?.getItemAtPosition(position)?.toString() ?: ""
                 refreshBackends(selected)
                 val smart = selected.contains("Smart")
-                val isSd = smart || selected.contains("SD") || selected.contains("Diffusion")
+                val isSd = smart || selected.contains("SD") || selected.contains("Diffusion") || selected.contains("Duel") || selected.contains("Dual")
                 promptCard.visibility = if (isSd) View.VISIBLE else View.GONE
                 // The 5-stage drawer belongs to Smart SD only: Standard SD sends the user's words as they are, there is nothing to trace.
                 pipelineTraceCard.visibility = if (smart) View.VISIBLE else View.GONE
@@ -347,12 +348,25 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnClear).setOnClickListener {
             canvasView.clearMask()
+            val feedback = qidk.fix.OnlineLearningEngine.onUserFeedback(saved = false)
+            if (feedback != null) Toast.makeText(this, feedback, Toast.LENGTH_SHORT).show()
             updateRouterLogic()
         }
 
         findViewById<Button>(R.id.btnUndo).setOnClickListener {
             canvasView.undo()
+            val feedback = qidk.fix.OnlineLearningEngine.onUserFeedback(saved = false)
+            if (feedback != null) Toast.makeText(this, feedback, Toast.LENGTH_SHORT).show()
             updateRouterLogic()
+        }
+
+        resultImageView.setOnLongClickListener {
+            val bmp = UiSession.inpaintResult
+            if (bmp != null) {
+                val feedback = qidk.fix.OnlineLearningEngine.onUserFeedback(saved = true)
+                Toast.makeText(this, feedback ?: "💾 Output Saved (Online Bandit Reward +1.0)", Toast.LENGTH_SHORT).show()
+                true
+            } else false
         }
         findViewById<Button>(R.id.btnZoomIn)?.setOnClickListener {
             canvasView.zoomIn()
@@ -633,6 +647,8 @@ class MainActivity : AppCompatActivity() {
             selectedOption.contains("MIGAN") -> "MIGAN"
             selectedOption.contains("LaMa") -> "LAMA"
             selectedOption.contains("AOT") -> "AOTGAN"
+            selectedOption.contains("Smart") -> "SMART_SD"
+            selectedOption.contains("Duel") || selectedOption.contains("Dual") -> "SD_DUEL"
             selectedOption.contains("SD") || selectedOption.contains("Diffusion") -> "SD"
             else -> "LAMA"
         }
@@ -644,13 +660,17 @@ class MainActivity : AppCompatActivity() {
         Thread {
             try {
                 // ONE plan per run: Standard SD = the user's words untouched, Smart SD = SmartSd.plan. The drawer shows it before the NPU starts.
-                val plan: SmartSdPlan? = if (targetModel == "SD") {
-                    if (isSmartPrompt) SmartSdAnalyzer.plan(src, mask, posPrompt, negPrompt) else SmartSd.standardPlan(posPrompt, negPrompt, 12)
+                val isSdModel = targetModel == "SD" || targetModel == "SMART_SD" || targetModel == "SD_DUEL"
+                val plan: SmartSdPlan? = if (isSdModel) {
+                    if (isSmartPrompt || targetModel == "SMART_SD") SmartSdAnalyzer.plan(src, mask, posPrompt, negPrompt)
+                    else SmartSd.standardPlan(posPrompt, negPrompt, if (targetModel == "SD_DUEL") 3 else 12)
                 } else null
                 if (plan != null && plan.smart) runOnUiThread { showPlan(plan) }
                 val telemetry = OnDeviceProcessDriver.executeInference(
                     src, mask, targetModel, backend, posPrompt, negPrompt, smartPrompt = isSmartPrompt, plan = plan
                 )
+                val predEst = qidk.fix.PredictionEngine.predict(targetModel, 0.15f, 0.05f, telemetry.startTempC)
+                qidk.fix.AdaptiveDriftTracker.recordInference(predEst.expectedLatencyMs, telemetry.latencyMs.toFloat())
                 runOnUiThread {
                     progressBar.visibility = View.GONE
                     btnRunInpaint.isEnabled = true

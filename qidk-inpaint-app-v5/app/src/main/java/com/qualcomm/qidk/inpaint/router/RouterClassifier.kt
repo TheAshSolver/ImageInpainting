@@ -34,17 +34,26 @@ object RouterClassifier {
         val msk = if (mask.width == 512 && mask.height == 512) mask else Bitmap.createScaledBitmap(mask, 512, 512, false)
         val argb = IntArray(512 * 512).also { img.getPixels(it, 0, 512, 0, 0, 512, 512) }
         val d = policy.decide(ProxyGrid.build(argb, ClassicalInpainter.holeBytes(msk), 512, 512)) ?: return ladder
-        val model = ModeDispatch.model(d.mode, ladder.recommendedModel, ladder.maskAreaRatio)
+        val rawModel = ModeDispatch.model(d.mode, ladder.recommendedModel, ladder.maskAreaRatio)
+        val isContended = qidk.fix.AdaptiveDriftTracker.isThrottled()
+        // Real-Time Adaptation: Divert from high-latency neural models if thermal/bus drift > 1.25x
+        val model = if (isContended && (rawModel == "LAMA" || rawModel == "AOTGAN" || rawModel.contains("SD"))) {
+            "MIGAN"
+        } else {
+            rawModel
+        }
         val t = d.telemetry
+        qidk.fix.OnlineLearningEngine.recordDecision(model, d.state)
+        val pred = qidk.fix.PredictionEngine.predict(model, ladder.maskAreaRatio, ladder.edgeDensity, t.siliconTempC)
         val scoreStr = d.scores.joinToString(prefix = "[", postfix = "]") { "%.3f".format(it) }
         val tempStr = "%.1f".format(t.siliconTempC)
         val cpuStr = "%.2f".format(t.cpuBusy)
         val gpuStr = "%.2f".format(t.gpuBusy)
         Log.i("QIDK.Router", "mode=${d.mode} arm=${d.armName} model=$model scores=$scoreStr feat_us=${d.featureMicros} policy_us=${d.policyMicros} T=${tempStr}C batt=${t.batteryPct.toInt()}% cpu=$cpuStr gpu=$gpuStr (${t.notes})")
-        val justStr = "LinUCB ${d.mode.label}: ${tempStr} °C, battery ${t.batteryPct.toInt()}%, CPU ${(t.cpuBusy * 100).toInt()}%, GPU ${(t.gpuBusy * 100).toInt()}% → $model"
+        val justStr = "${pred.summary()}\nLinUCB ${d.mode.label}: ${tempStr} °C, battery ${t.batteryPct.toInt()}%, CPU ${(t.cpuBusy * 100).toInt()}%, GPU ${(t.gpuBusy * 100).toInt()}% → $model"
         return ladder.copy(
             recommendedModel = model,
-            ruleTriggered = "LINUCB_${d.mode.name}",
+            ruleTriggered = if (isContended) "ADAPTIVE_CONTENDED_MIGAN" else "LINUCB_${d.mode.name}",
             justification = justStr
         )
     }

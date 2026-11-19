@@ -24,7 +24,7 @@ enum class TargetKind(val label: String) {
     BACKGROUND("background / scene region"),
 }
 
-enum class IntentKind { EMPTY, WEARABLE, FEATURE, OBJECT, DESCRIPTIVE }
+enum class IntentKind { EMPTY, WEARABLE, FEATURE, OBJECT, DESCRIPTIVE, REPLACEMENT }
 
 /** Stage 1: what the WHOLE picture shows. */
 class SceneContext(
@@ -48,13 +48,18 @@ class SceneContext(
 /** Stage 2: what the mask is about to replace. */
 class TargetContext(
     val holePx: Int, val holePct: Float, val bbox: IntArray,
-    val kind: TargetKind, val faceIndex: Int, val extra: String, val location: String, val boundary: String
+    val kind: TargetKind, val faceIndex: Int, val extra: String, val location: String, val boundary: String,
+    val contactSurface: String = "matching surface",
+    val interiorDesc: String = "",
+    val aspectRatio: Float = 1.0f
 ) {
     val onFace: Boolean get() = kind != TargetKind.BACKGROUND
     fun describe(): String {
         val what = if (onFace) "${kind.label} of face ${faceIndex + 1}$extra" else "${kind.label} at the $location"
-        return "Void: %,d px (%.1f%% of the image), box x %d-%d y %d-%d | Target: %s | Boundary: %s"
-            .format(Locale.US, holePx, holePct, bbox[0], bbox[2], bbox[1], bbox[3], what, boundary)
+        val surf = if (contactSurface.isNotEmpty()) " | Ground Contact: $contactSurface" else ""
+        val intText = if (interiorDesc.isNotEmpty()) " | Pre-inpaint Void: $interiorDesc (AR %.2f)".format(Locale.US, aspectRatio) else ""
+        return "Void: %,d px (%.1f%% of the image), box x %d-%d y %d-%d | Target: %s | Boundary: %s%s%s"
+            .format(Locale.US, holePx, holePct, bbox[0], bbox[2], bbox[1], bbox[3], what, boundary, surf, intText)
     }
 }
 
@@ -177,7 +182,7 @@ object SmartSd {
     // ----------------------------------------------------------------------------------------------- Stage 2
 
     /** [hole] w*h bytes, non-zero = masked. [ring] is the optional boundary descriptor of the older ring analysis. */
-    fun analyseTarget(scene: SceneContext, hole: ByteArray, w: Int, h: Int, ring: SmartPrompt.Descriptor?): TargetContext {
+    fun analyseTarget(scene: SceneContext, hole: ByteArray, w: Int, h: Int, ring: SmartPrompt.Descriptor?, argb: IntArray? = null): TargetContext {
         var n = 0; var x0 = w; var y0 = h; var x1 = -1; var y1 = -1
         for (i in 0 until w * h) if (hole[i].toInt() != 0) {
             n++
@@ -197,12 +202,76 @@ object SmartSd {
             (if (cx < 0.34f) "left" else if (cx > 0.66f) "right" else "centre")
         val bbox = intArrayOf(x0, y0, x1, y1)
 
+        // Dual-Context Extraction: (1) Pre-inpaint mask interior & (2) Ground contact horizon
+        val ar = if (y1 >= y0) (x1 - x0 + 1).toFloat() / max(1, y1 - y0 + 1).toFloat() else 1.0f
+        var interiorDesc = ""
+        var contactSurface = if (ring != null) ring.surface else "table or floor surface"
+
+        if (argb != null && argb.size == w * h) {
+            var inR = 0.0; var inG = 0.0; var inB = 0.0; var inL = 0.0; var inCount = 0
+            for (y in y0..y1) {
+                for (x in x0..x1) {
+                    val idx = y * w + x
+                    if (idx in 0 until (w * h) && hole[idx].toInt() != 0) {
+                        val c = argb[idx]
+                        val r = (c shr 16) and 0xFF
+                        val g = (c shr 8) and 0xFF
+                        val b = c and 0xFF
+                        inR += r; inG += g; inB += b
+                        inL += 0.299 * r + 0.587 * g + 0.114 * b
+                        inCount++
+                    }
+                }
+            }
+            if (inCount > 0) {
+                val avgL = (inL / inCount).toFloat()
+                interiorDesc = when {
+                    ar < 0.65f -> if (avgL < 90) "dark upright object" else "slender upright object"
+                    ar > 1.45f -> if (avgL < 90) "dark horizontal object" else "wide horizontal object"
+                    else -> if (avgL < 90) "dark compact object" else "compact object"
+                }
+            }
+
+            var botR = 0.0; var botG = 0.0; var botB = 0.0; var botL = 0.0; var botCount = 0
+            val scanY0 = min(h - 1, y1 + 1)
+            val scanY1 = min(h - 1, y1 + 12)
+            for (sy in scanY0..scanY1) {
+                for (sx in x0..x1) {
+                    val idx = sy * w + sx
+                    if (idx in 0 until (w * h) && hole[idx].toInt() == 0) {
+                        val c = argb[idx]
+                        val r = (c shr 16) and 0xFF
+                        val g = (c shr 8) and 0xFF
+                        val b = c and 0xFF
+                        botR += r; botG += g; botB += b
+                        botL += 0.299 * r + 0.587 * g + 0.114 * b
+                        botCount++
+                    }
+                }
+            }
+            if (botCount > 10) {
+                val mR = (botR / botCount).toFloat()
+                val mG = (botG / botCount).toFloat()
+                val mB = (botB / botCount).toFloat()
+                val mL = (botL / botCount).toFloat()
+                val warmth = mR - mB
+                contactSurface = when {
+                    mG > mR + 10 && mG > mB + 10 -> "natural lawn or foliage ground"
+                    warmth > 18f && mL in 40f..180f -> "wooden table or tabletop surface"
+                    mL > 190f -> "bright polished tabletop"
+                    mL < 45f -> "dark table surface"
+                    abs(warmth) < 12f -> "neutral stone tabletop"
+                    else -> "tabletop surface"
+                }
+            }
+        }
+
         // Face zones in face-aligned units (u, v) = rotate(p - mid, -roll) / eyeDist.
         var bestFace = -1; var bestCount = 0
         val faceZones = scene.faces.map { zoneCounts(it, hole, w, h) }
         for (i in faceZones.indices) if (faceZones[i].total > bestCount) { bestCount = faceZones[i].total; bestFace = i }
         if (bestFace < 0 || bestCount < n * 0.25) {
-            return TargetContext(n, pct, bbox, TargetKind.BACKGROUND, -1, "", location, boundary)
+            return TargetContext(n, pct, bbox, TargetKind.BACKGROUND, -1, "", location, boundary, contactSurface, interiorDesc, ar)
         }
         val z = faceZones[bestFace]
         val eyeShare = z.eye.toFloat() / bestCount
@@ -220,7 +289,7 @@ object SmartSd {
             z.cheek > bestCount * 0.3f -> kind = TargetKind.CHEEK
             else -> kind = TargetKind.FACE_OTHER
         }
-        return TargetContext(n, pct, bbox, kind, bestFace, extra, location, boundary)
+        return TargetContext(n, pct, bbox, kind, bestFace, extra, location, boundary, contactSurface, interiorDesc, ar)
     }
 
     private class Zones(var total: Int = 0, var eye: Int = 0, var eyeArea: Int = 0, var forehead: Int = 0, var mouth: Int = 0, var cheek: Int = 0)
@@ -257,11 +326,33 @@ object SmartSd {
 
     fun classify(userPrompt: String): IntentKind {
         val ws = words(userPrompt)
-        if (ws.isEmpty()) return IntentKind.EMPTY
-        if (ws.size > 7) return IntentKind.DESCRIPTIVE
+        if (ws.isEmpty() || userPrompt.equals("remove", ignoreCase = true) || userPrompt.equals("clean", ignoreCase = true) || userPrompt.equals("erase", ignoreCase = true)) return IntentKind.EMPTY
+        val lower = userPrompt.lowercase(Locale.US)
+        if (lower.contains("replace") || lower.contains("substitute") || lower.contains("swap") || lower.contains("change to") || lower.contains("put")) return IntentKind.REPLACEMENT
+        if (ws.size > 8) return IntentKind.DESCRIPTIVE
         if (ws.any { it in glassesWords || it in headWords || it in coverWords || it in earWords }) return IntentKind.WEARABLE
         if (ws.any { it in featureWords }) return IntentKind.FEATURE
         return IntentKind.OBJECT
+    }
+
+    fun extractReplacementTarget(userPrompt: String): String {
+        val lower = userPrompt.trim()
+        val replaceRegex = Regex("(?i)replace\\s+(?:the\\s+|a\\s+|an\\s+)?(?:.+?)\\s+with\\s+(?:an?\\s+)?(.+)", RegexOption.IGNORE_CASE)
+        val matchReplace = replaceRegex.find(lower)
+        if (matchReplace != null && matchReplace.groupValues.size > 1) {
+            return matchReplace.groupValues[1].trim()
+        }
+        val subRegex = Regex("(?i)substitute\\s+(?:the\\s+|a\\s+|an\\s+)?(?:.+?)\\s+for\\s+(?:an?\\s+)?(.+)", RegexOption.IGNORE_CASE)
+        val matchSub = subRegex.find(lower)
+        if (matchSub != null && matchSub.groupValues.size > 1) {
+            return matchSub.groupValues[1].trim()
+        }
+        val putRegex = Regex("(?i)put\\s+(?:an?\\s+)?(.+?)\\s+(?:on|in|onto)\\s+(?:the|a)?\\s*(.+)", RegexOption.IGNORE_CASE)
+        val matchPut = putRegex.find(lower)
+        if (matchPut != null && matchPut.groupValues.size > 1) {
+            return matchPut.groupValues[1].trim()
+        }
+        return userPrompt.trim()
     }
 
     private fun wornPhrase(user: String): String {
@@ -288,7 +379,8 @@ object SmartSd {
 
     /** Words that must not appear in the negative prompt because they describe what the user asked for. */
     private fun protectedWords(user: String): Set<String> {
-        val ws = words(user).toMutableSet()
+        val target = extractReplacementTarget(user)
+        val ws = (words(user) + words(target)).toMutableSet()
         if (ws.any { it in glassesWords }) ws += setOf("glasses", "sunglasses", "eyewear", "lens", "lenses", "frame", "frames", "shades", "reflection")
         if (ws.any { it in headWords }) ws += setOf("hat", "cap", "headwear", "brim")
         if (ws.any { it in coverWords }) ws += setOf("mask", "cover", "covered")
@@ -340,16 +432,31 @@ object SmartSd {
                     parts += "natural human skin and facial features"
                     parts += "photorealistic portrait"
                 } else {
-                    parts += when (scene.sceneClass) {
-                        SceneClass.SKY -> "clear open sky"
-                        SceneClass.WATER -> "calm water surface"
-                        SceneClass.FOLIAGE -> "natural foliage"
-                        else -> "the same surface and background as the surrounding area"
-                    }
+                    parts += "seamless photographic continuation of ${target.contactSurface}"
                     parts += "photorealistic photograph"
                 }
-                parts += light; parts += scene.tone; parts += "seamless continuation of the surrounding scene"
+                parts += light; parts += scene.tone; parts += "seamless continuation of the surrounding scene, no artifacts"
                 cfg = 3.5f
+            }
+            IntentKind.REPLACEMENT -> {
+                val targetObj = extractReplacementTarget(user)
+                parts += targetObj
+                parts += "a high quality photo of a $targetObj"
+                parts += "photorealistic $targetObj"
+                parts += "sharp focus"
+                parts += "natural lighting"
+                parts += "seamless continuation"
+                cfg = 7.5f
+            }
+            IntentKind.OBJECT -> {
+                parts += user
+                parts += "$user clearly visible in the scene"
+                parts += "a photo of a $user"
+                parts += "photorealistic $user"
+                parts += "sharp focus"
+                parts += "natural lighting"
+                parts += "seamless blend with the surrounding photo"
+                cfg = 7.5f
             }
             IntentKind.WEARABLE -> {
                 parts += user
@@ -367,14 +474,6 @@ object SmartSd {
                 parts += "photorealistic"; parts += "sharp focus"; if (skin.isNotEmpty()) parts += skin
                 parts += "seamless blend with the surrounding photo"
                 cfg = 7.0f
-            }
-            IntentKind.OBJECT -> {
-                parts += user
-                parts += "$user clearly visible in the scene"
-                parts += "matching the ${light}"; parts += scene.tone
-                parts += "photorealistic"; parts += "sharp focus"; parts += "consistent perspective and shadows"
-                parts += "seamless blend with the surrounding photo"
-                cfg = 6.0f
             }
             IntentKind.DESCRIPTIVE -> {
                 parts += user                                     // an expert prompt: verbatim, only a light touch after it
