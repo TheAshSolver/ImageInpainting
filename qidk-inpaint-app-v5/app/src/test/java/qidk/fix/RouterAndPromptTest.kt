@@ -60,6 +60,11 @@ class RouterAndPromptTest {
         assertEquals(evil, SdRunnerCommand.environment(evil, "x")["SD_PROMPT"])
         for (bad in listOf(0, 1, 101, -5)) try { SdRunnerCommand.script("./r", "/d", emptyList(), bad, 2f, 1); fail("steps $bad") } catch (_: IllegalArgumentException) {}
         try { SdRunnerCommand.script("./r; reboot", "/d", emptyList(), 20, 2f, 1); fail() } catch (_: IllegalArgumentException) {}
+
+        // Test dual runner command generation with flags
+        val sDual = SdRunnerCommand.script("./sd_qidk_runner_dual_zerocopy", "/data/local/tmp/sd_dual",
+            listOf("export LD_LIBRARY_PATH=/data/local/tmp/sd_dual/lib:/data/local/tmp/sd_dual/lib/sm8750:\$LD_LIBRARY_PATH"), 12, 2.0f, 42)
+        assertTrue(sDual, sDual.contains("./sd_qidk_runner_dual_zerocopy -s 12 -o sd_output.png --timing -v -p \"\$SD_PROMPT\" --seed 42"))
     }
 
     // ---------------------------------------------------------------- router features

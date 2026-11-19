@@ -417,9 +417,13 @@ object OnDeviceProcessDriver {
             val clockSd = PhaseClock()
             val tPrepSd = System.nanoTime()
 
-            val activeSdDir = if (isDualSd && File(DEVICE_SD_DUAL_DIR).exists()) DEVICE_SD_DUAL_DIR else DEVICE_SD_DIR
-            val runnerBin = if (isDualSd && File(DEVICE_SD_DUAL_DIR, "sd_dual").exists()) {
-                "./sd_dual"
+            val activeSdDir = if (isDualSd) DEVICE_SD_DUAL_DIR else DEVICE_SD_DIR
+            val runnerBin = if (isDualSd) {
+                val dualBinFile = File(DEVICE_SD_DUAL_DIR, "sd_qidk_runner_dual_zerocopy")
+                if (!dualBinFile.exists()) {
+                    throw FileNotFoundException("File not found: ${dualBinFile.absolutePath}\nPlease ensure the executable is built and pushed to the device.")
+                }
+                "./sd_qidk_runner_dual_zerocopy"
             } else if (isSmartSd) {
                 "./sd_qidk_runner_inpaint"
             } else if (is20Step) {
@@ -433,7 +437,7 @@ object OnDeviceProcessDriver {
             }
 
             val runnerName = if (isDualSd) {
-                "Stable Diffusion Dual-DLC (Taylor Order-1 • 1.5s NPU)"
+                "Stable Diffusion Dual-DLC (Taylor Order-1 • 12-step NPU)"
             } else if (isSmartSd) {
                 "Smart Stable Diffusion (Object Replacement • CFG 7.5)"
             } else if (is20Step) {
@@ -444,14 +448,14 @@ object OnDeviceProcessDriver {
                 "Stable Diffusion 1.5 (Inpainting - DPM 12-step)"
             }
             val execMode = if (isDualSd) {
-                "Qualcomm Hexagon NPU (Dual UNet Cache Extrapolation N=3)"
+                "Qualcomm Hexagon NPU (Dual UNet Cache Extrapolation N=12)"
             } else if (isSmartSd) {
                 "Qualcomm Hexagon NPU (DPM-Solver++ CFG 7.5 Dual-Pass Guidance)"
             } else {
                 "Qualcomm Hexagon NPU (HTP v79 Live DPM++)"
             }
 
-            val steps = if (isDualSd) 3 else if (is20Step || isInefficientSd || isSmartSd) 20 else 12
+            val steps = if (isDualSd) 12 else if (is20Step || isInefficientSd || isSmartSd) 20 else 12
             val isSmart = isSmartSd || (plan?.smart ?: smartPrompt)
             // ONE plan per run. Standard SD: the user's words, untouched, CFG 2.0. Smart SD: SmartSd.plan (intent first, scene second).
             val effPlan: SmartSdPlan = plan
@@ -482,7 +486,7 @@ object OnDeviceProcessDriver {
             maskRaw.setReadable(true, false)
             maskRaw.setWritable(true, false)
 
-            val exportList = if (runnerBin.contains("sd_dual")) {
+            val exportList = if (runnerBin.contains("dual") || runnerBin.contains("sd_dual")) {
                 listOf(
                     "export SD_MODE=proposed",
                     "export SD_CACHE_INTERVAL=3",

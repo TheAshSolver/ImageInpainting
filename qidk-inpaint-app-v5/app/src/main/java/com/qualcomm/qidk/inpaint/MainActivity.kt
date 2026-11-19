@@ -663,7 +663,7 @@ class MainActivity : AppCompatActivity() {
                 val isSdModel = targetModel == "SD" || targetModel == "SMART_SD" || targetModel == "SD_DUEL"
                 val plan: SmartSdPlan? = if (isSdModel) {
                     if (isSmartPrompt || targetModel == "SMART_SD") SmartSdAnalyzer.plan(src, mask, posPrompt, negPrompt)
-                    else SmartSd.standardPlan(posPrompt, negPrompt, if (targetModel == "SD_DUEL") 3 else 12)
+                    else SmartSd.standardPlan(posPrompt, negPrompt, 12)
                 } else null
                 if (plan != null && plan.smart) runOnUiThread { showPlan(plan) }
                 val telemetry = OnDeviceProcessDriver.executeInference(
