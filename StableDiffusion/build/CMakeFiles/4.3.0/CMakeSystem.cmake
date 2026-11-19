@@ -1,9 +1,9 @@
-set(CMAKE_HOST_SYSTEM "Linux-7.1.9-200.fc44.x86_64")
+set(CMAKE_HOST_SYSTEM "Linux-7.3.3-200.fc44.x86_64")
 set(CMAKE_HOST_SYSTEM_NAME "Linux")
-set(CMAKE_HOST_SYSTEM_VERSION "7.1.9-200.fc44.x86_64")
+set(CMAKE_HOST_SYSTEM_VERSION "7.3.3-200.fc44.x86_64")
 set(CMAKE_HOST_SYSTEM_PROCESSOR "x86_64")
 
-include("/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/build/cmake/android.toolchain.cmake")
+include("/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/build/cmake/android.toolchain.cmake")
 
 set(CMAKE_SYSTEM "Android-1")
 set(CMAKE_SYSTEM_NAME "Android")

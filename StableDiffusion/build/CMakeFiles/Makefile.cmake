@@ -7,16 +7,16 @@ set(CMAKE_DEPENDS_GENERATOR "Unix Makefiles")
 # The top level Makefile was generated from the following files:
 set(CMAKE_MAKEFILE_DEPENDS
   "CMakeCache.txt"
-  "/home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/CMakeLists.txt"
+  "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/build/cmake/android-legacy.toolchain.cmake"
+  "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/build/cmake/android.toolchain.cmake"
+  "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/build/cmake/flags.cmake"
+  "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/build/cmake/hooks/pre/Android-Clang.cmake"
+  "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/build/cmake/hooks/pre/Android-Initialize.cmake"
+  "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/build/cmake/hooks/pre/Android.cmake"
+  "/home/sky-stingray/Documents/Courses/ESW/Dependencies/android-ndk-r26c/build/cmake/platforms.cmake"
+  "/home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/CMakeLists.txt"
   "CMakeFiles/4.3.0/CMakeCXXCompiler.cmake"
   "CMakeFiles/4.3.0/CMakeSystem.cmake"
-  "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/build/cmake/android-legacy.toolchain.cmake"
-  "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/build/cmake/android.toolchain.cmake"
-  "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/build/cmake/flags.cmake"
-  "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/build/cmake/hooks/pre/Android-Clang.cmake"
-  "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/build/cmake/hooks/pre/Android-Initialize.cmake"
-  "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/build/cmake/hooks/pre/Android.cmake"
-  "/home/sky-sringray/Documents/Course/ESW/qualcomm/android-ndk-r26c/build/cmake/platforms.cmake"
   "/usr/share/cmake/Modules/CMakeCXXInformation.cmake"
   "/usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake"
   "/usr/share/cmake/Modules/CMakeGenericSystem.cmake"
@@ -62,4 +62,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/sd_qidk_runner.dir/DependInfo.cmake"
   "CMakeFiles/sd_qidk_runner_encoder.dir/DependInfo.cmake"
+  "CMakeFiles/sd_qidk_runner_inpaint.dir/DependInfo.cmake"
+  "CMakeFiles/sd_qidk_runner_dual_zerocopy.dir/DependInfo.cmake"
   )

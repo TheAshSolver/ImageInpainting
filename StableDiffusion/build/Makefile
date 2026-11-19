@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion
+CMAKE_SOURCE_DIR = /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build
+CMAKE_BINARY_DIR = /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/sky-sringray/Documents/Course/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/sky-stingray/Documents/Courses/ESW/ImageInpainting/StableDiffusion/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -142,6 +142,56 @@ sd_qidk_runner_encoder/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner_encoder.dir/build.make CMakeFiles/sd_qidk_runner_encoder.dir/build
 .PHONY : sd_qidk_runner_encoder/fast
 
+#=============================================================================
+# Target rules for targets named sd_qidk_runner_inpaint
+
+# Build rule for target.
+sd_qidk_runner_inpaint: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 sd_qidk_runner_inpaint
+.PHONY : sd_qidk_runner_inpaint
+
+# fast build rule for target.
+sd_qidk_runner_inpaint/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner_inpaint.dir/build.make CMakeFiles/sd_qidk_runner_inpaint.dir/build
+.PHONY : sd_qidk_runner_inpaint/fast
+
+#=============================================================================
+# Target rules for targets named sd_qidk_runner_dual_zerocopy
+
+# Build rule for target.
+sd_qidk_runner_dual_zerocopy: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 sd_qidk_runner_dual_zerocopy
+.PHONY : sd_qidk_runner_dual_zerocopy
+
+# fast build rule for target.
+sd_qidk_runner_dual_zerocopy/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner_dual_zerocopy.dir/build.make CMakeFiles/sd_qidk_runner_dual_zerocopy.dir/build
+.PHONY : sd_qidk_runner_dual_zerocopy/fast
+
+sd_dual.o: sd_dual.cpp.o
+.PHONY : sd_dual.o
+
+# target to build an object file
+sd_dual.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner_dual_zerocopy.dir/build.make CMakeFiles/sd_qidk_runner_dual_zerocopy.dir/sd_dual.cpp.o
+.PHONY : sd_dual.cpp.o
+
+sd_dual.i: sd_dual.cpp.i
+.PHONY : sd_dual.i
+
+# target to preprocess a source file
+sd_dual.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner_dual_zerocopy.dir/build.make CMakeFiles/sd_qidk_runner_dual_zerocopy.dir/sd_dual.cpp.i
+.PHONY : sd_dual.cpp.i
+
+sd_dual.s: sd_dual.cpp.s
+.PHONY : sd_dual.s
+
+# target to generate assembly for a file
+sd_dual.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner_dual_zerocopy.dir/build.make CMakeFiles/sd_qidk_runner_dual_zerocopy.dir/sd_dual.cpp.s
+.PHONY : sd_dual.cpp.s
+
 sd_runner.o: sd_runner.cpp.o
 .PHONY : sd_runner.o
 
@@ -190,6 +240,30 @@ sd_runner_encoder.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner_encoder.dir/build.make CMakeFiles/sd_qidk_runner_encoder.dir/sd_runner_encoder.cpp.s
 .PHONY : sd_runner_encoder.cpp.s
 
+sd_runner_inpaint.o: sd_runner_inpaint.cpp.o
+.PHONY : sd_runner_inpaint.o
+
+# target to build an object file
+sd_runner_inpaint.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner_inpaint.dir/build.make CMakeFiles/sd_qidk_runner_inpaint.dir/sd_runner_inpaint.cpp.o
+.PHONY : sd_runner_inpaint.cpp.o
+
+sd_runner_inpaint.i: sd_runner_inpaint.cpp.i
+.PHONY : sd_runner_inpaint.i
+
+# target to preprocess a source file
+sd_runner_inpaint.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner_inpaint.dir/build.make CMakeFiles/sd_qidk_runner_inpaint.dir/sd_runner_inpaint.cpp.i
+.PHONY : sd_runner_inpaint.cpp.i
+
+sd_runner_inpaint.s: sd_runner_inpaint.cpp.s
+.PHONY : sd_runner_inpaint.s
+
+# target to generate assembly for a file
+sd_runner_inpaint.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sd_qidk_runner_inpaint.dir/build.make CMakeFiles/sd_qidk_runner_inpaint.dir/sd_runner_inpaint.cpp.s
+.PHONY : sd_runner_inpaint.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -199,13 +273,21 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... sd_qidk_runner"
+	@echo "... sd_qidk_runner_dual_zerocopy"
 	@echo "... sd_qidk_runner_encoder"
+	@echo "... sd_qidk_runner_inpaint"
+	@echo "... sd_dual.o"
+	@echo "... sd_dual.i"
+	@echo "... sd_dual.s"
 	@echo "... sd_runner.o"
 	@echo "... sd_runner.i"
 	@echo "... sd_runner.s"
 	@echo "... sd_runner_encoder.o"
 	@echo "... sd_runner_encoder.i"
 	@echo "... sd_runner_encoder.s"
+	@echo "... sd_runner_inpaint.o"
+	@echo "... sd_runner_inpaint.i"
+	@echo "... sd_runner_inpaint.s"
 .PHONY : help
 
 
