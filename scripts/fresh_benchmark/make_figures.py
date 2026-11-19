@@ -19,11 +19,31 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Patch
 from PIL import Image
 
+def default_results_dir():
+    repo = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    fresh_base = os.path.join(repo, "Benchmark", "output", "fresh_benchmark")
+    if os.path.isdir(fresh_base):
+        subdirs = sorted([os.path.join(fresh_base, d) for d in os.listdir(fresh_base) if os.path.isdir(os.path.join(fresh_base, d))], reverse=True)
+        for s in subdirs:
+            if os.path.exists(os.path.join(s, "summary.json")):
+                return s
+    alt = os.path.join(repo, "Benchmark", "output_old", "fresh_benchmark_2026-10-04")
+    return alt if os.path.exists(alt) else "."
+
 ap = argparse.ArgumentParser()
-ap.add_argument("--results", required=True); ap.add_argument("--ds", required=True)
-ap.add_argument("--raw", default=None); ap.add_argument("--sd", default=None)
-ap.add_argument("--out", required=True); ap.add_argument("--dpi", type=int, default=200)
+ap.add_argument("--results", default=None, help="Directory containing summary.json and quality CSVs")
+ap.add_argument("--ds", default="Benchmark/input_102", help="Dataset root directory")
+ap.add_argument("--raw", default=None)
+ap.add_argument("--sd", default=None)
+ap.add_argument("--out", default=None, help="Output folder for generated figures")
+ap.add_argument("--dpi", type=int, default=300)
 A = ap.parse_args()
+
+if A.results is None:
+    A.results = default_results_dir()
+if A.out is None:
+    A.out = os.path.join(A.results, "figures")
+
 os.makedirs(A.out, exist_ok=True)
 S = json.load(open(os.path.join(A.results, "summary.json"), encoding="utf-8"))
 CSV = os.path.join(A.results, "per_sample_csv")
@@ -48,8 +68,13 @@ def find_csv(tag):
     raise SystemExit(f"no per-sample CSV with LPIPS for {tag} under {A.results} (run run_fresh_benchmark.py with --lpips)")
 
 Q = {t: find_csv(t) for t in ("migan_npu", "lama_npu", "aotgan_npu", "migan_gpu", "lama_gpu", "aotgan_gpu")}
-_sdcsv = os.path.join(CSV, "quality_sd_vs_gan_subset_lpips.csv")
-if os.path.exists(_sdcsv):
+_sdcsv_candidates = [
+    os.path.join(CSV, "quality_sd_vs_gan_subset_lpips.csv"),
+    os.path.join(A.results, "quality_sd_vs_gan_subset_lpips.csv"),
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "Benchmark", "output_old", "fresh_benchmark_2026-10-04", "per_sample_csv", "quality_sd_vs_gan_subset_lpips.csv"))
+]
+_sdcsv = next((p for p in _sdcsv_candidates if os.path.exists(p)), None)
+if _sdcsv:
     SDQ = [r for r in rows(_sdcsv) if r["model"] == "sd15_inpaint_12step"]
 elif "sd" in S:
     SDQ = [dict(sample=k, **v["quality"]) for k, v in S["sd"]["samples"].items()]

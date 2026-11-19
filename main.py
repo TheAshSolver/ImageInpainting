@@ -53,7 +53,7 @@ def cmd_gui(args):
 def cmd_visuals(args):
     """Generate presentation visual figures."""
     print("🎨 Generating 8 Publication-Grade Presentation Figures (300 DPI)...")
-    script_path = os.path.join(REPO_ROOT, "scripts", "generate_presentation_visuals.py")
+    script_path = os.path.join(REPO_ROOT, "scripts", "benchmarks", "generate_presentation_visuals.py")
     subprocess.run([sys.executable, script_path], check=True)
 
 def cmd_benchmark(args, extra):

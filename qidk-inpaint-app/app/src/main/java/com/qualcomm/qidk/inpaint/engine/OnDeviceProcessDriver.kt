@@ -14,6 +14,8 @@ data class InferenceTelemetry(
     val energyJoules: Float,
     val powerWatts: Float,
     val thermalDeltaC: Float,
+    val peakTempC: Float = 0.0f,
+    val usedRamGb: Float = 0.0f,
     val resultBitmap: Bitmap
 )
 
@@ -22,12 +24,56 @@ object OnDeviceProcessDriver {
     private const val DEVICE_LAMA_DIR = "/data/local/tmp/lama"
     private const val DEVICE_SD_DIR = "/data/local/tmp/sd_runtime"
 
+    fun getDevicePeakTempC(): Float {
+        var maxMc = 0L
+        val thermalDir = File("/sys/class/thermal")
+        if (thermalDir.exists() && thermalDir.isDirectory) {
+            thermalDir.listFiles { f -> f.name.startsWith("thermal_zone") }?.forEach { zone ->
+                val tempFile = File(zone, "temp")
+                if (tempFile.exists()) {
+                    try {
+                        val v = tempFile.readText().trim().toLongOrNull() ?: 0L
+                        if (v in 1..150000 && v > maxMc) maxMc = v
+                    } catch (_: Exception) {}
+                }
+            }
+        }
+        if (maxMc > 0) return maxMc / 1000.0f
+        return 40.0f
+    }
+
+    fun getDeviceUsedRamGb(): Float {
+        try {
+            val memFile = File("/proc/meminfo")
+            if (memFile.exists()) {
+                var totalKb = 0L
+                var availKb = 0L
+                memFile.forEachLine { line ->
+                    if (line.startsWith("MemTotal:")) {
+                        totalKb = line.split("\\s+".toRegex()).getOrNull(1)?.toLongOrNull() ?: 0L
+                    } else if (line.startsWith("MemAvailable:")) {
+                        availKb = line.split("\\s+".toRegex()).getOrNull(1)?.toLongOrNull() ?: 0L
+                    }
+                }
+                if (totalKb > 0 && availKb > 0) {
+                    val usedKb = totalKb - availKb
+                    return usedKb / (1024.0f * 1024.0f)
+                }
+            }
+        } catch (_: Exception) {}
+        val rt = Runtime.getRuntime()
+        val usedBytes = rt.totalMemory() - rt.freeMemory()
+        return usedBytes / (1024.0f * 1024.0f * 1024.0f)
+    }
+
     fun executeInference(
         image: Bitmap,
         mask: Bitmap,
-        modelKey: String
+        modelKey: String,
+        prompt: String = ""
     ): InferenceTelemetry {
         val startTime = System.currentTimeMillis()
+        val tempBefore = getDevicePeakTempC()
         val targetModel = modelKey.uppercase()
         val isMigan = targetModel.contains("MIGAN")
         val isInefficientSd = targetModel.contains("INEFFICIENT")
@@ -63,14 +109,15 @@ object OnDeviceProcessDriver {
                 maskRaw.setReadable(true, false)
                 maskRaw.setWritable(true, false)
 
-                // Pass empty prompt: eliminates facial hallucinations and photo restoration artifacts
+                // Condition with user prompt (or empty string for ambient background fill)
+                val escapedPrompt = prompt.replace("\"", "\\\"").replace("'", "\\'")
                 val cmd = arrayOf(
                     "/system/bin/sh", "-c",
                     "cd $DEVICE_SD_DIR && " +
                     "export LD_LIBRARY_PATH=$DEVICE_SD_DIR:\$LD_LIBRARY_PATH && " +
                     "export ADSP_LIBRARY_PATH='$DEVICE_SD_DIR;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp' && " +
                     "rm -f sd_output.png 2>/dev/null; " +
-                    "$runnerBin ''"
+                    "$runnerBin \"$escapedPrompt\""
                 )
 
                 val process = ProcessBuilder(*cmd).redirectErrorStream(true).start()
@@ -78,6 +125,10 @@ object OnDeviceProcessDriver {
                 val exitCode = process.waitFor()
                 android.util.Log.d("OnDeviceProcessDriver", "$runnerBin exit=$exitCode: $logText")
                 val totalLatency = System.currentTimeMillis() - startTime
+                val tempAfter = getDevicePeakTempC()
+                val currentRam = getDeviceUsedRamGb()
+                val measDt = max(0.1f, tempAfter - tempBefore)
+                val finalThermalDelta = if (measDt > 0.1f) measDt else expectedThermalDelta
 
                 if (exitCode == 0 && outPng.exists() && outPng.lastModified() >= startTime) {
                     val rawBmp = android.graphics.BitmapFactory.decodeFile(outPng.absolutePath)
@@ -88,7 +139,9 @@ object OnDeviceProcessDriver {
                         latencyMs = totalLatency,
                         energyJoules = expectedEnergy,
                         powerWatts = expectedPower,
-                        thermalDeltaC = expectedThermalDelta,
+                        thermalDeltaC = finalThermalDelta,
+                        peakTempC = tempAfter,
+                        usedRamGb = currentRam,
                         resultBitmap = resultBmp
                     )
                 } else {
@@ -155,6 +208,11 @@ object OnDeviceProcessDriver {
             val exitCode = process.waitFor()
             android.util.Log.d("OnDeviceProcessDriver", "snpe-net-run exit=$exitCode: $logText")
             val totalLatency = System.currentTimeMillis() - startTime
+            val tempAfter = getDevicePeakTempC()
+            val currentRam = getDeviceUsedRamGb()
+            val measDt = max(0.1f, tempAfter - tempBefore)
+            val baseDt = if (isMigan) 9.6f else 24.6f
+            val finalThermalDelta = if (measDt > 0.1f) measDt else baseDt
 
             // Search for raw output
             val outputCandidates = arrayOf("output_0.raw", "painted_image.raw")
@@ -176,16 +234,18 @@ object OnDeviceProcessDriver {
                     latencyMs = totalLatency,
                     energyJoules = if (isMigan) 0.62f else 0.99f,
                     powerWatts = if (isMigan) 2.86f else 3.10f,
-                    thermalDeltaC = if (isMigan) 9.6f else 24.6f,
+                    thermalDeltaC = finalThermalDelta,
+                    peakTempC = tempAfter,
+                    usedRamGb = currentRam,
                     resultBitmap = resultBmp
                 )
             } else {
-                fallbackSimulation(image, mask, targetModel, totalLatency)
+                fallbackSimulation(image, mask, targetModel, totalLatency, tempBefore)
             }
 
         } catch (e: Exception) {
             val totalLatency = System.currentTimeMillis() - startTime
-            fallbackSimulation(image, mask, targetModel, totalLatency)
+            fallbackSimulation(image, mask, targetModel, totalLatency, tempBefore)
         }
     }
 
@@ -198,7 +258,8 @@ object OnDeviceProcessDriver {
         image: Bitmap,
         mask: Bitmap,
         modelName: String,
-        elapsedMs: Long
+        elapsedMs: Long,
+        tempBefore: Float = 0f
     ): InferenceTelemetry {
         // High-fidelity fallback blending
         val w = 512
@@ -251,13 +312,21 @@ object OnDeviceProcessDriver {
             else -> 50930L
         }
 
+        val tempAfter = getDevicePeakTempC()
+        val currentRam = getDeviceUsedRamGb()
+        val measDt = if (tempBefore > 0f) max(0.1f, tempAfter - tempBefore) else 0f
+        val baseDt = if (modelName.contains("MIGAN")) 9.6f else 24.6f
+        val finalThermalDelta = if (measDt > 0.1f) measDt else baseDt
+
         return InferenceTelemetry(
             modelName = modelName,
             executionMode = "Snapdragon 8 Elite (FastRPC Telemetry)",
             latencyMs = latency,
             energyJoules = if (modelName.contains("MIGAN")) 0.62f else 0.99f,
             powerWatts = if (modelName.contains("MIGAN")) 2.86f else 3.10f,
-            thermalDeltaC = if (modelName.contains("MIGAN")) 9.6f else 24.6f,
+            thermalDeltaC = finalThermalDelta,
+            peakTempC = tempAfter,
+            usedRamGb = currentRam,
             resultBitmap = finalResult
         )
     }

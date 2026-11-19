@@ -3,7 +3,7 @@
 # Measures cold (N=1) and warm (N=102) wall-clock of snpe-net-run, with compute-zone temps around every run.
 TAG=$1; DLC=$2; LS=$3; RT=$4; COOL=${5:-42000}; CTO=${6:-240}
 cd /data/local/tmp/lama
-export LD_LIBRARY_PATH=/data/local/tmp/lama/lib:/data/local/tmp/lama:/data/local/tmp/sd_runtime:vendor/lib64:/system/lib64
+export LD_LIBRARY_PATH=/data/local/tmp/lama/lib:/data/local/tmp/lama:/data/local/tmp/sd_runtime
 export ADSP_LIBRARY_PATH='/data/local/tmp/lama/dsp/lib;/data/local/tmp/lama/dsp;/data/local/tmp/sd_runtime;/system/lib/rfsa/adsp;/system/vendor/lib/rfsa/adsp;/dsp'
 
 CPUZ=""; GPUZ=""; NSPZ=""; ALLZ=""

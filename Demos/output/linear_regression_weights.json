@@ -1,0 +1,72 @@
+{
+  "metadata": {
+    "dataset_source": "/home/aaravind/develop/models/Image_Inpainting/rl_system_thermal_benchmark.csv",
+    "total_samples": 375,
+    "npu_samples": 216,
+    "target_hardware": "Qualcomm Snapdragon 8 Elite (Hexagon HTP v79 NPU & Adreno 830 GPU)",
+    "date_fitted": "2026-10-29T20:10:44.038263",
+    "status": "calibrated_with_empirical_thermal_telemetry"
+  },
+  "npu_calibrated_latency": {
+    "intercept": 306.4502249152683,
+    "weights": {
+      "soc_temp_start_c": 0.0036832164829325065,
+      "power_mw": -0.002361091180198116,
+      "arch_lama": -145.47892440488192,
+      "arch_migan": -246.9479559992322
+    },
+    "r2": 0.9998542672959274,
+    "cv_r2_5fold": 0.9998480766222109,
+    "mae_ms": 1.0151497286671551,
+    "cv_mae_ms": 1.0258948744083007,
+    "rmse_ms": 1.2244727804176883,
+    "num_samples": 216
+  },
+  "npu_individual_models": {
+    "migan": {
+      "formula": "Latency = 58.7018 + (+0.01996) * Temp_C",
+      "intercept": 58.70178100243894,
+      "temp_slope": 0.019961004426924396,
+      "mae_ms": 1.022548997102277,
+      "rmse_ms": 1.2082292918007953,
+      "actual_mean_ms": 59.59258395061729,
+      "num_samples": 81
+    },
+    "lama_dilated": {
+      "formula": "Latency = 162.2023 + (-0.02448) * Temp_C",
+      "intercept": 162.20233871982086,
+      "temp_slope": -0.02448241510825142,
+      "mae_ms": 0.963699185353033,
+      "rmse_ms": 1.1525113687291928,
+      "actual_mean_ms": 161.05468115942028,
+      "num_samples": 69
+    },
+    "aot_gan": {
+      "formula": "Latency = 306.4700 + (+0.00148) * Temp_C",
+      "intercept": 306.4700467003434,
+      "temp_slope": 0.0014760884172630143,
+      "mae_ms": 1.0592735934890967,
+      "rmse_ms": 1.308687185992363,
+      "actual_mean_ms": 306.53919696969695,
+      "num_samples": 66
+    }
+  },
+  "full_system_joint_latency": {
+    "intercept": 1718.8737587598935,
+    "weights": {
+      "soc_temp_start_c": -0.14271153134080303,
+      "power_mw": -0.005392446779865168,
+      "is_npu": -1405.4580827226255,
+      "arch_lama": 430.4394783415941,
+      "arch_migan": -855.6175078473207,
+      "is_npu_x_lama": -575.9067142444742,
+      "is_npu_x_migan": 608.3323621713851
+    },
+    "r2": 0.9999778134603672,
+    "cv_r2_5fold": 0.9999768767161615,
+    "mae_ms": 2.413186973677538,
+    "cv_mae_ms": 2.460369316974271,
+    "rmse_ms": 3.62762131350915,
+    "num_samples": 375
+  }
+}

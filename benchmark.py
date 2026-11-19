@@ -33,8 +33,8 @@ import time
 import shutil
 
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
-SCRIPTS_DIR = os.path.join(REPO_ROOT, "scripts")
-FRESH_BENCH_DIR = os.path.join(SCRIPTS_DIR, "fresh_benchmark")
+SCRIPTS_DIR = os.path.join(REPO_ROOT, "scripts", "benchmarks")
+FRESH_BENCH_DIR = os.path.join(REPO_ROOT, "scripts", "fresh_benchmark")
 
 # ANSI Color Codes
 CYAN = "\033[96m"
@@ -191,6 +191,26 @@ def run_two_phase_benchmark():
         return 1
 
     return subprocess.run([sys.executable, script]).returncode
+
+
+def run_6000_npu_benchmark(extra_args=None):
+    """Executes the 6,000-sample NPU batch benchmark with resumption and telemetry."""
+    print_header("Executing 6,000-Sample NPU Batch Benchmark & Meta-Predictor Harness")
+    wait_for_device_reconnection()
+    script = os.path.join(SCRIPTS_DIR, "run_6000_npu_benchmark.py")
+    if not os.path.isfile(script):
+        print(f"{RED}Error: Script not found: {script}{RESET}")
+        return 1
+
+    # Prefer the conda environment containing lpips/torch if available
+    py_bin = "/home/aaravind/miniconda3/envs/inpainting/bin/python"
+    if not os.path.isfile(py_bin):
+        py_bin = sys.executable
+
+    cmd = [py_bin, script]
+    if extra_args:
+        cmd.extend(extra_args)
+    return subprocess.run(cmd).returncode
 
 
 def build_init_cache():
@@ -350,11 +370,13 @@ def interactive_menu():
         print(f"     {DIM}High-resolution composite comparison strips and PowerPoint presentations{RESET}")
         print(f" {BOLD}[8]{RESET} Run Environment Smoke Test & Device Health Probe")
         print(f"     {DIM}Verifies ADB, runtime staging directories, DLCs, and dependencies{RESET}")
+        print(f" {BOLD}[9]{RESET} 6,000-Sample NPU Resilient Batch Benchmark & Meta-Predictor Harness")
+        print(f"     {DIM}Batch push/purge, thermal barrier, checkpoint resumption, LPIPS/PSNR/SSIM{RESET}")
         print(f" {BOLD}[0]{RESET} Exit")
         print(f"{CYAN}================================================================================{RESET}")
 
         try:
-            choice = input(f"{BOLD}Select an option [0-8]: {RESET}").strip()
+            choice = input(f"{BOLD}Select an option [0-9]: {RESET}").strip()
         except (KeyboardInterrupt, EOFError):
             print("\nExiting.")
             break
@@ -406,6 +428,15 @@ def interactive_menu():
             generate_qualitative_strips_and_deck()
         elif choice == "8":
             run_smoke_test()
+        elif choice == "9":
+            bs = input("Batch size (default: 50): ").strip()
+            lim = input("Limit sample count (default: 6000): ").strip()
+            extra = []
+            if bs.isdigit():
+                extra.extend(["--batch-size", bs])
+            if lim.isdigit():
+                extra.extend(["--limit", lim])
+            run_6000_npu_benchmark(extra)
         else:
             print(f"{RED}Invalid option: {choice}{RESET}")
 
@@ -444,6 +475,10 @@ Examples:
     parser.add_argument("--deck", action="store_true", help="Generate qualitative comparisons and presentation slide deck")
     parser.add_argument("--smoke-test", action="store_true", help="Verify ADB connection and on-device runtime staging")
     parser.add_argument("--configs", nargs="*", help="Specific model configs for fresh benchmark (e.g. migan_npu lama_npu)")
+    parser.add_argument("--npu-6000", action="store_true", help="Execute 6,000-sample NPU resilient batch benchmark & meta-predictor dataset harness")
+    parser.add_argument("--batch-size", type=int, default=50, help="Batch size for --npu-6000 (default: 50)")
+    parser.add_argument("--cooldown-temp", type=float, default=55.0, help="Thermal barrier start temp for --npu-6000 (default: 55.0°C)")
+    parser.add_argument("--reset-checkpoint", action="store_true", help="Reset checkpoint and restart --npu-6000 from batch 0")
 
     args, unknown = parser.parse_known_args()
 
@@ -489,6 +524,15 @@ Examples:
         run_migan_diagnostics(unknown)
     if args.two_phase:
         run_two_phase_benchmark()
+    if args.npu_6000:
+        npu_args = ["--batch-size", str(args.batch_size), "--cooldown-temp", str(args.cooldown_temp)]
+        if args.limit:
+            npu_args.extend(["--limit", str(args.limit)])
+        if args.reset_checkpoint:
+            npu_args.append("--reset-checkpoint")
+        if unknown:
+            npu_args.extend(unknown)
+        run_6000_npu_benchmark(npu_args)
     if args.figures:
         generate_figures(args.figures)
     if args.deck:

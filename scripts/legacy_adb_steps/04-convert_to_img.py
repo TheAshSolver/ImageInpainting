@@ -147,13 +147,15 @@ if __name__ == "__main__":
         help="Target model name for file naming ({idx}_{model}.png). Default: migan"
     )
     parser.add_argument(
-        "--base_dir",
+        "--base_dir", "--base-dir", "-b",
+        dest="base_dir",
         type=str,
         default=None,
         help="Base directory containing Result_* folders (default: Benchmark/output/<model>)"
     )
     parser.add_argument(
-        "--output_dir",
+        "--output_dir", "--output-dir", "-o",
+        dest="output_dir",
         type=str,
         default=None,
         help="Output directory to save images (default: <base_dir>/results)"

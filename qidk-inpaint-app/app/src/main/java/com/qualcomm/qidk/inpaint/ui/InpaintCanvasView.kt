@@ -486,7 +486,7 @@ class InpaintCanvasView @JvmOverloads constructor(
                                 saveUndoState()
                                 maskCanvas.drawRect(left, top, right, bottom, maskFillPaint)
                                 currentBBox = RectF(left, top, right, bottom)
-                                onBoxSelectionStatusChanged?.invoke("Square mask created (${(right - left).toInt()}x${(bottom - top).toInt()} px)")
+                                onBoxSelectionStatusChanged?.invoke("Box Select: ${(right - left).toInt()}x${(bottom - top).toInt()} px selected")
                                 onMaskChanged?.invoke()
                             }
                             resetBoxSelection()
@@ -494,7 +494,7 @@ class InpaintCanvasView @JvmOverloads constructor(
                             firstCorner = PointF(cx, cy)
                             dragPreviewBox = null
                             isDraggingBox = false
-                            onBoxSelectionStatusChanged?.invoke("Tap opposite corner to complete square mask")
+                            onBoxSelectionStatusChanged?.invoke("Tap opposite corner to complete box select")
                             invalidate()
                         } else {
                             val p1 = firstCorner!!
@@ -507,7 +507,7 @@ class InpaintCanvasView @JvmOverloads constructor(
                                 saveUndoState()
                                 maskCanvas.drawRect(left, top, right, bottom, maskFillPaint)
                                 currentBBox = RectF(left, top, right, bottom)
-                                onBoxSelectionStatusChanged?.invoke("Square mask created (${(right - left).toInt()}x${(bottom - top).toInt()} px)")
+                                onBoxSelectionStatusChanged?.invoke("Box Select: ${(right - left).toInt()}x${(bottom - top).toInt()} px selected")
                                 onMaskChanged?.invoke()
                             }
                             resetBoxSelection()
@@ -581,9 +581,9 @@ class InpaintCanvasView @JvmOverloads constructor(
 
         if (currentMode == Mode.BOUNDING_BOX) {
             if (firstCorner != null) {
-                drawBanner(canvas, "📍 Corner 1 set. Tap opposite corner to create square mask")
+                drawBanner(canvas, "📍 Corner 1 set. Tap opposite corner to complete box select")
             } else if (dragPreviewBox == null) {
-                drawBanner(canvas, "🔲 Box Mode: Tap 2 corners or drag to create square mask")
+                drawBanner(canvas, "🔲 Box Select: Tap 2 corners or drag to select box")
             }
         }
     }

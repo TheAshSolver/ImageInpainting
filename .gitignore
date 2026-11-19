@@ -1,6 +1,7 @@
 # Qualcomm binary model containers & builds
 *.dlc
 /StableDiffusion/build
+/StableDiffusion/sd_qidk_runner_inpaint
 StableDiffusion/sd_runtime/
 models/StableDiffusion
 
@@ -42,7 +43,16 @@ qidk-inpaint-app/build/
 qidk-inpaint-app/app/build/
 qidk-inpaint-app/local.properties
 qidk-inpaint-app/decompiled/
+qidk-inpaint-app-v5/.gradle/
+qidk-inpaint-app-v5/build/
+qidk-inpaint-app-v5/app/build/
+qidk-inpaint-app-v5/local.properties
+qidk-inpaint-app-v5/app/.cxx/
 *.apk
+todays presentation.zip
+todays presentation/
+todays_presentation/
+Benchmark/output/6000_benchmark/
 
 # Virtual environments and Python caches
 .venv/
@@ -57,4 +67,34 @@ comparison_results/
 generated_charts/
 qidk_outputs/
 qidk-inpaint-app/decompiled/
+qidk-inpaint-app/app/.cxx/
+qidk_backup/
+qidk_retrieved_models/
+snpe_resident_daemon
+test_snpe_shell
+
+phone_*.png
+
+# 6000-sample dataset: ignore image and mask binaries but whitelist metadata manifests
+Benchmark/6000_images/compiled/images/
+Benchmark/6000_images/compiled/masks/
+!Benchmark/6000_images/*.csv
+!Benchmark/6000_images/**/*.csv
+
+for_ai.zip
+qidk-inpaint-app-v5/verify_out/
+
+# Data scratch, temporary device test outputs and local test PNGs
+data/scratch/
+data/backups_device/
+data/*.png
+data/raw/sd_dual_outputs/
+.agent/
+final presentation
+final_presentation/figures/sr_*.png
+
+
+tmp
+Benchmark/output_old/
+Benchmark/6000_images/natural_images/
 

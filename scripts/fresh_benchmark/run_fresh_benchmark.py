@@ -49,8 +49,21 @@ def adb(*args, timeout=3600, check=True):
     return p.stdout
 
 
-def shell(cmd, timeout=3600):
-    return adb("shell", cmd, timeout=timeout, check=False)
+def shell(cmd, timeout=3600, stream=False):
+    if not stream:
+        return adb("shell", cmd, timeout=timeout, check=False)
+    proc = subprocess.Popen([ADB, "shell", cmd], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors="replace", bufsize=1)
+    output_lines = []
+    try:
+        for line in proc.stdout:
+            sys.stdout.write(line)
+            sys.stdout.flush()
+            output_lines.append(line)
+        proc.wait(timeout=timeout)
+    except Exception as e:
+        proc.kill()
+        raise e
+    return "".join(output_lines)
 
 
 # --------------------------------------------------------------------------- dataset / tensors
@@ -58,11 +71,32 @@ def stems():
     return [f"{i:03d}" for i in range(1, 103)]
 
 
+def are_inputs_present_on_device() -> bool:
+    """Checks if all 102 benchmark input tensors and lists are already staged on the device."""
+    check_cmd = (
+        f"[ -d {LAMA}/bench_in/raw_image ] && "
+        f"[ -f {LAMA}/list_standard.txt ] && "
+        f"[ -f {LAMA}/list_inverted.txt ] && "
+        f"[ $(ls -1 {LAMA}/bench_in/raw_image/*.raw 2>/dev/null | wc -l) -ge 102 ] && "
+        f"[ $(ls -1 {LAMA}/bench_in/raw_mask_standard/*.raw 2>/dev/null | wc -l) -ge 102 ] && "
+        f"echo 'PRESENT' || echo 'MISSING'"
+    )
+    res = shell(check_cmd).strip()
+    return "PRESENT" in res
+
+
 def prepare_tensors(dest: Path):
     """NHWC float32 .raw tensors from the PNG triplets (same layout as scripts/prep_102_benchmark.py)."""
+    if (dest / "raw_image" / "102.raw").exists() and (dest / "raw_mask_standard" / "102_mask.raw").exists() and (dest / "list_standard.txt").exists():
+        print(f"  ⚡ Tensors already present locally in {dest}. Skipping preparation.", flush=True)
+        return
     for d in ("raw_image", "raw_mask_standard", "raw_mask_inverted"):
         (dest / d).mkdir(parents=True, exist_ok=True)
-    for s in stems():
+    all_stems = stems()
+    total = len(all_stems)
+    for idx, s in enumerate(all_stems, 1):
+        if idx % 20 == 0 or idx == total or idx == 1:
+            print(f"  [Tensors] Preparing sample {idx}/{total} ({idx * 100 // total}%)...", flush=True)
         img = Image.open(DS / "image" / f"{s}.png").convert("RGB")
         msk = Image.open(DS / "mask" / f"{s}.png").convert("L")
         assert img.size == (512, 512) and msk.size == (512, 512), s
@@ -75,16 +109,26 @@ def prepare_tensors(dest: Path):
             f"image:=bench_in/raw_image/{s}.raw mask:=bench_in/{mdir}/{s}_mask.raw\n" for s in stems()), newline="\n")
         (dest / f"list1_{name}.txt").write_text(
             f"image:=bench_in/raw_image/001.raw mask:=bench_in/{mdir}/001_mask.raw\n", newline="\n")
+    print(f"  ✅ All {total} tensor triplets generated successfully.", flush=True)
 
 
-def push_inputs(tdir: Path):
+def push_inputs(tdir: Path, force: bool = False):
+    if not force and are_inputs_present_on_device():
+        print("  ⚡ All 102 benchmark inputs already present on device. Skipping push.", flush=True)
+        return
+    print("  [Push] Resetting remote bench_in directory...", flush=True)
     shell(f"rm -rf {LAMA}/bench_in; mkdir -p {LAMA}/bench_in")
     for d in ("raw_image", "raw_mask_standard", "raw_mask_inverted"):
-        adb("push", str(tdir / d), f"{LAMA}/bench_in/")
+        size_est = 321 if d == "raw_image" else 105
+        print(f"  [Push] Pushing {d} (~{size_est} MB across 102 files)...", flush=True)
+        subprocess.run([ADB, "push", str(tdir / d), f"{LAMA}/bench_in/"], check=True)
+    print("  [Push] Pushing input lists...", flush=True)
     for f in tdir.glob("list*.txt"):
-        adb("push", str(f), f"{LAMA}/{f.name}")
+        subprocess.run([ADB, "push", str(f), f"{LAMA}/{f.name}"], check=True)
+    print("  [Push] Pushing device benchmark scripts...", flush=True)
     for f in (HERE / "device").glob("*.sh"):
-        adb("push", str(f), f"/data/local/tmp/{f.name}")
+        subprocess.run([ADB, "push", str(f), f"/data/local/tmp/{f.name}"], check=True)
+    print("  ✅ All benchmark inputs & scripts successfully pushed to device.", flush=True)
 
 
 # --------------------------------------------------------------------------- quality
@@ -156,7 +200,14 @@ def load_raw_output(res_dir: Path):
 
 
 def evaluate_gan(out_dir: Path, csv_path: Path, use_lpips):
-    rows = [score(s, load_raw_output(out_dir / f"Result_{i}"), use_lpips) for i, s in enumerate(stems())]
+    all_stems = stems()
+    total = len(all_stems)
+    rows = []
+    print(f"  [Scoring] Evaluating {total} outputs (PSNR, SSIM{', LPIPS' if use_lpips else ''})...", flush=True)
+    for i, s in enumerate(all_stems):
+        if (i + 1) % 20 == 0 or (i + 1) == total or (i + 1) == 1:
+            print(f"    Sample {i+1}/{total} evaluated...", flush=True)
+        rows.append(score(s, load_raw_output(out_dir / f"Result_{i}"), use_lpips))
     with open(csv_path, "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
     return rows
@@ -167,13 +218,12 @@ RES_RE = re.compile(r"RESULT (\S+) (cold|batch102) rep=(\d) rc=(\d+) ms=(-?\d+) 
 
 
 def run_config(tag, dlc, ls, rt, out: Path, keep_raw, use_lpips, cool_mc, cool_timeout):
-    print(f"\n=== {tag}", flush=True)
+    print(f"\n=== Executing on-device benchmark for {tag}...", flush=True)
     # the runtime flag(s) must be ONE shell argument (e.g. '--use_dsp --enable_init_cache')
-    log = shell(f"sh /data/local/tmp/bench_cfg.sh {tag} {dlc} {ls} '{rt}' {cool_mc} {cool_timeout}", timeout=3600)
+    log = shell(f"sh /data/local/tmp/bench_cfg.sh {tag} {dlc} {ls} '{rt}' {cool_mc} {cool_timeout}", timeout=3600, stream=True)
     lines = [l for l in log.splitlines() if re.match(r"(COOLDOWN|RESULT|DONE)", l)]
     (out / "logs").mkdir(exist_ok=True)
     (out / "logs" / f"{tag}.txt").write_text("\n".join(lines) + "\n")
-    print("\n".join(lines), flush=True)
     runs = {"cold": [], "batch102": []}
     for m in RES_RE.finditer("\n".join(lines)):
         t = [int(x) / 1000 for x in m.groups()[6:]]
@@ -183,7 +233,8 @@ def run_config(tag, dlc, ls, rt, out: Path, keep_raw, use_lpips, cool_mc, cool_t
     if any(r["rc"] != 0 for r in runs["cold"] + runs["batch102"]) or any(r["n"] != 102 for r in runs["batch102"]):
         raise SystemExit(f"{tag}: snpe-net-run failed or produced < 102 results")
     raw = out / "raw_outputs"; raw.mkdir(exist_ok=True)
-    adb("pull", f"{LAMA}/bench_out_{tag}_r1", str(raw) + os.sep)
+    print(f"  [Pull] Pulling {tag} raw outputs (~330 MB) from device...", flush=True)
+    subprocess.run([ADB, "pull", f"{LAMA}/bench_out_{tag}_r1", str(raw) + os.sep], check=True)
     shell(f"cd {LAMA} && rm -rf bench_out_{tag}_r1 bench_out_{tag}_r2 bench_out_{tag}_r3 bench_out_{tag}_cold bench_out_{tag}_warm")
     q = evaluate_gan(raw / f"bench_out_{tag}_r1", out / f"quality_{tag}.csv", use_lpips)
     if not keep_raw:
@@ -290,6 +341,8 @@ def main():
     ap.add_argument("--keep-raw", action="store_true", help="keep pulled raw outputs (~330 MB per config; needed for make_figures per-sample sheets)")
     ap.add_argument("--cool-mc", type=int, default=42000, help="cooldown target on hottest CPU/GPU/NSP zone, milli-degC")
     ap.add_argument("--cool-timeout", type=int, default=150)
+    ap.add_argument("--skip-push", action="store_true", help="skip pushing input tensors if already present on device")
+    ap.add_argument("--force-push", action="store_true", help="force re-pushing inputs even if already present on device")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
     ADB = a.adb
@@ -300,8 +353,12 @@ def main():
     out = Path(a.out) if a.out else REPO / "Benchmark" / "output" / "fresh_benchmark" / datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     out.mkdir(parents=True, exist_ok=True)
     tdir = out / "tensors"
-    print("preparing tensors ...", flush=True); prepare_tensors(tdir)
-    print("pushing inputs ...", flush=True); push_inputs(tdir)
+    print("Preparing tensors...", flush=True)
+    prepare_tensors(tdir)
+    if not a.skip_push:
+        push_inputs(tdir, force=a.force_push)
+    else:
+        print("⚡ Skipping input push (--skip-push provided).", flush=True)
 
     summary = dict(device=dev[0].split()[0], date=datetime.date.today().isoformat(), configs={})
     quality = {}

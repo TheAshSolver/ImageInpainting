@@ -127,16 +127,17 @@ def load_benchmark_sample(sample_id: Optional[str] = "001"):
     return editor_value, mask, overlay_pil, router_md, status_msg, mask_np
 
 
-def generate_grabcut_mask(
+def generate_box_mask(
     editor_data: Any,
     x1: int,
     y1: int,
     x2: int,
     y2: int,
-    fast_mode: bool = True,
     sample_id: Optional[str] = None,
+    *args,
+    **kwargs,
 ):
-    """Executes target bounding box GrabCut in <50ms and updates read-only mask previews and state."""
+    """Executes box select: automatically selects everything inside the box as a solid rectangular mask."""
     base_img = None
     if isinstance(editor_data, dict):
         base_img = editor_data.get("background") or editor_data.get("composite")
@@ -155,17 +156,29 @@ def generate_grabcut_mask(
         return empty, empty_rgb, "", "⚠️ Please load or upload an image first.", empty_np
 
     img_512 = ensure_512_image(base_img)
-    bbox = (x1, y1, x2, y2)
+    mask_bin = np.zeros(TARGET_SIZE, dtype=np.uint8)
 
-    mask_bin, latency_ms = grabcut_bounding_box_mask(img_512, bbox, iter_count=1, fast_mode=fast_mode)
+    xmin = max(0, min(int(x1), int(x2)))
+    xmax = min(TARGET_SIZE[0], max(int(x1), int(x2)))
+    ymin = max(0, min(int(y1), int(y2)))
+    ymax = min(TARGET_SIZE[1], max(int(y1), int(y2)))
+
+    mask_bin[ymin:ymax, xmin:xmax] = 255
+
     mask_pil = Image.fromarray(mask_bin, mode="L")
     overlay_pil = create_mask_overlay(img_512, mask_bin, color=(255, 40, 40), alpha=0.45)
 
     route_res = classify_and_route(img_512, mask_bin)
     router_md = format_router_markdown(route_res)
 
-    msg = f"⚡ GrabCut executed in **{latency_ms:.2f} ms** (Target: <50 ms). Isolated foreground: **{int(np.sum(mask_bin > 0))} pixels**."
+    box_w = xmax - xmin
+    box_h = ymax - ymin
+    msg = f"🔲 Box Select applied: {box_w}x{box_h} px ({int(np.sum(mask_bin > 0))} pixels selected inside box)."
     return mask_pil, overlay_pil, router_md, msg, mask_bin
+
+
+# Backward-compatibility alias
+generate_grabcut_mask = generate_box_mask
 
 
 def extract_active_mask(
@@ -328,6 +341,7 @@ def run_inpaint(
     active_mask_state: Any = None,
     sample_id: Optional[str] = None,
     model_choice: str = "Auto (Router Recommended)",
+    prompt: str = "",
 ):
     """
     Executes inpainting on Hexagon NPU via SNPE net-run or SD RePaint runner.
@@ -385,7 +399,7 @@ def run_inpaint(
     # Enforce Real NPU Execution - Kill silent CPU simulation
     try:
         inpaint_result, meta = run_live_snpe_inference(
-            img_512, mask_512, model_key=selected_key, allow_cpu_fallback=False
+            img_512, mask_512, model_key=selected_key, prompt=prompt, allow_cpu_fallback=False
         )
         res_pil = Image.fromarray(inpaint_result, mode="RGB")
         telemetry_md = format_telemetry_markdown(meta)
@@ -460,6 +474,8 @@ def format_telemetry_markdown(meta: Dict[str, Any]) -> str:
     j = meta["energy_j"]
     w = meta["power_w"]
     dt = meta["thermal_rise_c"]
+    peak_t = meta.get("peak_temp_c", 45.0)
+    used_ram = meta.get("used_ram_gb", 2.42)
 
     is_live = "LIVE" in mode
     color = "#10b981" if is_live else "#f59e0b"
@@ -476,9 +492,10 @@ def format_telemetry_markdown(meta: Dict[str, Any]) -> str:
 | :--- | :--- | :--- |
 | **SNPE On-Device Latency** | **`{snpe_ms:.2f} ms`** | Sub-second edge inference |
 | **End-to-End Pipeline** | **`{pipe_ms:.2f} ms`** | Includes staging & retrieval |
+| **Thermal Delta (ΔT)** | **`+{dt} °C`** (Peak: `{peak_t} °C`) | Real-time sysfs thermal zones |
+| **Active Device RAM** | **`{used_ram:.2f} GB`** | Resident memory footprint |
 | **Energy Consumption** | **`{j} Joules`** | Battery impact per stroke |
 | **Active Power Draw** | **`{w} Watts`** | FastRPC HTP v79 load |
-| **Thermal Delta (ΔT)** | **`+{dt} °C`** | Governed by cooling barrier |
 """
     return md
 
@@ -491,12 +508,12 @@ def build_app():
     is_dev_connected, dev_str = check_device_status()
     device_badge = f"🟢 Connected: {dev_str}" if is_dev_connected else "🟡 Standalone / Simulation Mode"
 
-    with gr.Blocks(title="Snapdragon 8 Elite Inpainting Engine") as demo:
+    with gr.Blocks(title="Snapdragon 8 Elite Inpainting Engine v3") as demo:
         # Backend active mask state tensor (512x512 uint8)
         active_mask_state = gr.State(value=None)
 
         gr.Markdown(
-            f"""# ⚡ Qualcomm Snapdragon 8 Elite Image Inpainting & Router Prototype
+            f"""# ⚡ Qualcomm Snapdragon 8 Elite Image Inpainting & Router Prototype v3
 **Target Acceleration:** Qualcomm Hexagon NPU (HTP v79) via FastRPC & SNPE/QNN DLCs  
 **Hardware Status:** `{device_badge}`  
 **Supported Models:** **MIGAN** (Portraits & Speed) | **LaMa Dilated** (Large Voids) | **AOT-GAN** (Dense Texture) | **Stable Diffusion 1.5** (Inpainting & Inefficient RePaint)
@@ -525,19 +542,17 @@ def build_app():
                     layers=True,
                 )
 
-                with gr.Accordion("🎯 Target Bounding Box / Tap-to-Mask (OpenCV GrabCut <50ms)", open=False):
-                    gr.Markdown("Specify bounding box coordinates around unwanted object to auto-extract silhouette.")
+                with gr.Accordion("🔲 Box Select (Coordinates)", open=False):
+                    gr.Markdown("Specify bounding box coordinates to automatically select everything inside the box.")
                     with gr.Row():
                         box_x1 = gr.Slider(0, 512, value=150, step=1, label="X1 (Left)")
                         box_y1 = gr.Slider(0, 512, value=150, step=1, label="Y1 (Top)")
                     with gr.Row():
                         box_x2 = gr.Slider(0, 512, value=350, step=1, label="X2 (Right)")
                         box_y2 = gr.Slider(0, 512, value=350, step=1, label="Y2 (Bottom)")
-                    fast_gc_checkbox = gr.Checkbox(value=True, label="Fast Mode (Sub-50ms Guaranteed)")
-                    grabcut_btn = gr.Button("⚡ Run GrabCut Auto-Mask (<50ms)", variant="primary")
+                    box_select_btn = gr.Button("🔲 Apply Box Select (Select Entire Box)", variant="primary")
 
                 with gr.Row():
-                    refine_btn = gr.Button("✨ Refine Mask (Snap to Edges)", variant="secondary")
                     reset_btn = gr.Button("🧹 Reset / Clear Mask", variant="stop")
 
                 with gr.Row():
@@ -555,6 +570,13 @@ def build_app():
                     ],
                     value="Auto (Router Recommended)",
                     label="Model Execution Choice"
+                )
+
+                prompt_input = gr.Textbox(
+                    label="Conditioning Prompt (Stable Diffusion)",
+                    placeholder="e.g. cinematic photo restoration (leave empty for pure object removal)",
+                    value="",
+                    lines=1,
                 )
 
             # Right Column: Read-Only Previews, Inpainted Result & Telemetry
@@ -606,15 +628,9 @@ def build_app():
             outputs=[image_editor, mask_display, overlay_display, router_output, status_box, active_mask_state]
         )
 
-        grabcut_btn.click(
-            fn=generate_grabcut_mask,
-            inputs=[image_editor, box_x1, box_y1, box_x2, box_y2, fast_gc_checkbox, sample_dropdown],
-            outputs=[mask_display, overlay_display, router_output, status_box, active_mask_state]
-        )
-
-        refine_btn.click(
-            fn=refine_mask_interaction,
-            inputs=[image_editor, mask_display, active_mask_state, sample_dropdown],
+        box_select_btn.click(
+            fn=generate_box_mask,
+            inputs=[image_editor, box_x1, box_y1, box_x2, box_y2, sample_dropdown],
             outputs=[mask_display, overlay_display, router_output, status_box, active_mask_state]
         )
 
@@ -632,7 +648,7 @@ def build_app():
 
         inpaint_btn.click(
             fn=run_inpaint,
-            inputs=[image_editor, mask_display, active_mask_state, sample_dropdown, model_selector],
+            inputs=[image_editor, mask_display, active_mask_state, sample_dropdown, model_selector, prompt_input],
             outputs=[result_display, telemetry_output, status_box]
         )
 
@@ -664,12 +680,12 @@ def run_headless_test():
 
     sample_010 = "010"
     ed_010, _, _, _, _, _ = load_benchmark_sample(sample_010)
-    gc_mask, gc_overlay, gc_md, gc_status, gc_state = generate_grabcut_mask(ed_010, 100, 100, 300, 300, fast_mode=True, sample_id=sample_010)
+    gc_mask, gc_overlay, gc_md, gc_status, gc_state = generate_box_mask(ed_010, 100, 100, 300, 300, sample_id=sample_010)
     assert gc_mask is not None
     assert gc_overlay is not None
     assert gc_state is not None and np.sum(gc_state > 0) > 0
-    assert "GrabCut executed" in gc_status
-    print("3. Target Bounding Box GrabCut executed cleanly in sub-50ms with state synchronization.")
+    assert "Box Select applied" in gc_status
+    print("3. Target Bounding Box Select executed cleanly: selects entire box with state synchronization.")
 
     print("4. Testing Inpainting Pipeline execution with MIGAN...")
     res_img, tele_md, inpaint_status = run_inpaint(

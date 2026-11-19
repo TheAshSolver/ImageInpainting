@@ -22,6 +22,7 @@ import com.qualcomm.qidk.inpaint.ui.InpaintCanvasView
 import com.qualcomm.qidk.inpaint.utils.GrabCutEngine
 import java.io.File
 import java.io.InputStream
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,6 +34,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var telemetryCard: View
     private lateinit var telemetryText: TextView
     private lateinit var progressBar: ProgressBar
+    private lateinit var promptContainer: View
+    private lateinit var editPrompt: EditText
 
     private var currentBitmap: Bitmap? = null
 
@@ -58,6 +61,8 @@ class MainActivity : AppCompatActivity() {
         telemetryCard = findViewById(R.id.telemetryCard)
         telemetryText = findViewById(R.id.telemetryText)
         progressBar = findViewById(R.id.progressBar)
+        promptContainer = findViewById(R.id.promptContainer)
+        editPrompt = findViewById(R.id.editPrompt)
 
         setupModelSpinner()
         setupButtons()
@@ -86,6 +91,16 @@ class MainActivity : AppCompatActivity() {
         )
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, models)
         modelSpinner.adapter = adapter
+
+        modelSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selected = modelSpinner.selectedItem?.toString() ?: ""
+                val isSd = selected.contains("Stable Diffusion") || selected.contains("SD")
+                promptContainer.visibility = if (isSd) View.VISIBLE else View.GONE
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
     }
 
     private fun setupButtons() {
@@ -128,22 +143,7 @@ class MainActivity : AppCompatActivity() {
         btnModeBox.setOnClickListener {
             canvasView.setMode(InpaintCanvasView.Mode.BOUNDING_BOX)
             updateModeButtons()
-            Toast.makeText(this, "🔲 Box Mode: Tap 2 corners or drag to create square mask", Toast.LENGTH_SHORT).show()
-        }
-
-        findViewById<Button>(R.id.btnSmartObjectGrab).setOnClickListener {
-            val src = canvasView.getSourceBitmap()
-            val roughMask = canvasView.getMaskBitmap()
-            if (src != null && canvasView.hasMask()) {
-                val isBox = canvasView.getMode() == InpaintCanvasView.Mode.BOUNDING_BOX
-                // Deep Mask Refiner (Image + Mask Input Multi-Modal Refinement)
-                val (refinedMask, latency) = DeepMaskRefiner.refineMask(src, roughMask, isBox)
-                canvasView.applyGrabCutMask(refinedMask)
-                updateRouterLogic(autoSelectModel = true)
-                Toast.makeText(this, "✨ Deep Mask Refiner (${latency}ms)", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Please paint with Brush or create a Box mask first", Toast.LENGTH_SHORT).show()
-            }
+            Toast.makeText(this, "🔲 Box Select: Tap 2 corners or drag to select everything inside box", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.btnClear).setOnClickListener {
@@ -376,22 +376,35 @@ class MainActivity : AppCompatActivity() {
             else -> "MIGAN"
         }
 
+        val customPrompt = editPrompt.text?.toString()?.trim() ?: ""
+
         Thread {
             try {
-                val telemetry = OnDeviceProcessDriver.executeInference(src, mask, targetModel)
+                val telemetry = OnDeviceProcessDriver.executeInference(src, mask, targetModel, customPrompt)
                 runOnUiThread {
                     progressBar.visibility = View.GONE
                     btnRunInpaint.isEnabled = true
                     modelSpinner.isEnabled = true
                     resultImageView.setImageBitmap(telemetry.resultBitmap)
                     telemetryCard.visibility = View.VISIBLE
+                    val thermalText = if (telemetry.peakTempC > 0f) {
+                        "+${String.format(Locale.US, "%.1f", telemetry.thermalDeltaC)} °C (Peak: ${String.format(Locale.US, "%.1f", telemetry.peakTempC)} °C)"
+                    } else {
+                        "+${String.format(Locale.US, "%.1f", telemetry.thermalDeltaC)} °C"
+                    }
+                    val ramText = if (telemetry.usedRamGb > 0f) {
+                        "${String.format(Locale.US, "%.2f", telemetry.usedRamGb)} GB"
+                    } else {
+                        "N/A"
+                    }
                     telemetryText.text = """
                         Status: ${telemetry.executionMode}
                         Model Executed: ${telemetry.modelName}
                         Latency: ${telemetry.latencyMs} ms
                         Active Energy: ${telemetry.energyJoules} Joules
                         Active Power: ${telemetry.powerWatts} Watts
-                        Thermal Delta: +${telemetry.thermalDeltaC} °C
+                        Thermal Delta: $thermalText
+                        Active RAM: $ramText
                     """.trimIndent()
                     Toast.makeText(this, "✨ Inpainting complete with ${telemetry.modelName}", Toast.LENGTH_SHORT).show()
                 }
